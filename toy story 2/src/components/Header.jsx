@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import './Header.css'
 
 const Header = () => {
@@ -8,14 +9,14 @@ const Header = () => {
   return (
     <header className="header">
       <div className="header-top">
-        <div className="header-logo">
+        <Link to="/" className="header-logo">
           <img 
             src="https://www.figma.com/api/mcp/asset/a3292b82-feb6-483d-a4f2-619ec8b796dd" 
             alt="Logo" 
             onError={handleImageError}
           />
           <div className="logo-placeholder">TOYSTORY</div>
-        </div>
+        </Link>
         <div className="header-search">
           <div className="search-box">
             <svg className="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -26,13 +27,13 @@ const Header = () => {
           </div>
         </div>
         <div className="header-actions">
-          <div className="header-action-item">
+          <Link to="/login" className="header-action-item">
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
               <circle cx="11" cy="7" r="4" stroke="white" strokeWidth="2"/>
               <path d="M3 21C3 16 6.5 13 11 13C15.5 13 19 16 19 21" stroke="white" strokeWidth="2" strokeLinecap="round"/>
             </svg>
             <span>Đăng nhập</span>
-          </div>
+          </Link>
           <div className="header-action-item">
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
               <path d="M7 7H5C3.89543 7 3 7.89543 3 9V19C3 20.1046 3.89543 21 5 21H17C18.1046 21 19 20.1046 19 19V9C19 7.89543 18.1046 7 17 7H15" stroke="white" strokeWidth="2" strokeLinecap="round"/>
