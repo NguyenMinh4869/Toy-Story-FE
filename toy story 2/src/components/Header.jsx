@@ -34,13 +34,13 @@ const Header = () => {
             </svg>
             <span>Đăng nhập</span>
           </Link>
-          <div className="header-action-item">
+          <Link to="/cart" className="header-action-item">
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
               <path d="M7 7H5C3.89543 7 3 7.89543 3 9V19C3 20.1046 3.89543 21 5 21H17C18.1046 21 19 20.1046 19 19V9C19 7.89543 18.1046 7 17 7H15" stroke="white" strokeWidth="2" strokeLinecap="round"/>
               <path d="M7 7V5C7 2.79086 8.79086 1 11 1C13.2091 1 15 2.79086 15 5V7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
             </svg>
             <span>Giỏ hàng</span>
-          </div>
+          </Link>
         </div>
       </div>
       <nav className="header-nav">
