@@ -10,16 +10,12 @@ export interface NavigationButtonConfig {
 
 interface NavigationButtonProps {
   config: NavigationButtonConfig;
-  index: number;
 }
 
-export const NavigationButton = ({ config, index }: NavigationButtonProps): React.JSX.Element => {
+export const NavigationButton = ({ config }: NavigationButtonProps): React.JSX.Element => {
   const handleClick = () => {
     if (config.onClick) {
       config.onClick();
-    } else {
-      // Default behavior: scroll carousel if available
-      console.log(`Navigation button ${index} clicked (${config.direction})`);
     }
   };
 

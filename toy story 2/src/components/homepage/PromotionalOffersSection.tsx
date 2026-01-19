@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import type { ViewProductDto } from "../../types/ProductDTO";
 import { ProductCard } from "../ProductCard";
 import { PRODUCT_IMAGE_87 } from "../../constants/imageAssets";
@@ -9,9 +9,18 @@ const decorativeLine = "https://www.figma.com/api/mcp/asset/d3ec4de9-3478-4971-9
 interface PromotionalOffersSectionProps {
   products?: ViewProductDto[];
   isLoading?: boolean;
+  page?: number;
+  onPageChange?: (nextPage: number) => void;
+  maxPages?: number;
 }
 
-export const PromotionalOffersSection = ({ products = [], isLoading = false }: PromotionalOffersSectionProps): React.JSX.Element => {
+export const PromotionalOffersSection = ({
+  products = [],
+  isLoading = false,
+  page = 0,
+  onPageChange,
+  maxPages = 3,
+}: PromotionalOffersSectionProps): React.JSX.Element => {
   if (isLoading) {
     return (
       <section className="absolute top-[669px] left-[111px] w-[991px] h-[465px] flex rounded-[45px] overflow-hidden bg-[linear-gradient(180deg,rgba(248,227,184,1)_0%,rgba(226,182,99,1)_100%)] items-center justify-center">
@@ -28,21 +37,50 @@ export const PromotionalOffersSection = ({ products = [], isLoading = false }: P
     );
   }
 
-  const displayProducts = products.slice(0, 4);
-  const marginLeftValues = ["ml-[21px]", "ml-[42px]", "ml-[38px]", "ml-[30px]"];
+  const pageSize = 4;
+  const pageCount = Math.max(1, Math.min(maxPages, Math.ceil(products.length / pageSize)));
+  const safePage = Math.max(0, Math.min(page, pageCount - 1));
+  const displayProducts = useMemo(
+    () => products.slice(0, pageCount * pageSize),
+    [products, pageCount]
+  );
+
+  useEffect(() => {
+    if (safePage !== page) onPageChange?.(safePage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [safePage]);
+
+  const pages = useMemo(() => {
+    const result: ViewProductDto[][] = [];
+    for (let i = 0; i < pageCount; i++) {
+      result.push(displayProducts.slice(i * pageSize, i * pageSize + pageSize));
+    }
+    return result;
+  }, [displayProducts, pageCount]);
 
   return (
-    <section className="absolute top-[669px] left-[111px] w-[991px] h-[465px] flex rounded-[45px] overflow-hidden bg-[linear-gradient(180deg,rgba(248,227,184,1)_0%,rgba(226,182,99,1)_100%)]">
-      {displayProducts.map((product, index) => (
-        <ProductCard
-          key={product.productId}
-          product={product}
-          className={`mt-[100px] ${marginLeftValues[index] || ""}`}
-          backgroundImage={PRODUCT_IMAGE_87}
-          decorativeLine={decorativeLine}
-          discount={30}
-        />
-      ))}
+    <section className="absolute top-[669px] left-[111px] w-[991px] h-[465px] rounded-[45px] overflow-hidden bg-[linear-gradient(180deg,rgba(248,227,184,1)_0%,rgba(226,182,99,1)_100%)]">
+      <div className="absolute inset-0 overflow-hidden">
+        <div
+          className="flex h-full transition-transform duration-500 ease-out"
+          style={{ transform: `translateX(-${safePage * 100}%)` }}
+        >
+          {pages.map((pageProducts, pageIndex) => (
+            <div key={`promo-page-${pageIndex}`} className="w-full shrink-0 h-full">
+              <div className="pt-[100px] px-[21px] flex gap-x-[34px]">
+                {pageProducts.map((product) => (
+                  <ProductCard
+                    key={product.productId}
+                    product={product}
+                    backgroundImage={PRODUCT_IMAGE_87}
+                    decorativeLine={decorativeLine}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </section>
   );
 };

@@ -15,21 +15,6 @@ import { POLYGON_RIGHT, POLYGON_LEFT, POLYGON_CENTER } from "../constants/imageA
 import type { ViewProductDto } from "../types/ProductDTO";
 import type { ViewBrandDto } from "../types/BrandDTO";
 
-// Navigation button configurations
-const navigationButtons: NavigationButtonConfig[] = [
-  { top: "1402px", left: "1107px", polygon: POLYGON_RIGHT, direction: "right" },
-  { top: "1890px", left: "1105px", polygon: POLYGON_RIGHT, direction: "right" },
-  { top: "881px", left: "1112px", polygon: POLYGON_CENTER, direction: "right" },
-  { top: "277px", left: "1116px", polygon: POLYGON_CENTER, direction: "right" },
-];
-
-const navigationButtonsLeft: NavigationButtonConfig[] = [
-  { top: "1413px", left: "42px", polygon: POLYGON_LEFT, direction: "left" },
-  { top: "1890px", left: "54px", polygon: POLYGON_LEFT, direction: "left" },
-  { top: "886px", left: "44px", polygon: POLYGON_LEFT, direction: "left" },
-  { top: "292px", left: "39px", polygon: POLYGON_LEFT, direction: "left" },
-];
-
 export const Homepage = (): React.JSX.Element => {
   const [promotionalProducts, setPromotionalProducts] = useState<ViewProductDto[]>([]);
   const [gundamProducts, setGundamProducts] = useState<ViewProductDto[]>([]);
@@ -37,6 +22,10 @@ export const Homepage = (): React.JSX.Element => {
   const [brands, setBrands] = useState<ViewBrandDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [heroPage, setHeroPage] = useState(0);
+  const [promotionsPage, setPromotionsPage] = useState(0);
+  const [gundamPage, setGundamPage] = useState(0);
+  const [favoritesPage, setFavoritesPage] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -49,9 +38,9 @@ export const Homepage = (): React.JSX.Element => {
         
         // Fetch promotional products
         // TODO: Replace with actual promotional products endpoint when available
-        // For now, use first 4 products as placeholder
-        // In production, this should fetch products that have active promotions
-        const promotional = allProducts.length > 0 ? allProducts.slice(0, 4) : [];
+        // For now, take up to 3 "pages" (4 per page) so the carousel can paginate.
+        // In production, this should fetch products that have active promotions.
+        const promotional = allProducts.length > 0 ? allProducts.slice(0, 12) : [];
         setPromotionalProducts(promotional);
 
         // Fetch Gundam products by filtering
@@ -64,18 +53,18 @@ export const Homepage = (): React.JSX.Element => {
         
         // Filter products by categoryId if found, otherwise by name
         const gundam = gundamCategory 
-          ? allProducts.filter(p => p.categoryId === gundamCategory.categoryId).slice(0, 3)
+          ? allProducts.filter(p => p.categoryId === gundamCategory.categoryId).slice(0, 9)
           : allProducts.filter(p => 
               p.name?.toUpperCase().includes('GUNDAM') || 
               p.categoryName?.toUpperCase().includes('GUNDAM')
-            ).slice(0, 3);
-        setGundamProducts(gundam.length > 0 ? gundam : (allProducts.length > 0 ? allProducts.slice(0, 3) : []));
+            ).slice(0, 9);
+        setGundamProducts(gundam.length > 0 ? gundam : (allProducts.length > 0 ? allProducts.slice(0, 9) : []));
 
         // Fetch favorite products (top products or featured)
         // TODO: Replace with actual top/favorite products endpoint when available
         // For now, use first 4 products as placeholder
         // In production, this should fetch products marked as "top" or "featured"
-        const favorites = allProducts.length > 0 ? allProducts.slice(0, 4) : [];
+        const favorites = allProducts.length > 0 ? allProducts.slice(0, 12) : [];
         setFavoriteProducts(favorites);
 
         // Fetch active brands
@@ -92,6 +81,55 @@ export const Homepage = (): React.JSX.Element => {
     fetchData();
   }, []);
 
+  const promotionsPageCount = Math.max(1, Math.min(3, Math.ceil(promotionalProducts.length / 4)));
+  const goPromotionsNext = () =>
+    setPromotionsPage((p) => (promotionsPageCount <= 1 ? 0 : (p + 1) % promotionsPageCount));
+  const goPromotionsPrev = () =>
+    setPromotionsPage((p) =>
+      promotionsPageCount <= 1 ? 0 : (p - 1 + promotionsPageCount) % promotionsPageCount
+    );
+
+  const heroPageCount = 3;
+  const goHeroNext = () => setHeroPage((p) => (heroPageCount <= 1 ? 0 : (p + 1) % heroPageCount));
+  const goHeroPrev = () =>
+    setHeroPage((p) => (heroPageCount <= 1 ? 0 : (p - 1 + heroPageCount) % heroPageCount));
+
+  const gundamPageCount = Math.max(1, Math.min(3, Math.ceil(gundamProducts.length / 3)));
+  const goGundamNext = () =>
+    setGundamPage((p) => (gundamPageCount <= 1 ? 0 : (p + 1) % gundamPageCount));
+  const goGundamPrev = () =>
+    setGundamPage((p) => (gundamPageCount <= 1 ? 0 : (p - 1 + gundamPageCount) % gundamPageCount));
+
+  const favoritesPageCount = Math.max(1, Math.min(3, Math.ceil(favoriteProducts.length / 4)));
+  const goFavoritesNext = () =>
+    setFavoritesPage((p) => (favoritesPageCount <= 1 ? 0 : (p + 1) % favoritesPageCount));
+  const goFavoritesPrev = () =>
+    setFavoritesPage((p) =>
+      favoritesPageCount <= 1 ? 0 : (p - 1 + favoritesPageCount) % favoritesPageCount
+    );
+
+  // Navigation button configurations
+  const navigationButtons: NavigationButtonConfig[] = [
+    // Gundam carousel (right)
+    { top: "1402px", left: "1107px", polygon: POLYGON_RIGHT, direction: "right", onClick: goGundamNext },
+    // Favorites carousel (right)
+    { top: "1890px", left: "1105px", polygon: POLYGON_RIGHT, direction: "right", onClick: goFavoritesNext },
+    // Promotions carousel (right)
+    { top: "881px", left: "1112px", polygon: POLYGON_CENTER, direction: "right", onClick: goPromotionsNext },
+    // Hero carousel (right)
+    { top: "277px", left: "1116px", polygon: POLYGON_CENTER, direction: "right", onClick: goHeroNext },
+  ];
+
+  const navigationButtonsLeft: NavigationButtonConfig[] = [
+    // Gundam carousel (left)
+    { top: "1413px", left: "42px", polygon: POLYGON_LEFT, direction: "left", onClick: goGundamPrev },
+    // Favorites carousel (left)
+    { top: "1890px", left: "54px", polygon: POLYGON_LEFT, direction: "left", onClick: goFavoritesPrev },
+    // Promotions carousel (left)
+    { top: "886px", left: "44px", polygon: POLYGON_LEFT, direction: "left", onClick: goPromotionsPrev },
+    // Hero carousel (left)
+    { top: "292px", left: "39px", polygon: POLYGON_LEFT, direction: "left", onClick: goHeroPrev },
+  ];
 
   return (
     <div className="bg-[#ab0007] w-full min-h-[3105px] relative">
@@ -103,28 +141,46 @@ export const Homepage = (): React.JSX.Element => {
             </div>
           )}
 
-          <HeroBannerSection />
+          <HeroBannerSection page={heroPage} onPageChange={setHeroPage} maxPages={3} />
 
-          <PromotionalOffersSection products={promotionalProducts} isLoading={isLoading} />
+          <PromotionalOffersSection
+            products={promotionalProducts}
+            isLoading={isLoading}
+            page={promotionsPage}
+            onPageChange={setPromotionsPage}
+            maxPages={3}
+          />
 
           <FeaturedProductsBannerSection />
 
           <GundamKingdomHeaderSection />
 
-          <GundamKingdomCardsSection products={gundamProducts} isLoading={isLoading} />
+          <GundamKingdomCardsSection
+            products={gundamProducts}
+            isLoading={isLoading}
+            page={gundamPage}
+            onPageChange={setGundamPage}
+            maxPages={3}
+          />
 
-          <FavoriteProductsSection products={favoriteProducts} isLoading={isLoading} />
+          <FavoriteProductsSection
+            products={favoriteProducts}
+            isLoading={isLoading}
+            page={favoritesPage}
+            onPageChange={setFavoritesPage}
+            maxPages={3}
+          />
 
           <BrandsSection brands={brands} isLoading={isLoading} />
 
           <ShoppingGuideMainSection />
 
           {navigationButtons.map((btn, index) => (
-            <NavigationButton key={`right-${index}`} config={btn} index={index} />
+            <NavigationButton key={`right-${index}`} config={btn} />
           ))}
 
           {navigationButtonsLeft.map((btn, index) => (
-            <NavigationButton key={`left-${index}`} config={btn} index={index} />
+            <NavigationButton key={`left-${index}`} config={btn} />
           ))}
         </div>
       </main>
