@@ -7,14 +7,14 @@ const highlights = [
 ]
 
 const policyLinks = [
-  { label: 'Điều kiện giao dịch chung', href: 'https://www.mykingdom.com.vn/pages/dieu-kien-giao-dich-chung' },
-  { label: 'Điều kiện & Điều khoản thành viên', href: 'https://www.mykingdom.com.vn/pages/dieu-kien-dieu-khoan-thanh-vien' },
-  { label: 'Chính sách giao hàng', href: 'https://www.mykingdom.com.vn/pages/chinh-sach-giao-hang' },
-  { label: 'Chính sách bảo mật', href: 'https://www.mykingdom.com.vn/pages/private-policy' },
-  { label: 'Chính sách bảo hành & đổi trả', href: 'https://www.mykingdom.com.vn/pages/exchange-refunds' },
-  { label: 'Chính sách thanh toán', href: 'https://www.mykingdom.com.vn/pages/payment' },
-  { label: 'Chính sách trả góp', href: 'https://www.mykingdom.com.vn/pages/chinh-sach-tra-gop' },
-  { label: 'Hệ thống cửa hàng', href: 'https://www.mykingdom.com.vn/pages/store-locator' },
+  { label: 'Điều kiện giao dịch chung', href: '' },
+  { label: 'Điều kiện & Điều khoản thành viên', href: '' },
+  { label: 'Chính sách giao hàng', href: '' },
+  { label: 'Chính sách bảo mật', href: '' },
+  { label: 'Chính sách bảo hành & đổi trả', href: '' },
+  { label: 'Chính sách thanh toán', href: '' },
+  { label: 'Chính sách trả góp', href: '' },
+  { label: 'Hệ thống cửa hàng', href: '' },
 ]
 
 const socialLinks = [

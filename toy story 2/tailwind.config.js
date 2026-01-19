@@ -32,6 +32,7 @@ export default {
         'varela': ['Varela', 'sans-serif'],
         'viga': ['Viga', 'sans-serif'],
         'archivo': ['Archivo Black', 'sans-serif'],
+        'unbounded': ['Unbounded', 'sans-serif'],
       },
     },
   },
