@@ -1,10 +1,13 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { ROUTES } from '../routes/routePaths'
 import { Search, User, ShoppingBag, ChevronDown } from 'lucide-react'
 import { useCart } from '../context/CartContext'
+import ProductsDropdown from './ProductsDropdown'
 
 const Header: React.FC = () => {
   const { getTotalItems, openCart } = useCart()
+  const [isProductsDropdownOpen, setIsProductsDropdownOpen] = useState(false)
   
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>): void => {
     e.currentTarget.style.display = 'none'
@@ -48,19 +51,41 @@ const Header: React.FC = () => {
           </button>
         </div>
       </div>
-      <nav className="max-w-[1800px] mx-auto flex gap-12 items-center justify-center font-tilt-warp text-xs max-xl:gap-6 max-xl:flex-wrap">
+      <nav className="max-w-[1800px] mx-auto flex gap-12 items-center justify-center font-tilt-warp text-xs max-xl:gap-6 max-xl:flex-wrap relative">
         <a href="#exclusive" className="text-white no-underline flex items-center gap-2 hover:opacity-80">ĐỘC QUYỀN ONLINE</a>
         <a href="#gundam" className="text-white no-underline flex items-center gap-2 hover:opacity-80">
           GUNDAM
           <ChevronDown size={17} stroke="white" strokeWidth={2} className="w-[17px] h-2 flex-shrink-0" />
         </a>
         <a href="#new" className="text-white no-underline flex items-center gap-2 hover:opacity-80">HÀNG MỚI</a>
-        <a href="#products" className="text-white no-underline flex items-center gap-2 hover:opacity-80">
-          SẢN PHẨM
-          <ChevronDown size={17} stroke="white" strokeWidth={2} className="w-[17px] h-2 flex-shrink-0" />
-        </a>
+        
+        {/* Products Dropdown Trigger */}
+        <div 
+          className="relative"
+          onMouseEnter={() => setIsProductsDropdownOpen(true)}
+          onMouseLeave={() => setIsProductsDropdownOpen(false)}
+        >
+          <button 
+            className="text-white no-underline flex items-center gap-2 hover:opacity-80 bg-transparent border-none cursor-pointer font-tilt-warp text-xs"
+            onClick={() => setIsProductsDropdownOpen(!isProductsDropdownOpen)}
+          >
+            SẢN PHẨM
+            <ChevronDown 
+              size={17} 
+              stroke="white" 
+              strokeWidth={2} 
+              className={`w-[17px] h-2 flex-shrink-0 transition-transform ${isProductsDropdownOpen ? 'rotate-180' : ''}`}
+            />
+          </button>
+          
+          <ProductsDropdown 
+            isOpen={isProductsDropdownOpen} 
+            onClose={() => setIsProductsDropdownOpen(false)} 
+          />
+        </div>
+        
         <a href="#promotion" className="text-white no-underline flex items-center gap-2 hover:opacity-80">KHUYẾN MÃI</a>
-        <a href="#brands" className="text-white no-underline flex items-center gap-2 hover:opacity-80">THƯƠNG HIỆU</a>
+        <Link to={ROUTES.BRANDS} className="text-white no-underline flex items-center gap-2 hover:opacity-80">THƯƠNG HIỆU</Link>
         <a href="#guide" className="text-white no-underline flex items-center gap-2 hover:opacity-80">CẨM NANG MUA HÀNG</a>
       </nav>
     </header>

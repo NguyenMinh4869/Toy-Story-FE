@@ -14,6 +14,8 @@ export const ROUTES = {
   PRODUCTS: '/products',
   PRODUCT_DETAIL: '/product/:id',
   CATEGORY: '/category/:category',
+  BRANDS: '/brands',
+  BRAND_DETAIL: '/brands/:id',
   
   // Cart & Checkout
   CART: '/cart',
