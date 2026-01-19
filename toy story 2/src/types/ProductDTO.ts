@@ -1,36 +1,23 @@
-// ProductDTO interface matching .NET backend structure
-export interface ProductDTO {
-  id: string;
-  name: string;
-  price: number;
-  originalPrice: number;
-  description: string;
-  brandName: string;
-  categoryName: string;
-  imageUrl: string;
-  images?: string[];
-  sku?: string;
-  ageRange?: string;
-  origin?: string;
-  manufacturer?: string;
-  gender?: string;
-  stock?: number;
-  storeName?: string;
-  storeAddress?: string;
-  storePhone?: string;
-  discount?: number;
-}
+/**
+ * Product DTOs - Generated from Swagger/OpenAPI spec
+ * Source: https://toy-story-xwni.onrender.com/swagger/v1/swagger.json
+ */
 
-// Related types
-export interface CartItem {
-  productId: string;
-  quantity: number;
-  product: ProductDTO;
-}
+import type { components } from './generated'
+
+/**
+ * ViewProductDto - matches backend ViewProductDto exactly
+ */
+export type ViewProductDto = components['schemas']['ViewProductDto']
+
+// Alias for backward compatibility
+export type ProductDTO = ViewProductDto
+
+// Note: CartItem is now in CartDTO.ts
 
 export interface StoreLocation {
-  name: string;
-  address: string;
-  phone: string;
-  stock: number;
+  name: string
+  address: string
+  phone: string
+  stock: number
 }

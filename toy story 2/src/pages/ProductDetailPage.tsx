@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import ProductSection from '../components/ProductSection'
-import { ProductDTO } from '../types/ProductDTO'
+import type { ViewProductDto } from '../types/ProductDTO'
 import { ProductCard } from '../types/ProductCard'
 import { formatPrice, formatDiscount } from '../utils/formatPrice'
 
@@ -12,7 +12,7 @@ const ProductDetail: React.FC = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0)
 
   // Mock data - structure ready for API call with useEffect
-  const product: ProductDTO = {
+  const product: ViewProductDto = {
     id: id || '1',
     name: 'Mô Hình Đồ Chơi Xe Tập Đi Đa Năng Có Nhạc Và Đèn Cho Bé VTECH 80-505600',
     price: 1245300,
@@ -110,7 +110,7 @@ Lợi ích nổi bật cho bé
       </div>
 
       {/* Main Product Section */}
-      <div className="max-w-[1200px] mx-auto py-9 px-5 grid grid-cols-[524px_1fr] gap-10 max-xl:grid-cols-1 max-xl:max-w-[600px] max-md:p-5 max-md:gap-5">
+      <div className="max-w-[1800px] mx-auto py-9 px-5 grid grid-cols-[524px_1fr] gap-10 max-xl:grid-cols-1 max-xl:max-w-[600px] max-md:p-5 max-md:gap-5">
         {/* Image Gallery */}
         <div className="relative max-xl:w-full">
           <div className="w-[524px] h-[524px] rounded-xl overflow-hidden mb-5 max-xl:w-full max-xl:h-auto max-xl:aspect-square">
@@ -248,7 +248,7 @@ Lợi ích nổi bật cho bé
       </div>
 
       {/* Product Description */}
-      <div className="max-w-[1200px] mx-auto my-10 px-5">
+      <div className="max-w-[1800px] mx-auto my-10 px-5">
         <h2 className="font-tilt-warp text-[15px] text-black mb-5">Mô tả sản phẩm</h2>
         <div className="font-red-hat text-[13px] text-black leading-[1.8] max-[480px]:text-xs">
           {product.description.split('\n').map((paragraph, index) => (
@@ -258,7 +258,7 @@ Lợi ích nổi bật cho bé
       </div>
 
       {/* Reviews Section */}
-      <div className="max-w-[1200px] mx-auto my-10 px-5">
+      <div className="max-w-[1800px] mx-auto my-10 px-5">
         <h2 className="font-tilt-warp text-[13px] text-black mb-5">Đánh giá sản phẩm</h2>
         <div className="flex items-center gap-5 mb-[30px]">
           <div className="font-tilt-warp text-2xl text-black">5.0/5</div>

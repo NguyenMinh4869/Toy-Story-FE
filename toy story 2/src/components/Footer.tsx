@@ -39,7 +39,7 @@ const Footer: React.FC = () => {
           <span>miễn phí giao hàng đơn 200k</span>
         </div>
       </div>
-      <div className="bg-white p-[8px_113px_0] grid grid-cols-3 gap-10 text-black max-w-[1200px] mx-auto max-xl:grid-cols-1 max-xl:p-5">
+      <div className="bg-white p-[8px_113px_0] grid grid-cols-3 gap-10 text-black max-w-[1800px] mx-auto max-xl:grid-cols-1 max-xl:p-5">
         <div className="p-0">
           <div className="mb-[15px]">
             <img 

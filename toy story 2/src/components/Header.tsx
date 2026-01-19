@@ -9,7 +9,7 @@ const Header: React.FC = () => {
 
   return (
     <header className="bg-[#ab0007] relative w-full px-[38px] py-[19px] text-white">
-      <div className="max-w-[1200px] mx-auto flex items-center justify-between mb-[30px]">
+      <div className="max-w-[1800px] mx-auto flex items-center justify-between mb-[30px]">
         <Link to="/" className="relative h-[47px] flex items-center no-underline text-inherit">
           <img 
             src="https://www.figma.com/api/mcp/asset/a3292b82-feb6-483d-a4f2-619ec8b796dd" 
@@ -40,7 +40,7 @@ const Header: React.FC = () => {
           </Link>
         </div>
       </div>
-      <nav className="max-w-[1200px] mx-auto flex gap-12 items-center justify-center font-tilt-warp text-xs max-xl:gap-6 max-xl:flex-wrap">
+      <nav className="max-w-[1800px] mx-auto flex gap-12 items-center justify-center font-tilt-warp text-xs max-xl:gap-6 max-xl:flex-wrap">
         <a href="#exclusive" className="text-white no-underline flex items-center gap-2 hover:opacity-80">ĐỘC QUYỀN ONLINE</a>
         <a href="#gundam" className="text-white no-underline flex items-center gap-2 hover:opacity-80">
           GUNDAM

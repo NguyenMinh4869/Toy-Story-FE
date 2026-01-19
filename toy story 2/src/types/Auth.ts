@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { LoginDto } from './Account'
+import type { LoginDto } from './AccountDTO'
 
 /**
  * Login form validation schema
@@ -54,7 +54,7 @@ export type RegisterFormData = z.infer<typeof registerSchema>
 /**
  * Convert RegisterFormData to CreateUserDto (removes agreeToTerms, keeps confirmPassword)
  */
-import { CreateUserDto } from './Account'
+import type { CreateUserDto } from './AccountDTO'
 
 export const toCreateUserDto = (formData: RegisterFormData): CreateUserDto => {
   return {

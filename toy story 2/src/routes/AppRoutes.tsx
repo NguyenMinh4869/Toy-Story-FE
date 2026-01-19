@@ -1,22 +1,22 @@
 import React from 'react'
 import { Routes, Route } from 'react-router-dom'
-import Home from '../pages/Home'
+import HomePage from '../pages/HomePage'
 import LoginPage from '../pages/LoginPage'
-import ProductDetail from '../pages/ProductDetail'
+import ProductDetailPage from '../pages/ProductDetailPage'
 import { ROUTES } from './routePaths'
 
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
       {/* Public Routes */}
-      <Route path={ROUTES.HOME} element={<Home />} />
+      <Route path={ROUTES.HOME} element={<HomePage />} />
       
       {/* Auth Routes */}
       <Route path={ROUTES.LOGIN} element={<LoginPage />} />
       {/* <Route path={ROUTES.REGISTER} element={<RegisterPage />} /> */}
       
       {/* Product Routes */}
-      <Route path={ROUTES.PRODUCT_DETAIL} element={<ProductDetail />} />
+      <Route path={ROUTES.PRODUCT_DETAIL} element={<ProductDetailPage />} />
       {/* <Route path={ROUTES.PRODUCTS} element={<ProductListPage />} /> */}
       {/* <Route path={ROUTES.CATEGORY} element={<ProductListPage />} /> */}
       

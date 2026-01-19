@@ -45,6 +45,21 @@ VITE_ENV=development
 - `src/services/authService.ts` - Authentication
 - `src/services/apiClient.ts` - HTTP client
 
+### 🆕 Swagger Type Generation
+
+This project uses **Swagger/OpenAPI** to automatically generate TypeScript types from your backend API.
+
+**Quick Start:**
+```bash
+# Generate types from Swagger
+npm run generate-types
+
+# Types are auto-generated before builds
+npm run build
+```
+
+**📖 See `docs/SWAGGER_TYPES_GUIDE.md` for complete guide**
+
 See `API_SETUP.md` for detailed integration guide.
 
 ## 📁 Project Structure
@@ -78,12 +93,14 @@ const product = await getProductById('123')
 
 ## 📚 Documentation
 
+- `docs/SWAGGER_TYPES_GUIDE.md` - **Swagger Type Generation Guide** (NEW!)
 - `API_SETUP.md` - Backend integration guide
 - `QUICK_START.md` - Development quick reference
 
 ## ✅ Features
 
 - ✅ TypeScript for type safety
+- ✅ **Swagger-based type generation** (auto-sync with backend)
 - ✅ Tailwind CSS for styling
 - ✅ React Router for navigation
 - ✅ React Hook Form for forms

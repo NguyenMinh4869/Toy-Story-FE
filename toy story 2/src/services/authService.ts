@@ -5,7 +5,7 @@
  */
 
 import { apiGet, apiPost, apiPut } from './apiClient'
-import { LoginDto, LoginResponse, CreateUserDto, ViewUserDto, UpdateUserDto, ChangePasswordDto, FilterUserDto } from '../types/Account'
+import type { LoginDto, LoginResponse, CreateUserDto, ViewUserDto, UpdateUserDto, ChangePasswordDto, FilterUserDto } from '../types/AccountDTO'
 
 /**
  * Login user
@@ -67,7 +67,9 @@ export const getCurrentUser = async (): Promise<ViewUserDto> => {
   // Store user data in localStorage
   if (response.data) {
     localStorage.setItem('user', JSON.stringify(response.data))
+    if (response.data.accountId !== undefined) {
     localStorage.setItem('accountId', response.data.accountId.toString())
+    }
   }
   
   return response.data
