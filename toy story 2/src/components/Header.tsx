@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { ROUTES } from '../routes/routePaths'
 import { Search, User, ShoppingBag, ChevronDown } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import ProductsDropdown from './ProductsDropdown'
@@ -83,9 +84,9 @@ const Header: React.FC = () => {
           />
         </div>
         
-        <a href="#promotion" className="text-white no-underline flex items-center gap-2 hover:opacity-80">KHUYẾN MÃI</a>
-        <a href="#brands" className="text-white no-underline flex items-center gap-2 hover:opacity-80">THƯƠNG HIỆU</a>
-        <a href="#guide" className="text-white no-underline flex items-center gap-2 hover:opacity-80">CẨM NANG MUA HÀNG</a>
+        <Link to="/promotion" className="text-white no-underline flex items-center gap-2 hover:opacity-80">KHUYẾN MÃI</Link>
+        <Link to={ROUTES.BRANDS} className="text-white no-underline flex items-center gap-2 hover:opacity-80">THƯƠNG HIỆU</Link>
+        <Link to={ROUTES.CAM_NANG} className="text-white no-underline flex items-center gap-2 hover:opacity-80">CẨM NANG MUA HÀNG</Link>
       </nav>
     </header>
   )

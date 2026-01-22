@@ -1,4 +1,6 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import { ROUTES } from "../../routes/routePaths";
 
 // Figma MCP Asset URL
 const image372 = "https://www.figma.com/api/mcp/asset/b779d896-3a23-4d57-adbf-13e2bd183230"; // Same as image37
@@ -31,13 +33,13 @@ export const ShoppingGuideSection = (): React.JSX.Element => {
           {articleData.date}
         </time>
 
-        <a
-          href="#"
-          className="absolute top-[330px] left-[166px] [font-family:'Viga-Regular',Helvetica] font-normal text-[#ff0000] text-sm tracking-[0] leading-[normal] hover:underline focus:outline-none focus:ring-2 focus:ring-[#ff0000] focus:ring-offset-2"
+        <Link
+          to={`${ROUTES.CAM_NANG}/1`}
+          className="absolute top-[330px] left-[166px] [font-family:'Viga-Regular',Helvetica] font-normal text-[#ff0000] text-sm tracking-[0] leading-[normal] hover:underline focus:outline-none focus:ring-2 focus:ring-[#ff0000] focus:ring-offset-2 no-underline"
           aria-label={`${articleData.readMoreText}: ${articleData.title}`}
         >
           {articleData.readMoreText}
-        </a>
+        </Link>
 
         <span className="absolute top-[205px] left-[235px] [font-family:'Varela-Regular',Helvetica] font-normal text-[#473a3a75] text-sm tracking-[0] leading-[normal]">
           {articleData.author}

@@ -14,6 +14,8 @@ export const ROUTES = {
   PRODUCTS: '/products',
   PRODUCT_DETAIL: '/product/:id',
   CATEGORY: '/category/:category',
+  BRANDS: '/brands',
+  BRAND_DETAIL: '/brands/:id',
   
   // Cart & Checkout
   CART: '/cart',
@@ -24,6 +26,8 @@ export const ROUTES = {
   ORDERS: '/orders',
   
   // Other
+  CAM_NANG: '/cam-nang',
+  CAM_NANG_DETAIL: '/cam-nang/:id',
   NOT_FOUND: '*'
 } as const
 

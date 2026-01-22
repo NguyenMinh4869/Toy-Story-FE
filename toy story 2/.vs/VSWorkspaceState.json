@@ -3,7 +3,9 @@
     "",
     "\\public",
     "\\src",
-    "\\src\\components"
+    "\\src\\components",
+    "\\src\\services"
   ],
+  "SelectedNode": "\\src\\services\\apiClient.ts",
   "PreviewInSolutionExplorer": false
 }

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { Breadcrumb, FilterSidebar, ProductGrid, Pagination } from '../components/productpage'
+import { FilterSidebar, ProductGrid, Pagination } from '../components/productpage'
+import { BreadcrumbHeader } from '../components/BreadcrumbHeader'
 import { getActiveProducts } from '../services/productService'
 import type { ViewProductDto } from '../types/ProductDTO'
 
 // Breadcrumb items for the products page
 const breadcrumbItems = [
-  { label: 'Trang chủ', href: '/' },
   { label: 'Sản phẩm' },
 ]
 
@@ -107,7 +107,7 @@ export const ProductsPage: React.FC = () => {
   return (
     <div className="bg-white min-h-screen">
       {/* Breadcrumb */}
-      <Breadcrumb items={breadcrumbItems} />
+      <BreadcrumbHeader items={breadcrumbItems} />
 
       {/* Main Content */}
       <div className="max-w-[1200px] mx-auto px-6 py-8">

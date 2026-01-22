@@ -1,4 +1,6 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import { ROUTES } from "../../routes/routePaths";
 
 // Figma MCP Asset URLs
 const decorDynamicBrand252 = "https://www.figma.com/api/mcp/asset/c18966b1-02ef-44dc-b6e0-7ce67b29570f"; // Same as decorDynamicBrand21
@@ -34,12 +36,12 @@ export const ShoppingGuideContentSection = (): React.JSX.Element => {
           {articleData.date}
         </time>
 
-        <a
-          href="#"
-          className="absolute top-[330px] left-[166px] [font-family:'Viga-Regular',Helvetica] text-sm font-normal text-[#ff0000] tracking-[0] leading-[normal] hover:underline focus:outline-none focus:ring-2 focus:ring-[#ff0000] focus:ring-offset-2"
+        <Link
+          to={`${ROUTES.CAM_NANG}/1`}
+          className="absolute top-[330px] left-[166px] [font-family:'Viga-Regular',Helvetica] text-sm font-normal text-[#ff0000] tracking-[0] leading-[normal] hover:underline focus:outline-none focus:ring-2 focus:ring-[#ff0000] focus:ring-offset-2 no-underline"
         >
           Xem Thêm
-        </a>
+        </Link>
 
         <div className="absolute top-[205px] left-[235px] [font-family:'Varela-Regular',Helvetica] font-normal text-[#473a3a75] text-sm tracking-[0] leading-[normal]">
           {articleData.author}

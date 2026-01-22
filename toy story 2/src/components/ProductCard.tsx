@@ -11,7 +11,8 @@ interface ProductCardProps {
   // Optional customization
   backgroundImage?: string;
   decorativeLine?: string;
-  discount?: number; // Discount percentage (0-100)
+  // Optional discount percentage (0-100). Show badge/original price only when > 0.
+  discount?: number;
 }
 
 export const ProductCard = ({ 
@@ -26,9 +27,8 @@ export const ProductCard = ({
   const productName = product.name ?? 'Unnamed Product';
   const productImage = product.imageUrl ?? PRODUCT_IMAGE_87;
   
-  const hasDiscount = discount > 0;
-  // Calculate original price: if current price is discounted, original = current / (1 - discount/100)
-  const originalPrice = hasDiscount ? productPrice / (1 - discount / 100) : productPrice;
+  const hasDiscount = typeof discount === "number" && discount > 0;
+  const originalPrice = hasDiscount ? productPrice / (1 - (discount ?? 0) / 100) : productPrice;
 
   return (
     <article 

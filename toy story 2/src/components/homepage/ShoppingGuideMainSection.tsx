@@ -1,9 +1,11 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { SectionHeader } from "./SectionHeader";
 import { SectionTitle } from "./SectionTitle";
 import { ShoppingGuideSection } from "./ShoppingGuideSection";
 import { ShoppingGuideContentSection } from "./ShoppingGuideContentSection";
 import { SECTION_ICON, DECOR_DYNAMIC_BRAND, POLYGON_ARROW } from "../../constants/imageAssets";
+import { ROUTES } from "../../routes/routePaths";
 
 export const ShoppingGuideMainSection = (): React.JSX.Element => {
   return (
@@ -11,7 +13,7 @@ export const ShoppingGuideMainSection = (): React.JSX.Element => {
       <SectionHeader 
         iconSrc={SECTION_ICON}
         top="2404px"
-        left="426px"
+        left="409px"
       />
 
       <SectionTitle top="2454px" left="371px">
@@ -21,7 +23,10 @@ export const ShoppingGuideMainSection = (): React.JSX.Element => {
       <ShoppingGuideSection />
       <ShoppingGuideContentSection />
 
-      <button className="top-[2535px] left-[514px] w-[172px] h-[54px] absolute flex rounded-[34px] overflow-hidden bg-[linear-gradient(180deg,rgba(254,246,204,1)_3%,rgba(243,212,51,1)_100%)]">
+      <Link 
+        to={ROUTES.CAM_NANG}
+        className="top-[2535px] left-[514px] w-[172px] h-[54px] absolute flex rounded-[34px] overflow-hidden bg-[linear-gradient(180deg,rgba(254,246,204,1)_3%,rgba(243,212,51,1)_100%)] hover:opacity-90 transition-opacity"
+      >
         <span className="mt-[17px] w-[73px] h-[19px] ml-[49px] [font-family:'Tilt_Warp-Regular',Helvetica] text-[15px] font-normal text-[#ff0000] tracking-[0] leading-[normal]">
           Xem Thêm
         </span>
@@ -30,7 +35,7 @@ export const ShoppingGuideMainSection = (): React.JSX.Element => {
           alt=""
           src={POLYGON_ARROW}
         />
-      </button>
+      </Link>
 
       <img
         className="absolute top-[2589px] left-[152px] w-[399px] h-[67px] aspect-[6] object-cover"
