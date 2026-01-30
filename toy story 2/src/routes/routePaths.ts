@@ -3,6 +3,17 @@
  * Use these instead of hardcoding strings throughout the application
  */
 export const ROUTES = {
+  // Admin
+  ADMIN_DASHBOARD: '/admin/dashboard',
+  ADMIN_PRODUCTS: '/admin/products',
+  ADMIN_STAFF: '/admin/staff',
+  ADMIN_ORDERS: '/admin/orders',
+  ADMIN_BRANDS: '/admin/brands',
+  ADMIN_PROMOTIONS: '/admin/promotions',
+  ADMIN_SETS: '/admin/sets',
+  ADMIN_VOUCHERS: '/admin/vouchers',
+  ADMIN_WAREHOUSE: '/admin/warehouse',
+
   // Public
   HOME: '/',
   

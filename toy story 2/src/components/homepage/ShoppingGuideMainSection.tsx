@@ -15,7 +15,7 @@ export const ShoppingGuideMainSection = (): React.JSX.Element => {
         top="2404px"
         left="409px"
       />
-
+  
       <SectionTitle top="2454px" left="371px">
         Cẩm nang mua sắm
       </SectionTitle>

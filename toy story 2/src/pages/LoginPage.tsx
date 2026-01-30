@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { loginSchema, LoginFormData, toLoginDto } from '../types/Auth'
 import { login } from '../services/authService'
+import { ROUTES } from '../routes/routePaths'
 
 const imgImage11 = "https://www.figma.com/api/mcp/asset/85994e85-ec79-4a37-8966-0df73005c709"
 const imgLine38 = "https://www.figma.com/api/mcp/asset/919bffbb-b4c0-4649-a02e-4e37b30e697f"
@@ -42,8 +43,12 @@ const LoginPage: React.FC = () => {
         console.log('User data loaded:', response.user)
       }
       
-      // Navigate to home page
-      navigate('/')
+      // Navigate based on role
+      if (response.role === 'Admin' || response.role === 'Staff') {
+        navigate(ROUTES.ADMIN_DASHBOARD)
+      } else {
+        navigate(ROUTES.HOME)
+      }
     } catch (err: any) {
       // Handle backend validation/error messages
       console.error('Login error:', err)

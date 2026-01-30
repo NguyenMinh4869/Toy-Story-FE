@@ -43,12 +43,22 @@ export interface FilterUserDto {
 export type LoginDto = components['schemas']['LoginDto']
 
 /**
+ * User Roles Enum
+ * Maps numeric roles from backend to readable names
+ */
+export enum UserRole {
+  Admin = 0,
+  Staff = 1,
+  Member = 2
+}
+
+/**
  * LoginResponse - matches backend login response
  * Note: This is not in Swagger, but matches the actual API response
  */
 export interface LoginResponse {
   token: string
-  role: string
+  role: string | number | UserRole
   message: string
 }
 

@@ -10,10 +10,16 @@ import { ROUTES } from './routes/routePaths'
 const App: React.FC = () => {
   const location = useLocation()
   const isLoginPage = location.pathname === ROUTES.LOGIN
+  const isAdminRoute = location.pathname.startsWith('/admin')
 
   // If it's login page, render it separately without layout
   if (isLoginPage) {
     return <LoginPage />
+  }
+
+  // If it's admin page, render it without public layout
+  if (isAdminRoute) {
+    return <AppRoutes />
   }
 
   return (

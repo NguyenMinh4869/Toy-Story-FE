@@ -6,6 +6,30 @@
 
 import { apiGet, apiPost, apiPut } from './apiClient'
 import type { LoginDto, LoginResponse, CreateUserDto, ViewUserDto, UpdateUserDto, ChangePasswordDto, FilterUserDto } from '../types/AccountDTO'
+import { UserRole } from '../types/AccountDTO'
+
+/**
+ * Helper to normalize role to string
+ */
+const normalizeRole = (role: string | number | UserRole): string => {
+  if (typeof role === 'string') return role
+  
+  // Map numeric roles to string names
+  // Assuming 0=Admin, 1=Staff, 2=Member based on common conventions
+  switch (role) {
+    case UserRole.Admin:
+    case 0:
+      return 'Admin'
+    case UserRole.Staff:
+    case 1:
+      return 'Staff'
+    case UserRole.Member:
+    case 2:
+      return 'Member'
+    default:
+      return String(role)
+  }
+}
 
 /**
  * Login user
@@ -18,7 +42,13 @@ export const login = async (credentials: LoginDto): Promise<LoginResponse & { us
   // Store token and role in localStorage
   if (response.data.token) {
     localStorage.setItem('token', response.data.token)
-    localStorage.setItem('role', response.data.role)
+    
+    // Normalize and store role
+    const normalizedRole = normalizeRole(response.data.role)
+    localStorage.setItem('role', normalizedRole)
+    
+    // Update response role to be normalized for immediate usage
+    response.data.role = normalizedRole
     
     // Fetch user details using /me endpoint
     try {
@@ -64,11 +94,20 @@ export const getUserById = async (accountId: number): Promise<ViewUserDto> => {
 export const getCurrentUser = async (): Promise<ViewUserDto> => {
   const response = await apiGet<ViewUserDto>('/account/me')
   
+  // Normalize role in user object if present
+  if (response.data && response.data.role !== undefined) {
+    // We need to cast to any/unknown because ViewUserDto expects string but we might get number
+    const rawRole = response.data.role as unknown as string | number
+    const normalizedRole = normalizeRole(rawRole)
+    // @ts-ignore - We are fixing the type mismatch from backend
+    response.data.role = normalizedRole
+  }
+  
   // Store user data in localStorage
   if (response.data) {
     localStorage.setItem('user', JSON.stringify(response.data))
     if (response.data.accountId !== undefined) {
-    localStorage.setItem('accountId', response.data.accountId.toString())
+      localStorage.setItem('accountId', response.data.accountId.toString())
     }
   }
   
