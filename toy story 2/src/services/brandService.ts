@@ -18,7 +18,7 @@ export const getActiveBrands = async (): Promise<ViewBrandDto[]> => {
  * Get brand by ID
  */
 export const getBrandById = async (brandId: number): Promise<ViewBrandDto> => {
-  const response = await apiGet<ViewBrandDto>(`/brand/${brandId}`)
+  const response = await apiGet<ViewBrandDto>(`/Brand/${brandId}`)
   return response.data
 }
 
@@ -33,7 +33,7 @@ export const filterBrands = async (params?: {
   if (params?.name) queryParams.append('name', params.name)
   if (params?.status) queryParams.append('status', params.status)
 
-  const endpoint = `/brand/filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+  const endpoint = `/Brand/filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
   const response = await apiGet<ViewBrandDto[]>(endpoint)
   return response.data
 }
@@ -47,7 +47,7 @@ export const createBrand = async (data: CreateBrandDto, imageFile?: File): Promi
   const form = new FormData()
   if (data.name) form.append('Name', data.name)
   if (imageFile) form.append('imageFile', imageFile)
-  const response = await apiPostForm<{ message: string }>('/brand', form)
+  const response = await apiPostForm<{ message: string }>('/Brand', form)
   return response.data
 }
 
@@ -60,7 +60,7 @@ export const updateBrand = async (brandId: number, data: UpdateBrandDto, imageFi
   const form = new FormData()
   if (data.name) form.append('Name', data.name as string)
   if (imageFile) form.append('imageFile', imageFile)
-  const response = await apiPutForm<{ message: string }>(`/brand/${brandId}`, form)
+  const response = await apiPutForm<{ message: string }>(`/Brand/${brandId}`, form)
   return response.data
 }
 
@@ -70,7 +70,7 @@ export const updateBrand = async (brandId: number, data: UpdateBrandDto, imageFi
  */
 export const changeBrandStatus = async (brandId: number): Promise<{ message: string }> => {
   const form = new FormData()
-  const response = await apiPutForm<{ message: string }>(`/brand/change-status/${brandId}`, form)
+  const response = await apiPutForm<{ message: string }>(`/Brand/change-status/${brandId}`, form)
   return response.data
 }
 

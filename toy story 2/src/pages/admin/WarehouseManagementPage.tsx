@@ -9,6 +9,8 @@ import {
   deleteWarehouse 
 } from '../../services/warehouseService';
 import type { WarehouseSummaryDto, CreateWarehouseDto, UpdateWarehouseDto } from '../../types/WarehouseDTO';
+import { confirmAction } from '../../utils/confirmAction';
+import { runAsync } from '../../utils/runAsync';
 
 const WarehouseManagementPage: React.FC = () => {
   const [warehouses, setWarehouses] = useState<WarehouseSummaryDto[]>([]);
@@ -68,15 +70,14 @@ const WarehouseManagementPage: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm('Are you sure you want to delete this warehouse?')) return;
-    try {
-      await deleteWarehouse(id);
-      fetchData();
-    } catch (err) {
-      console.error(err);
-      setError('Failed to delete warehouse');
-    }
+  const handleDeleteWarehouse = async (id: number) => {
+    await confirmAction('Are you sure you want to delete this warehouse?', async () => {
+      await runAsync(async () => {
+        setError(null)
+        await deleteWarehouse(id)
+        await fetchData()
+      }, setError, 'Failed to delete warehouse')
+    })
   };
 
   const openCreateModal = () => {
@@ -123,7 +124,7 @@ const WarehouseManagementPage: React.FC = () => {
           <WarehouseListTable 
             warehouses={warehouses} 
             onEdit={openEditModal} 
-            onDelete={handleDelete} 
+            onDelete={handleDeleteWarehouse} 
           />
         </div>
       )}

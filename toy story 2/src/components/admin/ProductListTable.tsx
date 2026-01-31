@@ -29,7 +29,7 @@ const ProductListTable: React.FC<ProductListTableProps> = ({ products, onEdit, o
                 <div className="flex items-center">
                   <img 
                     className="w-10 h-10 rounded-md object-cover mr-4" 
-                    src={product.imageUrl || 'https://via.placeholder.com/40'} 
+                    src={product.imageUrl || '/favicon.ico'} 
                     alt={product.name || 'Product'} 
                   />
                   <div>
@@ -71,9 +71,9 @@ const ProductListTable: React.FC<ProductListTableProps> = ({ products, onEdit, o
                   </button>
                   <button 
                     onClick={() => product.productId && onDelete(product.productId)}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-red-600 hover:text-red-900 text-xs font-medium flex items-center gap-1"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={14} /> DELETE
                   </button>
                 </div>
               </td>

@@ -38,9 +38,9 @@ const WarehouseListTable: React.FC<WarehouseListTableProps> = ({ warehouses, onE
                   </button>
                   <button 
                     onClick={() => warehouse.warehouseId && onDelete(warehouse.warehouseId)}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-red-600 hover:text-red-900 text-xs font-medium flex items-center gap-1"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={14} /> DELETE
                   </button>
                 </div>
               </td>

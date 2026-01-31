@@ -18,7 +18,7 @@ export const getActiveProducts = async (): Promise<ViewProductDto[]> => {
  * Get product by ID
  */
 export const getProductById = async (productId: number): Promise<ViewProductDto> => {
-  const response = await apiGet<ViewProductDto>(`/product/${productId}`)
+  const response = await apiGet<ViewProductDto>(`/Product/${productId}`)
   return response.data
 }
 
@@ -37,7 +37,7 @@ export const filterProducts = async (params?: {
   promotionId?: number
 }): Promise<ViewProductDto[]> => {
   const queryParams = new URLSearchParams()
-  if (params?.name) queryParams.append('name', params.name)
+  if (params?.name) queryParams.append('searchTerm', params.name)
   if (params?.origin) queryParams.append('origin', params.origin)
   if (params?.material) queryParams.append('material', params.material)
   if (params?.genderTarget) queryParams.append('genderTarget', params.genderTarget)
@@ -47,7 +47,7 @@ export const filterProducts = async (params?: {
   if (params?.status) queryParams.append('status', params.status)
   if (params?.promotionId) queryParams.append('promotionId', params.promotionId.toString())
 
-  const endpoint = `/product/filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+  const endpoint = `/Product/admin-filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
   const response = await apiGet<ViewProductDto[]>(endpoint)
   return response.data
 }
@@ -84,7 +84,7 @@ export const createProduct = async (data: CreateProductDto, imageFile?: File): P
     if (value !== undefined && value !== null) form.append(key, String(value))
   })
   if (imageFile) form.append('imageFile', imageFile)
-  const response = await apiPostForm<{ message: string }>('/product', form)
+  const response = await apiPostForm<{ message: string }>('/Product', form)
   return response.data
 }
 
@@ -98,7 +98,7 @@ export const updateProduct = async (productId: number, data: UpdateProductDto, i
     if (value !== undefined && value !== null) form.append(key, String(value))
   })
   if (imageFile) form.append('imageFile', imageFile)
-  const response = await apiPutForm<{ message: string }>(`/product/${productId}`, form)
+  const response = await apiPutForm<{ message: string }>(`/Product/${productId}`, form)
   return response.data
 }
 
@@ -108,7 +108,7 @@ export const updateProduct = async (productId: number, data: UpdateProductDto, i
  */
 export const changeProductStatus = async (productId: number): Promise<{ message: string }> => {
   const form = new FormData()
-  const response = await apiPutForm<{ message: string }>(`/product/change-status/${productId}`, form)
+  const response = await apiPutForm<{ message: string }>(`/Product/change-status/${productId}`, form)
   return response.data
 }
 

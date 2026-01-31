@@ -19,6 +19,8 @@ import type {
   UpdatePromotionDto,
   DiscountType,
 } from '../../types/PromotionDTO';
+import { confirmAction } from '../../utils/confirmAction';
+import { runAsync } from '../../utils/runAsync';
 import type { ViewBrandDto } from '../../types/BrandDTO';
 import type { ViewCategoryDto } from '../../types/CategoryDTO';
 import type { ViewProductDto } from '../../types/ProductDTO';
@@ -152,24 +154,19 @@ const PromotionManagementPage: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Are you sure you want to delete this promotion?')) return;
-    try {
-      await deletePromotion(id);
-      fetchData();
-    } catch (err) {
-      console.error(err);
-      setError('Failed to delete promotion');
-    }
+    await confirmAction('Are you sure you want to delete this promotion?', async () => {
+      await runAsync(async () => {
+        await deletePromotion(id);
+        await fetchData();
+      }, setError, 'Failed to delete promotion');
+    });
   };
 
   const handleStatusChange = async (id: number) => {
-    try {
+    await runAsync(async () => {
       await changePromotionStatus(id);
-      fetchData();
-    } catch (err) {
-      console.error(err);
-      setError('Failed to update status');
-    }
+      await fetchData();
+    }, setError, 'Failed to update status');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -190,7 +187,6 @@ const PromotionManagementPage: React.FC = () => {
     }
   };
 
-  if (loading && !promotions.length) return <div>Loading...</div>;
 
   return (
     <div className="space-y-6">
@@ -215,12 +211,16 @@ const PromotionManagementPage: React.FC = () => {
         </div>
       )}
 
-      <PromotionListTable
-        promotions={promotions}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onStatusChange={handleStatusChange}
-      />
+      {loading ? (
+        <div className="text-center py-10">Loading...</div>
+      ) : (
+        <PromotionListTable
+          promotions={promotions}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onStatusChange={handleStatusChange}
+        />
+      )}
 
       <Modal
         isOpen={isModalOpen}
@@ -261,8 +261,8 @@ const PromotionManagementPage: React.FC = () => {
               >
                 <option value={0}>Percentage</option>
                 <option value={1}>Fixed Amount</option>
-                <option value={2}>Type 2</option>
-                <option value={3}>Type 3</option>
+                <option value={2}>Free Shipping</option>
+                <option value={3}>Buy X Get Y</option>
               </select>
             </div>
             <div>

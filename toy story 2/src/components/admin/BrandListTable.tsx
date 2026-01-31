@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit } from 'lucide-react';
+import { Edit, Trash2 } from 'lucide-react';
 import type { ViewBrandDto } from '../../types/BrandDTO';
 
 interface BrandListTableProps {
@@ -26,7 +26,7 @@ const BrandListTable: React.FC<BrandListTableProps> = ({ brands, onEdit, onChang
                 <div className="flex items-center">
                   <img 
                     className="w-10 h-10 rounded-md object-cover mr-4" 
-                    src={brand.imageUrl || 'https://via.placeholder.com/40'} 
+                    src={brand.imageUrl || '/favicon.ico'} 
                     alt={brand.name || 'Brand'} 
                   />
                   <div>
@@ -54,7 +54,12 @@ const BrandListTable: React.FC<BrandListTableProps> = ({ brands, onEdit, onChang
                   >
                     <Edit size={14} /> EDIT
                   </button>
-                  {/* Assuming delete is soft delete or not allowed if used, but let's keep it if needed or use status change */}
+                  <button 
+                    onClick={() => brand.brandId && onChangeStatus(brand.brandId)}
+                    className="text-red-600 hover:text-red-900 text-xs font-medium flex items-center gap-1"
+                  >
+                    <Trash2 size={14} /> DELETE
+                  </button>
                 </div>
               </td>
             </tr>

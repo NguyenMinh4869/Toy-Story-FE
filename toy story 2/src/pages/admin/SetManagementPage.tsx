@@ -4,17 +4,26 @@ import SetListTable from '../../components/admin/SetListTable';
 import Modal from '../../components/ui/Modal';
 import { 
   getSets, 
-  createSet 
+  getSetById,
+  createSet,
+  updateSet,
+  addProductToSet,
+  removeProductFromSet,
+  updateSetProductQuantity,
+  deleteSet,
 } from '../../services/setService';
-import type { ViewSetDto, CreateSetDto } from '../../types/SetDTO';
+import { filterProducts } from '../../services/productService';
+import type { ViewSetDetailDto, CreateSetDto, UpdateSetDto, CreateSetProductDto } from '../../types/SetDTO';
+import type { ViewProductDto } from '../../types/ProductDTO';
 
 const SetManagementPage: React.FC = () => {
-  const [sets, setSets] = useState<ViewSetDto[]>([]);
+  const [sets, setSets] = useState<ViewSetDetailDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentSet, setCurrentSet] = useState<ViewSetDto | null>(null);
+  const [currentSet, setCurrentSet] = useState<ViewSetDetailDto | null>(null);
+  const [currentSetDetail, setCurrentSetDetail] = useState<ViewSetDetailDto | null>(null);
   
   // Form State
   const [formData, setFormData] = useState<Partial<CreateSetDto>>({
@@ -24,8 +33,18 @@ const SetManagementPage: React.FC = () => {
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
 
+  const [products, setProducts] = useState<ViewProductDto[]>([]);
+
+  // Because ViewSetDto does not contain set items, we can only manage items added/removed during this modal session.
+  // Existing items cannot be listed without a dedicated endpoint.
+  const [selectedItems, setSelectedItems] = useState<Array<{ productId: number; quantity: number }>>([]);
+  const [pendingAddProductId, setPendingAddProductId] = useState<number>(0);
+  const [pendingAddQuantity, setPendingAddQuantity] = useState<number>(1);
+
   useEffect(() => {
     fetchData();
+    // Fetch all products for the dropdown in the modal
+    filterProducts({ status: 'Active' }).then(setProducts).catch(() => setError('Failed to load products for selection'));
   }, []);
 
   const fetchData = async () => {
@@ -59,16 +78,54 @@ const SetManagementPage: React.FC = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      if (currentSet && currentSet.setId) {
-        // Note: The backend currently doesn't support updating set details.
-        // For now, we'll show an error message.
-        setError('Updating sets is not currently supported. Please create a new set instead.');
-        return;
+      setError(null);
+
+      if (currentSet?.setId) {
+        await updateSet(currentSet.setId, formData as UpdateSetDto, imageFile || undefined);
+
+        const existing = new Map<number, number>();
+        for (const p of currentSetDetail?.products || []) {
+          if (p.productId) existing.set(p.productId, p.quantity || 0);
+        }
+
+        const desired = new Map<number, number>();
+        for (const item of selectedItems) {
+          desired.set(item.productId, item.quantity);
+        }
+
+        for (const [productId, oldQty] of existing.entries()) {
+          if (!desired.has(productId)) {
+            await removeProductFromSet(currentSet.setId, productId);
+          } else {
+            const newQty = desired.get(productId) || 0;
+            if (newQty !== oldQty) {
+              await updateSetProductQuantity(currentSet.setId, productId, newQty);
+            }
+          }
+        }
+
+        for (const [productId, qty] of desired.entries()) {
+          if (!existing.has(productId)) {
+            const payload: CreateSetProductDto = { productId, quantity: qty };
+            await addProductToSet(currentSet.setId, payload);
+          }
+        }
+
       } else {
-        await createSet(formData as CreateSetDto, imageFile || undefined);
-        setIsModalOpen(false);
-        fetchData();
+        const result = await createSet(formData as CreateSetDto, imageFile || undefined);
+
+        if (!result?.setId) {
+          throw new Error('Created setId not returned from API');
+        }
+
+        for (const item of selectedItems) {
+          const payload: CreateSetProductDto = { productId: item.productId, quantity: item.quantity };
+          await addProductToSet(result.setId, payload);
+        }
       }
+
+      setIsModalOpen(false);
+      await fetchData();
     } catch (err) {
       console.error(err);
       setError('Failed to save set');
@@ -79,24 +136,51 @@ const SetManagementPage: React.FC = () => {
 
   const openCreateModal = () => {
     setCurrentSet(null);
+    setCurrentSetDetail(null);
     setFormData({
       Name: '',
       Description: '',
       DiscountPercent: 0
     });
     setImageFile(null);
+    setSelectedItems([]);
+    setPendingAddProductId(0);
+    setPendingAddQuantity(1);
+    setError(null);
     setIsModalOpen(true);
   };
 
-  const openEditModal = (set: ViewSetDto) => {
+  const openEditModal = async (set: ViewSetDetailDto) => {
     setCurrentSet(set);
+    setCurrentSetDetail(null);
     setFormData({
       Name: set.name || '',
       Description: set.description || '',
       DiscountPercent: set.discountPercent || 0
     });
     setImageFile(null);
+    setSelectedItems([]);
+    setPendingAddProductId(0);
+    setPendingAddQuantity(1);
+    setError(null);
     setIsModalOpen(true);
+
+    if (set.setId) {
+      try {
+        const detail = await getSetById(set.setId);
+        setCurrentSetDetail(detail);
+        if (detail.products) {
+          setSelectedItems(
+            detail.products
+              .filter(p => (p.productId || 0) > 0)
+              .map(p => ({ productId: p.productId || 0, quantity: p.quantity || 1 }))
+          );
+        }
+      } catch (err) {
+        console.error(err);
+        setError('Failed to load set details.');
+      }
+    }
   };
 
   return (
@@ -125,6 +209,21 @@ const SetManagementPage: React.FC = () => {
           <SetListTable 
             sets={sets} 
             onEdit={openEditModal} 
+            onDelete={async (set) => {
+              if (!set.setId) return;
+              if (!confirm(`Delete set "${set.name || set.setId}"?`)) return;
+              try {
+                setLoading(true);
+                setError(null);
+                await deleteSet(set.setId);
+                await fetchData();
+              } catch (err) {
+                console.error(err);
+                setError('Failed to delete set');
+              } finally {
+                setLoading(false);
+              }
+            }} 
           />
         </div>
       )}
@@ -187,6 +286,92 @@ const SetManagementPage: React.FC = () => {
                 <img src={currentSet.imageUrl} alt="Current" className="h-20 rounded" />
               </div>
             )}
+          </div>
+
+          <div className="border-t pt-4">
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">Set Items</label>
+              {currentSet && !currentSetDetail && (
+                <span className="text-xs text-gray-500">Loading items...</span>
+              )}
+            </div>
+
+            <div className="grid grid-cols-12 gap-2 items-end">
+              <div className="col-span-7">
+                <label className="block text-xs text-gray-600 mb-1">Product</label>
+                <select
+                  value={pendingAddProductId}
+                  onChange={(e) => setPendingAddProductId(Number(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value={0}>Select product</option>
+                  {products.map(p => (
+                    <option key={p.productId} value={p.productId || 0}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="col-span-3">
+                <label className="block text-xs text-gray-600 mb-1">Qty</label>
+                <input
+                  type="number"
+                  min={1}
+                  value={pendingAddQuantity}
+                  onChange={(e) => setPendingAddQuantity(Number(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="col-span-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!pendingAddProductId) return;
+                    if (pendingAddQuantity < 1) return;
+
+                    setSelectedItems(prev => {
+                      const existing = prev.find(i => i.productId === pendingAddProductId);
+                      if (existing) {
+                        return prev.map(i => i.productId === pendingAddProductId ? { ...i, quantity: i.quantity + pendingAddQuantity } : i);
+                      }
+                      return [...prev, { productId: pendingAddProductId, quantity: pendingAddQuantity }];
+                    });
+
+                    setPendingAddProductId(0);
+                    setPendingAddQuantity(1);
+                  }}
+                  className="w-full px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+
+            {selectedItems.length > 0 && (
+              <div className="mt-3 space-y-2">
+                {selectedItems.map(item => {
+                  const product = products.find(p => p.productId === item.productId);
+                  return (
+                    <div key={item.productId} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium text-gray-800 truncate">{product?.name || `Product #${item.productId}`}</div>
+                        <div className="text-xs text-gray-500">Qty: {item.quantity}</div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedItems(prev => prev.filter(i => i.productId !== item.productId))}
+                        className="text-xs font-medium text-red-600 hover:text-red-800"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
           </div>
 
           <div className="flex justify-end gap-3 mt-6">

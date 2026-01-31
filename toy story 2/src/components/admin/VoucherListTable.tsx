@@ -83,15 +83,15 @@ const VoucherListTable: React.FC<VoucherListTableProps> = ({
                 <div className="flex justify-end space-x-2">
                   <button
                     onClick={() => onEdit(voucher)}
-                    className="text-indigo-600 hover:text-indigo-900"
+                    className="text-blue-600 hover:text-blue-900 text-xs font-medium flex items-center gap-1"
                   >
-                    <PencilSquareIcon className="h-5 w-5" />
+                    <PencilSquareIcon className="h-4 w-4" /> EDIT
                   </button>
                   <button
                     onClick={() => voucher.voucherId && onDelete(voucher.voucherId)}
-                    className="text-red-600 hover:text-red-900"
+                    className="text-red-600 hover:text-red-900 text-xs font-medium flex items-center gap-1"
                   >
-                    <TrashIcon className="h-5 w-5" />
+                    <TrashIcon className="h-4 w-4" /> DELETE
                   </button>
                 </div>
               </td>

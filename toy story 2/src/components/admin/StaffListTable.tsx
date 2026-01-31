@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit } from 'lucide-react';
+import { Edit, Trash2 } from 'lucide-react';
 import type { ViewStaffDto } from '../../types/StaffDTO';
 
 interface StaffListTableProps {
@@ -58,6 +58,12 @@ const StaffListTable: React.FC<StaffListTableProps> = ({ staffList, onEdit, onSt
                     className="text-blue-600 hover:text-blue-900 text-xs font-medium flex items-center gap-1"
                   >
                     <Edit size={14} /> EDIT
+                  </button>
+                  <button 
+                    onClick={() => staff.accountId && onStatusChange(staff.accountId)}
+                    className="text-red-600 hover:text-red-900 text-xs font-medium flex items-center gap-1"
+                  >
+                    <Trash2 size={14} /> DELETE
                   </button>
                 </div>
               </td>

@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { LayoutDashboard, ShoppingBag, Users, Tag, Percent, Layers, Ticket, Warehouse } from 'lucide-react';
 import { ROUTES } from '../../routes/routePaths';
+import logoSrc from '../../assets/admin/logo.png';
 
 const Sidebar: React.FC = () => {
   const navLinks = [
@@ -17,10 +18,10 @@ const Sidebar: React.FC = () => {
 
   return (
     <div className="w-64 bg-white flex flex-col flex-shrink-0 border-r border-gray-200">
-      <div className="h-20 flex items-center justify-center border-b border-gray-200">
+      <div className="h-20 flex items-center justify-center">
         <Link to="/" className="relative h-[47px] flex items-center no-underline text-inherit">
             <img 
-              src="https://www.figma.com/api/mcp/asset/a3292b82-feb6-483d-a4f2-619ec8b796dd" 
+              src={logoSrc} 
               alt="Logo" 
               className="h-[47px] w-auto"
             />

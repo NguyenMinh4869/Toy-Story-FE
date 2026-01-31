@@ -33,13 +33,13 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-black/30" onClick={onClose} />
-      <div className={`relative w-full ${sizeClasses[size]} mx-4 bg-white rounded-xl shadow-lg border border-gray-200`}>
+      <div className={`relative w-full ${sizeClasses[size]} mx-4 bg-white rounded-xl shadow-lg border border-gray-200 max-h-[90vh] flex flex-col`}>
         {title && (
-          <div className="px-6 py-4 border-b border-gray-100">
+          <div className="px-6 py-4 border-b border-gray-100 flex-none">
             <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
           </div>
         )}
-        <div className="p-6">{children}</div>
+        <div className="p-6 overflow-y-auto flex-1">{children}</div>
       </div>
     </div>
   )

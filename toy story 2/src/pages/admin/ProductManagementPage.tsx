@@ -7,13 +7,16 @@ import {
   createProduct, 
   updateProduct, 
   changeProductStatus, 
-  filterProducts 
+  filterProducts,
+  getProductById
 } from '../../services/productService';
 import { getActiveBrands } from '../../services/brandService';
 import { getCategories } from '../../services/categoryService';
 import type { ViewProductDto, CreateProductDto, UpdateProductDto, GenderTarget, AgeRange } from '../../types/ProductDTO';
 import type { ViewBrandDto } from '../../types/BrandDTO';
 import type { ViewCategoryDto } from '../../types/CategoryDTO';
+import { confirmAction } from '../../utils/confirmAction';
+import { runAsync } from '../../utils/runAsync';
 
 const ProductManagementPage: React.FC = () => {
   const [products, setProducts] = useState<ViewProductDto[]>([]);
@@ -34,7 +37,7 @@ const ProductManagementPage: React.FC = () => {
     Stock: 0,
     Origin: '',
     Material: '',
-    Gender: 0 as GenderTarget, // Assuming 0 is Unspecified/Boy etc. Check enum.
+    Gender: 0 as GenderTarget,
     AgeRange: 0 as AgeRange,
     CategoryId: 0,
     BrandId: 0
@@ -87,6 +90,7 @@ const ProductManagementPage: React.FC = () => {
     e.preventDefault();
     try {
       setLoading(true);
+      setError(null);
       if (currentProduct && currentProduct.productId) {
         await updateProduct(currentProduct.productId, formData as UpdateProductDto, imageFile || undefined);
       } else {
@@ -96,22 +100,20 @@ const ProductManagementPage: React.FC = () => {
       fetchData();
     } catch (err) {
       console.error(err);
-      alert('Failed to save product');
+      setError('Failed to save product');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete (change status to inactive) this product?')) {
-      try {
-        await changeProductStatus(id);
-        fetchData();
-      } catch (err) {
-        console.error(err);
-        alert('Failed to delete product');
-      }
-    }
+  const handleStatusChange = async (id: number) => {
+    await confirmAction('Are you sure you want to change status of this product?', async () => {
+      await runAsync(async () => {
+        setError(null)
+        await changeProductStatus(id)
+        await fetchData()
+      }, setError, 'Failed to change product status')
+    })
   };
 
   const openCreateModal = () => {
@@ -132,35 +134,32 @@ const ProductManagementPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const openEditModal = (product: ViewProductDto) => {
+  const openEditModal = async (product: ViewProductDto) => {
     setCurrentProduct(product);
-    setFormData({
-      Name: product.name || '',
-      Description: product.description || '',
-      Price: product.price || 0,
-      Stock: 0, // Stock might not be in ViewProductDto, need to check. ViewProductDto has no Stock field in generated.ts snippet I saw.
-      // Wait, ViewProductDto had `price`, `imageUrl`, etc.
-      // If Stock is missing in ViewProductDto, I can't edit it easily unless I fetch detail or it's just not exposed.
-      // CreateProductDto has Stock. UpdateProductDto has Stock.
-      // Backend ViewProductDto likely has Stock? Let's check generated.ts again or assume it's there.
-      // If not, I'll default to 0.
-      Origin: product.origin || '',
-      Material: product.material || '',
-      Gender: (product.gender === 'Boy' ? 0 : product.gender === 'Girl' ? 1 : 2) as GenderTarget, // Mapping string back to enum if needed, or if ViewProductDto returns string.
-      // Generated ViewProductDto said `gender?: string | null`.
-      // So I need to map string to enum for the form which uses enum values.
-      // GenderTarget enum: 0=Boy, 1=Girl, 2=Unisex (Check generated.ts enum values).
-      // AgeRange: similarly map string to enum.
-      CategoryId: product.categoryId || 0,
-      BrandId: product.brandId || 0
-    });
-    setImageFile(null);
-    setIsModalOpen(true);
+    try {
+      setLoading(true);
+      const details = product.productId ? await getProductById(product.productId) : product;
+      setFormData({
+        Name: details.name || '',
+        Description: details.description || '',
+        Price: details.price || 0,
+        Origin: details.origin || '',
+        Material: details.material || '',
+        Gender: details.genderTarget ?? 0,
+        AgeRange: details.ageRangeValue ?? 0,
+        CategoryId: details.categoryId || 0,
+        BrandId: details.brandId || 0
+      });
+      setImageFile(null);
+      setIsModalOpen(true);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to load product details');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Helper to map enum to string for display/select if needed
-  // GenderTarget: 0=Boy, 1=Girl, 2=Unisex (Assumption, verify with generated.ts)
-  // AgeRange: 0=ZeroToSixMonths, etc.
 
   return (
     <div className="p-6">
@@ -181,7 +180,7 @@ const ProductManagementPage: React.FC = () => {
         <ProductListTable 
           products={products} 
           onEdit={openEditModal} 
-          onDelete={handleDelete} 
+          onDelete={handleStatusChange} 
         />
       )}
 
@@ -240,7 +239,11 @@ const ProductManagementPage: React.FC = () => {
                 onChange={handleInputChange}
                 min="0"
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                disabled={!!currentProduct}
               />
+              {currentProduct && (
+                <p className="mt-1 text-xs text-gray-500">Stock editing is disabled (no stock field in product list/detail DTO)</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Category</label>

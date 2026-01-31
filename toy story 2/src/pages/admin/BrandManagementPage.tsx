@@ -22,7 +22,7 @@ const BrandManagementPage: React.FC = () => {
   
   // Form State
   const [formData, setFormData] = useState<Partial<CreateBrandDto>>({
-    Name: ''
+    name: ''
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
 
@@ -79,9 +79,9 @@ const BrandManagementPage: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    // Assuming delete or status change. Here we use status change as per service
+  const handleStatusChange = async (id: number) => {
     try {
+      setError(null);
       await changeBrandStatus(id);
       fetchData();
     } catch (err) {
@@ -92,7 +92,7 @@ const BrandManagementPage: React.FC = () => {
 
   const openCreateModal = () => {
     setCurrentBrand(null);
-    setFormData({ Name: '' });
+    setFormData({ name: '' });
     setImageFile(null);
     setIsModalOpen(true);
   };
@@ -100,7 +100,7 @@ const BrandManagementPage: React.FC = () => {
   const openEditModal = (brand: ViewBrandDto) => {
     setCurrentBrand(brand);
     setFormData({
-      Name: brand.name || ''
+      name: brand.name || ''
     });
     setImageFile(null);
     setIsModalOpen(true);
@@ -132,7 +132,7 @@ const BrandManagementPage: React.FC = () => {
           <BrandListTable 
             brands={brands} 
             onEdit={openEditModal} 
-            onChangeStatus={handleDelete}
+            onChangeStatus={handleStatusChange}
           />
         </div>
       )}
@@ -147,8 +147,8 @@ const BrandManagementPage: React.FC = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Brand Name</label>
             <input
               type="text"
-              name="Name"
-              value={formData.Name}
+              name="name"
+              value={formData.name}
               onChange={handleInputChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required

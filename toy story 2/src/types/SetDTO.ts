@@ -1,6 +1,9 @@
 import type { components } from './generated'
 
-export type ViewSetDto = components['schemas']['ViewSetDto']
+export type ViewSetDetailDto = components['schemas']['ViewSetDetailDto']
+export type ViewSetProductDto = components['schemas']['ViewSetProductDto']
+export type CreateSetProductDto = components['schemas']['CreateSetProductDto']
+export type CreateSetResponseDto = components['schemas']['CreateSetResponseDto']
 
 export interface CreateSetDto {
   Name?: string
@@ -13,4 +16,3 @@ export interface UpdateSetDto {
   Description?: string
   DiscountPercent?: number
 }
-
