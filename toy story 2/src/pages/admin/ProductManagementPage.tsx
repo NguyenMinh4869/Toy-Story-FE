@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import Pagination from '../../components/ui/Pagination';
 import { Plus } from 'lucide-react';
 import ProductListTable from '../../components/admin/ProductListTable';
 import Modal from '../../components/ui/Modal';
@@ -18,13 +19,19 @@ import type { ViewCategoryDto } from '../../types/CategoryDTO';
 import { confirmAction } from '../../utils/confirmAction';
 import { runAsync } from '../../utils/runAsync';
 
+const PAGE_SIZE = 10;
+
 const ProductManagementPage: React.FC = () => {
-  const [products, setProducts] = useState<ViewProductDto[]>([]);
   const [brands, setBrands] = useState<ViewBrandDto[]>([]);
   const [categories, setCategories] = useState<ViewCategoryDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const page = Math.max(1, Number(searchParams.get('page') || '1'));
+  const pageSize = Math.max(1, Number(searchParams.get('pageSize') || String(PAGE_SIZE)));
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<ViewProductDto | null>(null);
@@ -34,7 +41,6 @@ const ProductManagementPage: React.FC = () => {
     Name: '',
     Description: '',
     Price: 0,
-    Stock: 0,
     Origin: '',
     Material: '',
     Gender: 0 as GenderTarget,
@@ -44,22 +50,21 @@ const ProductManagementPage: React.FC = () => {
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
 
+  const [allProducts, setAllProducts] = useState<ViewProductDto[]>([]);
+
   useEffect(() => {
     fetchData();
-  }, [location.search]);
+  }, []);
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [brandsData, categoriesData] = await Promise.all([
+      const [brandsData, categoriesData, productsData] = await Promise.all([
         getActiveBrands(),
-        getCategories()
+        getCategories(),
+        filterProducts({})
       ]);
-      const q = new URLSearchParams(location.search).get('q') || '';
-      const allProducts = q.trim()
-        ? await filterProducts({ name: q.trim() })
-        : await filterProducts({}); 
-      setProducts(allProducts);
+      setAllProducts(productsData);
       setBrands(brandsData);
       setCategories(categoriesData);
     } catch (err) {
@@ -74,7 +79,7 @@ const ProductManagementPage: React.FC = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'Price' || name === 'Stock' || name === 'CategoryId' || name === 'BrandId' || name === 'Gender' || name === 'AgeRange' 
+      [name]: name === 'Price' || name === 'CategoryId' || name === 'BrandId' || name === 'Gender' || name === 'AgeRange' 
         ? Number(value) 
         : value
     }));
@@ -106,6 +111,25 @@ const ProductManagementPage: React.FC = () => {
     }
   };
 
+  const { paginatedProducts, totalPages } = useMemo(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const q = searchParams.get('q') || '';
+    const page = Math.max(1, Number(searchParams.get('page') || '1'));
+
+    const filtered = allProducts.filter(p => {
+        if (!q) return true;
+        const lowerCaseQuery = q.toLowerCase();
+        return p.name?.toLowerCase().includes(lowerCaseQuery) ||
+               p.brandName?.toLowerCase().includes(lowerCaseQuery) ||
+               p.categoryName?.toLowerCase().includes(lowerCaseQuery);
+    });
+
+    const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+    const total = Math.ceil(filtered.length / PAGE_SIZE);
+
+    return { paginatedProducts: paginated, totalPages: total };
+  }, [allProducts, location.search]);
+
   const handleStatusChange = async (id: number) => {
     await confirmAction('Are you sure you want to change status of this product?', async () => {
       await runAsync(async () => {
@@ -122,7 +146,6 @@ const ProductManagementPage: React.FC = () => {
       Name: '',
       Description: '',
       Price: 0,
-      Stock: 0,
       Origin: '',
       Material: '',
       Gender: 0 as GenderTarget,
@@ -177,11 +200,23 @@ const ProductManagementPage: React.FC = () => {
       {error && <div className="text-center py-4 text-red-500">{error}</div>}
 
       {!loading && !error && (
-        <ProductListTable 
-          products={products} 
-          onEdit={openEditModal} 
-          onDelete={handleStatusChange} 
-        />
+        <>
+          <ProductListTable 
+            products={paginatedProducts} 
+            onEdit={openEditModal} 
+            onStatusChange={handleStatusChange} 
+          />
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={(nextPage) => {
+              const next = new URLSearchParams(location.search)
+              next.set('page', String(nextPage))
+              next.set('pageSize', String(pageSize))
+              navigate(`${location.pathname}?${next.toString()}`)
+            }}
+          />
+        </>
       )}
 
       <Modal
@@ -230,21 +265,7 @@ const ProductManagementPage: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Stock</label>
-              <input
-                type="number"
-                name="Stock"
-                value={formData.Stock}
-                onChange={handleInputChange}
-                min="0"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
-                disabled={!!currentProduct}
-              />
-              {currentProduct && (
-                <p className="mt-1 text-xs text-gray-500">Stock editing is disabled (no stock field in product list/detail DTO)</p>
-              )}
-            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700">Category</label>
               <select

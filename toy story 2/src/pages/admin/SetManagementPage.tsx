@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import SetListTable from '../../components/admin/SetListTable';
 import Modal from '../../components/ui/Modal';
@@ -13,8 +14,13 @@ import {
   deleteSet,
 } from '../../services/setService';
 import { filterProducts } from '../../services/productService';
+import { getWarehouses, getWarehouseById } from '../../services/warehouseService';
 import type { ViewSetDetailDto, CreateSetDto, UpdateSetDto, CreateSetProductDto } from '../../types/SetDTO';
 import type { ViewProductDto } from '../../types/ProductDTO';
+import type { WarehouseDetailDto } from '../../types/WarehouseDTO';
+import Pagination from '../../components/ui/Pagination';
+
+const PAGE_SIZE = 10;
 
 const SetManagementPage: React.FC = () => {
   const [sets, setSets] = useState<ViewSetDetailDto[]>([]);
@@ -34,17 +40,69 @@ const SetManagementPage: React.FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   const [products, setProducts] = useState<ViewProductDto[]>([]);
+  const [totalStockByProductId, setTotalStockByProductId] = useState<Record<number, number>>({});
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const page = Math.max(1, Number(searchParams.get('page') || '1'));
+  const q = searchParams.get('q') || '';
+
+  const filteredSets = useMemo(() => {
+    if (!q) return sets;
+    return sets.filter(set => 
+        set.name?.toLowerCase().includes(q.toLowerCase())
+    );
+  }, [sets, q]);
+
+  const paginatedSets = useMemo(() => {
+      const start = (page - 1) * PAGE_SIZE;
+      return filteredSets.slice(start, start + PAGE_SIZE);
+  }, [filteredSets, page]);
+
+  const totalPages = Math.ceil(filteredSets.length / PAGE_SIZE);
 
   // Because ViewSetDto does not contain set items, we can only manage items added/removed during this modal session.
   // Existing items cannot be listed without a dedicated endpoint.
   const [selectedItems, setSelectedItems] = useState<Array<{ productId: number; quantity: number }>>([]);
   const [pendingAddProductId, setPendingAddProductId] = useState<number>(0);
   const [pendingAddQuantity, setPendingAddQuantity] = useState<number>(1);
+  const [setItemError, setSetItemError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
+
     // Fetch all products for the dropdown in the modal
-    filterProducts({ status: 'Active' }).then(setProducts).catch(() => setError('Failed to load products for selection'));
+    filterProducts({ status: 'Active' })
+      .then(setProducts)
+      .catch(() => setError('Failed to load products for selection'));
+
+    // Build total stock per product across all warehouses
+    (async () => {
+      try {
+        const warehouses = await getWarehouses();
+        const details: WarehouseDetailDto[] = await Promise.all(
+          (warehouses || [])
+            .filter(w => (w.warehouseId || 0) > 0)
+            .map(w => getWarehouseById(w.warehouseId as number))
+        );
+
+        const totals: Record<number, number> = {};
+        for (const d of details) {
+          for (const p of d.products || []) {
+            const pid = p.productId || 0;
+            const qty = p.quantity || 0;
+            if (pid <= 0) continue;
+            totals[pid] = (totals[pid] || 0) + qty;
+          }
+        }
+
+        setTotalStockByProductId(totals);
+      } catch (e) {
+        console.error(e);
+        // Do not block set creation if stock cannot be loaded.
+      }
+    })();
   }, []);
 
   const fetchData = async () => {
@@ -79,6 +137,17 @@ const SetManagementPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
+
+      // Final validation before submit
+      for (const item of selectedItems) {
+        const available = totalStockByProductId[item.productId] ?? 0;
+        if (available > 0 && item.quantity > available) {
+          const product = products.find(p => p.productId === item.productId);
+          setError(`Cannot save: quantity for "${product?.name || 'a product'}" (${item.quantity}) exceeds total stock (${available}).`);
+          setLoading(false);
+          return;
+        }
+      }
 
       if (currentSet?.setId) {
         await updateSet(currentSet.setId, formData as UpdateSetDto, imageFile || undefined);
@@ -205,27 +274,38 @@ const SetManagementPage: React.FC = () => {
       {loading && !isModalOpen ? (
         <div className="text-center py-10">Loading...</div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-          <SetListTable 
-            sets={sets} 
-            onEdit={openEditModal} 
-            onDelete={async (set) => {
-              if (!set.setId) return;
-              if (!confirm(`Delete set "${set.name || set.setId}"?`)) return;
-              try {
-                setLoading(true);
-                setError(null);
-                await deleteSet(set.setId);
-                await fetchData();
-              } catch (err) {
-                console.error(err);
-                setError('Failed to delete set');
-              } finally {
-                setLoading(false);
-              }
-            }} 
+        <>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+            <SetListTable 
+              sets={paginatedSets} 
+              onEdit={openEditModal} 
+              onDelete={async (set) => {
+                if (!set.setId) return;
+                if (!confirm(`Delete set "${set.name || set.setId}"?`)) return;
+                try {
+                  setLoading(true);
+                  setError(null);
+                  await deleteSet(set.setId);
+                  await fetchData();
+                } catch (err) {
+                  console.error(err);
+                  setError('Failed to delete set');
+                } finally {
+                  setLoading(false);
+                }
+              }} 
+            />
+          </div>
+          <Pagination 
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={(nextPage) => {
+              const next = new URLSearchParams(location.search);
+              next.set('page', String(nextPage));
+              navigate(`${location.pathname}?${next.toString()}`);
+            }}
           />
-        </div>
+        </>
       )}
 
       <Modal
@@ -301,25 +381,45 @@ const SetManagementPage: React.FC = () => {
                 <label className="block text-xs text-gray-600 mb-1">Product</label>
                 <select
                   value={pendingAddProductId}
-                  onChange={(e) => setPendingAddProductId(Number(e.target.value))}
+                  onChange={(e) => {
+                    setPendingAddProductId(Number(e.target.value));
+                    setSetItemError(null);
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value={0}>Select product</option>
-                  {products.map(p => (
-                    <option key={p.productId} value={p.productId || 0}>
-                      {p.name}
-                    </option>
-                  ))}
+                  {products
+                    .filter(p => {
+                      const pid = p.productId || 0;
+                      if (pid <= 0) return false;
+                      return (totalStockByProductId[pid] ?? 0) > 0;
+                    })
+                    .map(p => (
+                      <option key={p.productId} value={p.productId || 0}>
+                        {p.name} (Stock: {totalStockByProductId[p.productId || 0] ?? 0})
+                      </option>
+                    ))}
                 </select>
               </div>
 
               <div className="col-span-3">
-                <label className="block text-xs text-gray-600 mb-1">Qty</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs text-gray-600">Qty</label>
+                  {pendingAddProductId ? (
+                    <span className="text-[11px] text-gray-500">
+                      Max: {totalStockByProductId[pendingAddProductId] ?? 0}
+                    </span>
+                  ) : null}
+                </div>
                 <input
                   type="number"
                   min={1}
+                  max={pendingAddProductId ? (totalStockByProductId[pendingAddProductId] ?? undefined) : undefined}
                   value={pendingAddQuantity}
-                  onChange={(e) => setPendingAddQuantity(Number(e.target.value))}
+                  onChange={(e) => {
+                    setPendingAddQuantity(Number(e.target.value));
+                    setSetItemError(null);
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -327,9 +427,24 @@ const SetManagementPage: React.FC = () => {
               <div className="col-span-2">
                 <button
                   type="button"
+                  disabled={!pendingAddProductId || (totalStockByProductId[pendingAddProductId] ?? 0) <= 0}
                   onClick={() => {
                     if (!pendingAddProductId) return;
                     if (pendingAddQuantity < 1) return;
+
+                    const available = totalStockByProductId[pendingAddProductId] ?? 0;
+                    const existingQty = selectedItems.find(i => i.productId === pendingAddProductId)?.quantity ?? 0;
+                    const desiredQty = existingQty + pendingAddQuantity;
+
+                    if (available <= 0) {
+                      setSetItemError('This product has no stock available.');
+                      return;
+                    }
+
+                    if (desiredQty > available) {
+                      setSetItemError(`Quantity cannot exceed total stock (${available}).`);
+                      return;
+                    }
 
                     setSelectedItems(prev => {
                       const existing = prev.find(i => i.productId === pendingAddProductId);
@@ -341,13 +456,18 @@ const SetManagementPage: React.FC = () => {
 
                     setPendingAddProductId(0);
                     setPendingAddQuantity(1);
+                    setSetItemError(null);
                   }}
-                  className="w-full px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="w-full px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Add
                 </button>
               </div>
             </div>
+
+            {setItemError && (
+              <div className="mt-2 text-sm text-red-600">{setItemError}</div>
+            )}
 
             {selectedItems.length > 0 && (
               <div className="mt-3 space-y-2">
@@ -384,8 +504,8 @@ const SetManagementPage: React.FC = () => {
             </button>
             <button
               type="submit"
-              disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+              disabled={loading || selectedItems.length === 0}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Saving...' : 'Save Set'}
             </button>

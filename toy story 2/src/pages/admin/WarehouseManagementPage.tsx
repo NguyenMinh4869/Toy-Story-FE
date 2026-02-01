@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import WarehouseListTable from '../../components/admin/WarehouseListTable';
 import Modal from '../../components/ui/Modal';
@@ -6,16 +7,42 @@ import {
   getWarehouses, 
   createWarehouse, 
   updateWarehouse, 
-  deleteWarehouse 
+  updateWarehouseLowStockThreshold,
+  deleteWarehouse,
+  getWarehouseById 
 } from '../../services/warehouseService';
+import Pagination from '../../components/ui/Pagination';
 import type { WarehouseSummaryDto, CreateWarehouseDto, UpdateWarehouseDto } from '../../types/WarehouseDTO';
 import { confirmAction } from '../../utils/confirmAction';
 import { runAsync } from '../../utils/runAsync';
+
+const PAGE_SIZE = 10;
 
 const WarehouseManagementPage: React.FC = () => {
   const [warehouses, setWarehouses] = useState<WarehouseSummaryDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const page = Math.max(1, Number(searchParams.get('page') || '1'));
+  const q = searchParams.get('q') || '';
+
+  const filteredWarehouses = useMemo(() => {
+    if (!q) return warehouses;
+    return warehouses.filter(w => 
+        w.name?.toLowerCase().includes(q.toLowerCase()) ||
+        w.location?.toLowerCase().includes(q.toLowerCase())
+    );
+  }, [warehouses, q]);
+
+  const paginatedWarehouses = useMemo(() => {
+      const start = (page - 1) * PAGE_SIZE;
+      return filteredWarehouses.slice(start, start + PAGE_SIZE);
+  }, [filteredWarehouses, page]);
+
+  const totalPages = Math.ceil(filteredWarehouses.length / PAGE_SIZE);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentWarehouse, setCurrentWarehouse] = useState<WarehouseSummaryDto | null>(null);
@@ -25,6 +52,7 @@ const WarehouseManagementPage: React.FC = () => {
     Name: '',
     Location: ''
   });
+  const [lowStockThreshold, setLowStockThreshold] = useState<number>(20);
 
   useEffect(() => {
     fetchData();
@@ -56,9 +84,16 @@ const WarehouseManagementPage: React.FC = () => {
     try {
       setLoading(true);
       if (currentWarehouse && currentWarehouse.warehouseId) {
-      await updateWarehouse(currentWarehouse.warehouseId, formData as UpdateWarehouseDto);
+        await updateWarehouse(currentWarehouse.warehouseId, {
+          ...(formData as UpdateWarehouseDto),
+          LowStockThreshold: lowStockThreshold,
+        });
+        await updateWarehouseLowStockThreshold(currentWarehouse.warehouseId, lowStockThreshold);
       } else {
-        await createWarehouse(formData);
+        await createWarehouse({
+          ...(formData as CreateWarehouseDto),
+          LowStockThreshold: lowStockThreshold,
+        });
       }
       setIsModalOpen(false);
       fetchData();
@@ -86,16 +121,27 @@ const WarehouseManagementPage: React.FC = () => {
       Name: '',
       Location: ''
     });
+    setLowStockThreshold(20);
     setIsModalOpen(true);
   };
 
-  const openEditModal = (warehouse: WarehouseSummaryDto) => {
+  const openEditModal = async (warehouse: WarehouseSummaryDto) => {
     setCurrentWarehouse(warehouse);
     setFormData({
       Name: warehouse.name || '',
       Location: warehouse.location || ''
     });
+    setLowStockThreshold(20);
     setIsModalOpen(true);
+
+    if (warehouse.warehouseId) {
+      try {
+        const detail = await getWarehouseById(warehouse.warehouseId);
+        setLowStockThreshold(detail.lowStockThreshold ?? 20);
+      } catch (err) {
+        console.error(err);
+      }
+    }
   };
 
   return (
@@ -120,13 +166,24 @@ const WarehouseManagementPage: React.FC = () => {
       {loading && !isModalOpen ? (
         <div className="text-center py-10">Loading...</div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-          <WarehouseListTable 
-            warehouses={warehouses} 
-            onEdit={openEditModal} 
-            onDelete={handleDeleteWarehouse} 
+        <>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+            <WarehouseListTable 
+              warehouses={paginatedWarehouses} 
+              onEdit={openEditModal} 
+              onDelete={handleDeleteWarehouse} 
+            />
+          </div>
+          <Pagination 
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={(nextPage) => {
+              const next = new URLSearchParams(location.search);
+              next.set('page', String(nextPage));
+              navigate(`${location.pathname}?${next.toString()}`);
+            }}
           />
-        </div>
+        </>
       )}
 
       <Modal
@@ -154,6 +211,19 @@ const WarehouseManagementPage: React.FC = () => {
               name="Location"
               value={formData.Location}
               onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Low Stock Threshold</label>
+            <input
+              type="number"
+              min={0}
+              name="LowStockThreshold"
+              value={lowStockThreshold}
+              onChange={(e) => setLowStockThreshold(Number(e.target.value))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />

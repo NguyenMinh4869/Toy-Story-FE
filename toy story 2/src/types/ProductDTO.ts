@@ -40,7 +40,7 @@ export interface CreateProductDto {
   Name: string
   Description: string
   Price: number
-  Stock?: number
+
   Origin: string
   Material?: string
   Gender?: GenderTarget
@@ -53,7 +53,7 @@ export interface UpdateProductDto {
   Name?: string
   Description?: string
   Price?: number
-  Stock?: number
+
   Origin?: string
   Material?: string
   Gender?: GenderTarget

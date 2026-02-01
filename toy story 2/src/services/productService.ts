@@ -26,7 +26,7 @@ export const getProductById = async (productId: number): Promise<ViewProductDto>
  * Filter products (public endpoint with query parameters)
  */
 export const filterProducts = async (params?: {
-  name?: string
+  searchTerm?: string
   origin?: string
   material?: string
   genderTarget?: 'Boy' | 'Girl' | 'Unisex'
@@ -37,7 +37,7 @@ export const filterProducts = async (params?: {
   promotionId?: number
 }): Promise<ViewProductDto[]> => {
   const queryParams = new URLSearchParams()
-  if (params?.name) queryParams.append('searchTerm', params.name)
+  if (params?.searchTerm) queryParams.append('searchTerm', params.searchTerm)
   if (params?.origin) queryParams.append('origin', params.origin)
   if (params?.material) queryParams.append('material', params.material)
   if (params?.genderTarget) queryParams.append('genderTarget', params.genderTarget)
@@ -70,7 +70,7 @@ export const getProductsByBrandId = async (brandId: number): Promise<ViewProduct
  * Search products by name
  */
 export const searchProducts = async (searchTerm: string): Promise<ViewProductDto[]> => {
-  return filterProducts({ name: searchTerm, status: 'Active' })
+  return filterProducts({ searchTerm: searchTerm, status: 'Active' })
 }
 
 /**

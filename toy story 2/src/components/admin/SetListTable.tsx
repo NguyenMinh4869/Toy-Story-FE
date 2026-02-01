@@ -27,10 +27,10 @@ const SetListTable: React.FC<SetListTableProps> = ({ sets, onEdit, onDelete }) =
             <tr key={set.setId} className="bg-white border-b hover:bg-gray-50">
               <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                 <div className="flex items-center">
-                  <img
-                    className="w-10 h-10 rounded-md object-cover mr-4"
-                    src={set.imageUrl || 'https://via.placeholder.com/40'}
-                    alt={set.name || 'Set'}
+                  <img 
+                    className="w-10 h-10 rounded-md object-cover mr-4" 
+                    src={set.imageUrl || 'https://via.placeholder.com/40'} 
+                    alt={set.name || 'Set'} 
                   />
                   <div>
                     <div className="font-semibold">{set.name}</div>
@@ -44,7 +44,7 @@ const SetListTable: React.FC<SetListTableProps> = ({ sets, onEdit, onDelete }) =
               <td className="px-6 py-4">
                 <div className="text-gray-900 font-medium">{set.price?.toLocaleString()} VND</div>
                 {set.savings && set.savings > 0 && (
-                  <div className="text-xs text-green-600">Save {set.savings.toLocaleString()} VND</div>
+                   <div className="text-xs text-green-600">Save {set.savings.toLocaleString()} VND</div>
                 )}
               </td>
               <td className="px-6 py-4">
@@ -63,7 +63,7 @@ const SetListTable: React.FC<SetListTableProps> = ({ sets, onEdit, onDelete }) =
               </td>
               <td className="px-6 py-4">
                 <div className="flex items-center gap-4">
-                  <button
+                  <button 
                     onClick={() => onEdit(set)}
                     className="text-blue-600 hover:text-blue-900 text-xs font-medium flex items-center gap-1"
                   >

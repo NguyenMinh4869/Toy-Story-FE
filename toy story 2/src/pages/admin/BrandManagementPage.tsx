@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import BrandListTable from '../../components/admin/BrandListTable';
 import Modal from '../../components/ui/Modal';
@@ -9,13 +9,28 @@ import {
   changeBrandStatus, 
   filterBrands 
 } from '../../services/brandService';
+import Pagination from '../../components/ui/Pagination';
 import type { ViewBrandDto, CreateBrandDto, UpdateBrandDto } from '../../types/BrandDTO';
+
+const PAGE_SIZE = 10;
 
 const BrandManagementPage: React.FC = () => {
   const [brands, setBrands] = useState<ViewBrandDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const page = Math.max(1, Number(searchParams.get('page') || '1'));
+  const pageSize = Math.max(1, Number(searchParams.get('pageSize') || String(PAGE_SIZE)));
+
+  const paginatedBrands = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return brands.slice(start, start + pageSize);
+  }, [brands, page, pageSize]);
+
+  const totalPages = Math.ceil(brands.length / pageSize);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentBrand, setCurrentBrand] = useState<ViewBrandDto | null>(null);
@@ -129,11 +144,22 @@ const BrandManagementPage: React.FC = () => {
         <div className="text-center py-10">Loading...</div>
       ) : (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-          <BrandListTable 
-            brands={brands} 
-            onEdit={openEditModal} 
-            onChangeStatus={handleStatusChange}
-          />
+          <>
+            <BrandListTable 
+              brands={paginatedBrands} 
+              onEdit={openEditModal} 
+              onChangeStatus={handleStatusChange}
+            />
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={(nextPage) => {
+                const next = new URLSearchParams(location.search)
+                next.set('page', String(nextPage))
+                navigate(`${location.pathname}?${next.toString()}`)
+              }}
+            />
+          </>
         </div>
       )}
 

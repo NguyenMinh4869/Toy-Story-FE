@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import StaffListTable from '../../components/admin/StaffListTable';
 import Modal from '../../components/ui/Modal';
@@ -11,12 +12,37 @@ import {
 import { getWarehouses } from '../../services/warehouseService';
 import type { ViewStaffDto, CreateStaffDto, UpdateStaffDto } from '../../types/StaffDTO';
 import type { WarehouseSummaryDto } from '../../types/WarehouseDTO';
+import Pagination from '../../components/ui/Pagination';
+
+const PAGE_SIZE = 10;
 
 const StaffManagementPage: React.FC = () => {
   const [staffList, setStaffList] = useState<ViewStaffDto[]>([]);
   const [warehouses, setWarehouses] = useState<WarehouseSummaryDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const page = Math.max(1, Number(searchParams.get('page') || '1'));
+  const q = searchParams.get('q') || '';
+
+  const filteredStaff = useMemo(() => {
+    if (!q) return staffList;
+    return staffList.filter(staff => 
+        staff.name?.toLowerCase().includes(q.toLowerCase()) ||
+        staff.email?.toLowerCase().includes(q.toLowerCase()) ||
+        staff.phoneNumber?.toLowerCase().includes(q.toLowerCase())
+    );
+  }, [staffList, q]);
+
+  const paginatedStaff = useMemo(() => {
+      const start = (page - 1) * PAGE_SIZE;
+      return filteredStaff.slice(start, start + PAGE_SIZE);
+  }, [filteredStaff, page]);
+
+  const totalPages = Math.ceil(filteredStaff.length / PAGE_SIZE);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentStaff, setCurrentStaff] = useState<ViewStaffDto | null>(null);
@@ -154,13 +180,24 @@ const StaffManagementPage: React.FC = () => {
       {loading && !isModalOpen ? (
         <div className="text-center py-10">Loading...</div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-          <StaffListTable 
-            staffList={staffList} 
-            onEdit={openEditModal} 
-            onStatusChange={handleStatusChange} 
+        <>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+            <StaffListTable 
+              staffList={paginatedStaff} 
+              onEdit={openEditModal} 
+              onStatusChange={handleStatusChange} 
+            />
+          </div>
+          <Pagination 
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={(nextPage) => {
+              const next = new URLSearchParams(location.search);
+              next.set('page', String(nextPage));
+              navigate(`${location.pathname}?${next.toString()}`);
+            }}
           />
-        </div>
+        </>
       )}
 
       <Modal

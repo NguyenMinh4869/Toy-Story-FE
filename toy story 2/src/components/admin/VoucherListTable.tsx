@@ -1,18 +1,16 @@
 import React from 'react';
 import type { ViewVoucherSummaryDto } from '../../types/VoucherDTO';
-import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { Edit, Power, PowerOff } from 'lucide-react';
 
 interface VoucherListTableProps {
   vouchers: ViewVoucherSummaryDto[];
   onEdit: (voucher: ViewVoucherSummaryDto) => void;
-  onDelete: (id: number) => void;
   onStatusChange: (id: number) => void;
 }
 
 const VoucherListTable: React.FC<VoucherListTableProps> = ({
   vouchers,
   onEdit,
-  onDelete,
   onStatusChange,
 }) => {
   return (
@@ -81,17 +79,25 @@ const VoucherListTable: React.FC<VoucherListTableProps> = ({
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <div className="flex justify-end space-x-2">
-                  <button
+                  <button 
                     onClick={() => onEdit(voucher)}
                     className="text-blue-600 hover:text-blue-900 text-xs font-medium flex items-center gap-1"
                   >
-                    <PencilSquareIcon className="h-4 w-4" /> EDIT
+                    <Edit size={14} /> EDIT
                   </button>
                   <button
-                    onClick={() => voucher.voucherId && onDelete(voucher.voucherId)}
-                    className="text-red-600 hover:text-red-900 text-xs font-medium flex items-center gap-1"
+                    onClick={() => voucher.voucherId && onStatusChange(voucher.voucherId)}
+                    className={`text-xs font-medium flex items-center gap-1 ${
+                      voucher.isActive
+                        ? 'text-yellow-600 hover:text-yellow-900'
+                        : 'text-green-600 hover:text-green-900'
+                    }`}
                   >
-                    <TrashIcon className="h-4 w-4" /> DELETE
+                    {voucher.isActive ? (
+                      <><PowerOff size={14} /> DISABLE</>
+                    ) : (
+                      <><Power size={14} /> ENABLE</>
+                    )}
                   </button>
                 </div>
               </td>

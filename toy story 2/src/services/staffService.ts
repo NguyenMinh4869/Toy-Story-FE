@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPut } from './apiClient'
+import { apiGet, apiPost, apiPut, apiPutForm } from './apiClient'
 import type { ViewStaffDto, CreateStaffDto, UpdateStaffDto } from '../types/StaffDTO'
 
 export const getAllStaff = async (): Promise<ViewStaffDto[]> => {
@@ -17,7 +17,8 @@ export const updateStaff = async (accountId: number, data: UpdateStaffDto): Prom
 }
 
 export const changeStaffStatus = async (accountId: number): Promise<{ message: string }> => {
-  const response = await apiPut<{ message: string }>(`/Staff/change-status/${accountId}`)
-  return response.data
+  const form = new FormData();
+  const response = await apiPutForm<{ message: string }>(`/Staff/change-status/${accountId}`, form);
+  return response.data;
 }
 

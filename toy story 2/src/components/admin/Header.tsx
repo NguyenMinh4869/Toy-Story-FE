@@ -1,34 +1,58 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Search, User, Bell } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../routes/routePaths';
 
+const PAGE_SIZE = 10;
+
 const Header: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [query, setQuery] = useState('');
 
-  const isProducts = location.pathname.startsWith(ROUTES.ADMIN_PRODUCTS);
-  const isBrands = location.pathname.startsWith(ROUTES.ADMIN_BRANDS);
-  const placeholder = isProducts
-    ? 'Search products...'
-    : isBrands
-    ? 'Search brands...'
-    : 'Search...';
+  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const qFromUrl = searchParams.get('q') || '';
 
-  const handleSearch = () => {
-    const q = query.trim();
-    if (!q) return;
-    const params = new URLSearchParams({ q }).toString();
-    if (isProducts) {
-      navigate(`${ROUTES.ADMIN_PRODUCTS}?${params}`);
-      return;
+  const [query, setQuery] = useState(qFromUrl);
+
+  useEffect(() => {
+    setQuery(qFromUrl);
+  }, [qFromUrl]);
+
+  const placeholder = useMemo(() => {
+    if (location.pathname.startsWith(ROUTES.ADMIN_PRODUCTS)) return 'Search by name, brand, category...';
+    if (location.pathname.startsWith(ROUTES.ADMIN_BRANDS)) return 'Search by brand name...';
+    if (location.pathname.startsWith(ROUTES.ADMIN_SETS)) return 'Search by set name...';
+    if (location.pathname.startsWith(ROUTES.ADMIN_WAREHOUSE)) return 'Search by name or location...';
+    if (location.pathname.startsWith(ROUTES.ADMIN_STAFF)) return 'Search by name, email, or phone...';
+    if (location.pathname.startsWith(ROUTES.ADMIN_VOUCHERS)) return 'Search by code or name...';
+    if (location.pathname.startsWith(ROUTES.ADMIN_PROMOTIONS)) return 'Search by promotion name...';
+    return 'Search...';
+  }, [location.pathname]);
+
+  const updateUrlQuery = (nextQuery: string) => {
+    const next = new URLSearchParams(location.search);
+    if (nextQuery.trim()) {
+      next.set('q', nextQuery.trim());
+    } else {
+      next.delete('q');
     }
-    if (isBrands) {
-      navigate(`${ROUTES.ADMIN_BRANDS}?${params}`);
-      return;
-    }
+    next.set('page', '1');
+    next.set('pageSize', String(PAGE_SIZE));
+    navigate(`${location.pathname}?${next.toString()}`, { replace: true });
   };
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (query !== qFromUrl) {
+        updateUrlQuery(query);
+      }
+    }, 300); // 300ms debounce delay
+
+    return () => {
+      clearTimeout(handler);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
 
   return (
     <header className="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-6 flex-shrink-0">
@@ -41,9 +65,7 @@ const Header: React.FC = () => {
             placeholder={placeholder}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleSearch();
-            }}
+
             className="w-full h-10 pl-10 pr-4 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-red-500 transition-shadow"
           />
         </div>

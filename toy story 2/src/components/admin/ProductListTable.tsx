@@ -1,14 +1,14 @@
 import React from 'react';
-import { Trash2, Edit } from 'lucide-react';
+import { Edit, Power, PowerOff } from 'lucide-react';
 import type { ViewProductDto } from '../../types/ProductDTO';
 
 interface ProductListTableProps {
   products: ViewProductDto[];
   onEdit: (product: ViewProductDto) => void;
-  onDelete: (id: number) => void;
+  onStatusChange: (id: number) => void;
 }
 
-const ProductListTable: React.FC<ProductListTableProps> = ({ products, onEdit, onDelete }) => {
+const ProductListTable: React.FC<ProductListTableProps> = ({ products, onEdit, onStatusChange }) => {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm text-left text-gray-500">
@@ -69,11 +69,20 @@ const ProductListTable: React.FC<ProductListTableProps> = ({ products, onEdit, o
                   >
                     <Edit size={14} /> EDIT
                   </button>
-                  <button 
-                    onClick={() => product.productId && onDelete(product.productId)}
-                    className="text-red-600 hover:text-red-900 text-xs font-medium flex items-center gap-1"
+                  <button
+                    onClick={() => product.productId && onStatusChange(product.productId)}
+                    disabled={product.status?.toLowerCase() === 'outofstock' || product.status?.toLowerCase() === 'hết hàng'}
+                    className={`text-xs font-medium flex items-center gap-1 ${
+                      (product.status?.toLowerCase() === 'active' || product.status?.toLowerCase() === 'đang bán')
+                        ? 'text-yellow-600 hover:text-yellow-900'
+                        : 'text-green-600 hover:text-green-900'
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
-                    <Trash2 size={14} /> DELETE
+                    {(product.status?.toLowerCase() === 'active' || product.status?.toLowerCase() === 'đang bán') ? (
+                      <><PowerOff size={14} /> DISABLE</>
+                    ) : (
+                      <><Power size={14} /> ENABLE</>
+                    )}
                   </button>
                 </div>
               </td>

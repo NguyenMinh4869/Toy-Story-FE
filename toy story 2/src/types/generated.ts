@@ -916,6 +916,78 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/Dashboard/low-stock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    threshold?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["LowStockItemDto"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/Dashboard/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DashboardSummaryDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/Invoice": {
         parameters: {
             query?: never;
@@ -2914,16 +2986,33 @@ export interface paths {
                     "multipart/form-data": {
                         Name: string;
                         Location: string;
+                        /** Format: int32 */
+                        LowStockThreshold?: number;
                     };
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "text/plain": components["schemas"]["CreateWarehouseResponseDto"];
+                        "application/json": components["schemas"]["CreateWarehouseResponseDto"];
+                        "text/json": components["schemas"]["CreateWarehouseResponseDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
                 };
             };
         };
@@ -3012,6 +3101,65 @@ export interface paths {
                 };
             };
         };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/Warehouse/{warehouseId}/low-stock-threshold": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    warehouseId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["UpdateLowStockThresholdDto"];
+                    "text/json": components["schemas"]["UpdateLowStockThresholdDto"];
+                    "application/*+json": components["schemas"]["UpdateLowStockThresholdDto"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -3264,6 +3412,23 @@ export interface components {
             /** Format: int32 */
             quantity: number;
         };
+        CreateWarehouseResponseDto: {
+            /** Format: int32 */
+            warehouseId?: number;
+            message?: string | null;
+        };
+        DashboardSummaryDto: {
+            /** Format: int32 */
+            totalWarehouses?: number;
+            /** Format: int32 */
+            totalStaff?: number;
+            /** Format: int32 */
+            totalInventoryQty?: number;
+            /** Format: int32 */
+            lowStockCount?: number;
+            /** Format: int32 */
+            totalProducts?: number;
+        };
         /**
          * Format: int32
          * @enum {integer}
@@ -3277,6 +3442,23 @@ export interface components {
         LoginDto: {
             email: string;
             password: string;
+        };
+        LowStockItemDto: {
+            /** Format: int32 */
+            warehouseId?: number;
+            warehouseName?: string | null;
+            /** Format: int32 */
+            productId?: number;
+            productName?: string | null;
+            /** Format: int32 */
+            productWarehouseId?: number;
+            /** Format: int32 */
+            quantity?: number;
+            /** Format: int32 */
+            thresholdUsed?: number;
+            imageUrl?: string | null;
+            /** Format: double */
+            price?: number;
         };
         OrderDetailDto: {
             /** Format: int32 */
@@ -3371,6 +3553,10 @@ export interface components {
             imageUrl?: string | null;
             /** Format: double */
             price?: number;
+        };
+        UpdateLowStockThresholdDto: {
+            /** Format: int32 */
+            threshold?: number;
         };
         UpdateStaffDto: {
             email?: string | null;
@@ -3597,6 +3783,8 @@ export interface components {
             warehouseId?: number;
             name?: string | null;
             location?: string | null;
+            /** Format: int32 */
+            lowStockThreshold?: number;
             products?: components["schemas"]["ProductStockDto"][] | null;
             /** Format: int32 */
             totalProducts?: number;
