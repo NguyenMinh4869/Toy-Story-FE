@@ -22,3 +22,27 @@ export const changeStaffStatus = async (accountId: number): Promise<{ message: s
   return response.data;
 }
 
+/**
+ * Get staff by account ID
+ * GET /api/Staff/{accountId}
+ * Returns staff details including warehouseId
+ */
+export interface StaffDetailDto {
+  accountId: number
+  warehouseId: number
+  name?: string
+  email?: string
+}
+
+export const getStaffByAccountId = async (accountId: number): Promise<StaffDetailDto> => {
+  const response = await apiGet<StaffDetailDto>(`/staff/${accountId}`)
+  return response.data
+}
+
+/**
+ * Get current staff's warehouse ID
+ */
+export const getCurrentStaffWarehouseId = async (accountId: number): Promise<number> => {
+  const staff = await getStaffByAccountId(accountId)
+  return staff.warehouseId
+}

@@ -23,7 +23,7 @@ export const getProductById = async (productId: number): Promise<ViewProductDto>
 }
 
 /**
- * Filter products (public endpoint with query parameters)
+ * Filter products (admin endpoint with query parameters)
  */
 export const filterProducts = async (params?: {
   searchTerm?: string
@@ -111,4 +111,3 @@ export const changeProductStatus = async (productId: number): Promise<{ message:
   const response = await apiPutForm<{ message: string }>(`/Product/change-status/${productId}`, form)
   return response.data
 }
-

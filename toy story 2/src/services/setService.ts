@@ -6,6 +6,11 @@ export const getSets = async (): Promise<ViewSetDetailDto[]> => {
   return response.data
 }
 
+export const getSetsCustomerFilter = async (): Promise<ViewSetDetailDto[]> => {
+  const response = await apiGet<ViewSetDetailDto[]>('/Set/customer-filter')
+  return response.data
+}
+
 export const getSetById = async (id: number): Promise<ViewSetDetailDto> => {
   const response = await apiGet<ViewSetDetailDto>(`/Set/${id}`)
   return response.data

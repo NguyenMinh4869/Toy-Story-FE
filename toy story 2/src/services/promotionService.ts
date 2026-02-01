@@ -20,6 +20,15 @@ export const getPromotions = async (): Promise<ViewPromotionSummaryDto[]> => {
 }
 
 /**
+ * Get promotions using customer-filter endpoint (no auth required)
+ * Use this for staff/public access
+ */
+export const getPromotionsCustomerFilter = async (): Promise<ViewPromotionSummaryDto[]> => {
+  const response = await apiGet<ViewPromotionSummaryDto[]>('/Promotion/customer-filter')
+  return response.data
+}
+
+/**
  * Get promotion by ID (Admin only - requires authentication)
  */
 export const getPromotionById = async (promotionId: number): Promise<ViewPromotionDto> => {

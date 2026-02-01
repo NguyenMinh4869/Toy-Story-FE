@@ -14,6 +14,16 @@ export const ROUTES = {
   ADMIN_VOUCHERS: '/admin/vouchers',
   ADMIN_WAREHOUSE: '/admin/warehouse',
 
+  // Staff (mirrors Admin routes but with Staff-only access)
+  STAFF_DASHBOARD: '/staff/dashboard',
+  STAFF_PRODUCTS: '/staff/products',
+  STAFF_ORDERS: '/staff/orders',
+  STAFF_BRANDS: '/staff/brands',
+  STAFF_PROMOTIONS: '/staff/promotions',
+  STAFF_SETS: '/staff/sets',
+  STAFF_VOUCHERS: '/staff/vouchers',
+  STAFF_WAREHOUSE: '/staff/warehouse',
+
   // Public
   HOME: '/',
   

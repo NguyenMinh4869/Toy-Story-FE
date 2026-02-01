@@ -1,9 +1,13 @@
-import { apiGet, apiPostForm, apiPutForm, apiDelete, apiPut } from './apiClient'
+import { apiGet, apiPostForm, apiPutForm, apiDelete, apiPut, apiPost } from './apiClient'
 import type { WarehouseSummaryDto, CreateWarehouseDto, UpdateWarehouseDto, WarehouseDetailDto } from '../types/WarehouseDTO'
 import type { components } from '../types/generated'
 
 type CreateWarehouseResponseDto = components['schemas']['CreateWarehouseResponseDto']
 type UpdateLowStockThresholdDto = components['schemas']['UpdateLowStockThresholdDto']
+
+export type ProductStockDto = components['schemas']['ProductStockDto']
+
+type CreateWarehouseProductDto = components['schemas']['CreateWarehouseProductDto']
 
 export const getWarehouses = async (): Promise<WarehouseSummaryDto[]> => {
   const response = await apiGet<WarehouseSummaryDto[]>('/Warehouse')
@@ -51,5 +55,35 @@ export const updateWarehouseLowStockThreshold = async (
 
 export const deleteWarehouse = async (warehouseId: number): Promise<{ message: string }> => {
   const response = await apiDelete<{ message: string }>(`/Warehouse/${warehouseId}`)
+  return response.data
+}
+
+export const getWarehouseProducts = async (warehouseId: number): Promise<WarehouseDetailDto> => {
+  const response = await apiGet<WarehouseDetailDto>(`/Warehouse/${warehouseId}`)
+  return response.data
+}
+
+export const getWarehouseProductsWithDetails = async (warehouseId: number): Promise<ProductStockDto[]> => {
+  const warehouseDetail = await getWarehouseProducts(warehouseId)
+  return (warehouseDetail.products || []) as ProductStockDto[]
+}
+
+export const getWarehouseProductsForStaff = async (): Promise<components['schemas']['ViewWarehouseProductDto'][]> => {
+  const response = await apiGet<components['schemas']['ViewWarehouseProductDto'][]>('/Warehouse/get-product-from-staff')
+  return response.data
+}
+
+export const updateWarehouseProduct = async (productWarehouseId: number, quantity: number): Promise<{ message: string }> => {
+  const response = await apiPut<{ message: string }>(`/Warehouse/update-product/${productWarehouseId}`, quantity)
+  return response.data
+}
+
+export const addWarehouseProduct = async (data: CreateWarehouseProductDto): Promise<{ message: string }> => {
+  const response = await apiPost<{ message: string }>('/Warehouse/add-product', data)
+  return response.data
+}
+
+export const removeWarehouseProduct = async (productWarehouseId: number): Promise<{ message: string }> => {
+  const response = await apiDelete<{ message: string }>(`/Warehouse/remove-product/${productWarehouseId}`)
   return response.data
 }

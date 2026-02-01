@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { loginSchema, LoginFormData, toLoginDto } from '../types/Auth'
 import { login } from '../services/authService'
+import { getDashboardByRole } from '../routes/ProtectedRoute'
 import { ROUTES } from '../routes/routePaths'
 
 import imgImage11 from "@/assets/login/image11.png"
@@ -43,12 +44,9 @@ const LoginPage: React.FC = () => {
         console.log('User data loaded:', response.user)
       }
       
-      // Navigate based on role
-      if (response.role === 'Admin' || response.role === 'Staff') {
-        navigate(ROUTES.ADMIN_DASHBOARD)
-      } else {
-        navigate(ROUTES.HOME)
-      }
+      // Navigate to role-appropriate dashboard
+      const dashboardRoute = getDashboardByRole(response.role as string)
+      navigate(dashboardRoute)
     } catch (err: any) {
       // Handle backend validation/error messages
       console.error('Login error:', err)

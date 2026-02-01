@@ -11,14 +11,15 @@ const App: React.FC = () => {
   const location = useLocation()
   const isLoginPage = location.pathname === ROUTES.LOGIN
   const isAdminRoute = location.pathname.startsWith('/admin')
+  const isStaffRoute = location.pathname.startsWith('/staff')
 
   // If it's login page, render it separately without layout
   if (isLoginPage) {
     return <LoginPage />
   }
 
-  // If it's admin page, render it without public layout
-  if (isAdminRoute) {
+  // If it's admin or staff page, render it without public layout
+  if (isAdminRoute || isStaffRoute) {
     return <AppRoutes />
   }
 

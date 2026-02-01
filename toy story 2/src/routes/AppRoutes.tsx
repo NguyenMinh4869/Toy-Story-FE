@@ -9,8 +9,10 @@ import CamNangPage from '../pages/CamNangPage'
 import CamNangDetailPage from '../pages/CamNangDetailPage'
 import { ROUTES } from './routePaths'
 import PromotionPage from '../pages/PromotionPage'
-import AdminLayout from '../layouts/AdminLayout'
+import DashboardLayout from '../layouts/DashboardLayout'
 import ProtectedRoute from './ProtectedRoute'
+
+// Admin Pages
 import DashboardPage from '../pages/admin/DashboardPage'
 import ProductManagementPage from '../pages/admin/ProductManagementPage'
 import StaffManagementPage from '../pages/admin/StaffManagementPage'
@@ -20,23 +22,39 @@ import SetManagementPage from '../pages/admin/SetManagementPage'
 import VoucherManagementPage from '../pages/admin/VoucherManagementPage'
 import WarehouseManagementPage from '../pages/admin/WarehouseManagementPage'
 
+// Staff Pages
+import StaffDashboardPage from '../pages/staff/StaffDashboardPage'
+import StaffBrandManagementPage from '../pages/staff/StaffBrandManagementPage'
+import StaffSetManagementPage from '../pages/staff/StaffSetManagementPage'
+import StaffPromotionManagementPage from '../pages/staff/StaffPromotionManagementPage'
+import StaffWarehouseManagementPage from '../pages/staff/StaffWarehouseManagementPage'
+
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
       {/* Public Routes */}
       <Route path={ROUTES.HOME} element={<HomePage />} />
       
-      {/* Admin Routes */}
-      <Route element={<ProtectedRoute allowedRoles={['Admin', 'Staff']} />}>
-        <Route path={ROUTES.ADMIN_DASHBOARD} element={<AdminLayout><DashboardPage /></AdminLayout>} />
-        <Route path={ROUTES.ADMIN_PRODUCTS} element={<AdminLayout><ProductManagementPage /></AdminLayout>} />
-        <Route path={ROUTES.ADMIN_STAFF} element={<AdminLayout><StaffManagementPage /></AdminLayout>} />
-        <Route path={ROUTES.ADMIN_BRANDS} element={<AdminLayout><BrandManagementPage /></AdminLayout>} />
-        <Route path={ROUTES.ADMIN_PROMOTIONS} element={<AdminLayout><PromotionManagementPage /></AdminLayout>} />
-        <Route path={ROUTES.ADMIN_SETS} element={<AdminLayout><SetManagementPage /></AdminLayout>} />
-        <Route path={ROUTES.ADMIN_VOUCHERS} element={<AdminLayout><VoucherManagementPage /></AdminLayout>} />
-        <Route path={ROUTES.ADMIN_WAREHOUSE} element={<AdminLayout><WarehouseManagementPage /></AdminLayout>} />
-        <Route path={ROUTES.ADMIN_ORDERS} element={<AdminLayout><div>Orders Page (Under Construction)</div></AdminLayout>} />
+      {/* Admin Routes - Admin Only */}
+      <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>
+        <Route path={ROUTES.ADMIN_DASHBOARD} element={<DashboardLayout mode="admin"><DashboardPage /></DashboardLayout>} />
+        <Route path={ROUTES.ADMIN_PRODUCTS} element={<DashboardLayout mode="admin"><ProductManagementPage /></DashboardLayout>} />
+        <Route path={ROUTES.ADMIN_STAFF} element={<DashboardLayout mode="admin"><StaffManagementPage /></DashboardLayout>} />
+        <Route path={ROUTES.ADMIN_BRANDS} element={<DashboardLayout mode="admin"><BrandManagementPage /></DashboardLayout>} />
+        <Route path={ROUTES.ADMIN_PROMOTIONS} element={<DashboardLayout mode="admin"><PromotionManagementPage /></DashboardLayout>} />
+        <Route path={ROUTES.ADMIN_SETS} element={<DashboardLayout mode="admin"><SetManagementPage /></DashboardLayout>} />
+        <Route path={ROUTES.ADMIN_VOUCHERS} element={<DashboardLayout mode="admin"><VoucherManagementPage /></DashboardLayout>} />
+        <Route path={ROUTES.ADMIN_WAREHOUSE} element={<DashboardLayout mode="admin"><WarehouseManagementPage /></DashboardLayout>} />
+        <Route path={ROUTES.ADMIN_ORDERS} element={<DashboardLayout mode="admin"><div>Orders Page (Under Construction)</div></DashboardLayout>} />
+      </Route>
+
+      {/* Staff Routes - Staff Only */}
+      <Route element={<ProtectedRoute allowedRoles={['Staff']} />}>
+        <Route path={ROUTES.STAFF_DASHBOARD} element={<DashboardLayout mode="staff"><StaffDashboardPage /></DashboardLayout>} />
+        <Route path={ROUTES.STAFF_BRANDS} element={<DashboardLayout mode="staff"><StaffBrandManagementPage /></DashboardLayout>} />
+        <Route path={ROUTES.STAFF_PROMOTIONS} element={<DashboardLayout mode="staff"><StaffPromotionManagementPage /></DashboardLayout>} />
+        <Route path={ROUTES.STAFF_SETS} element={<DashboardLayout mode="staff"><StaffSetManagementPage /></DashboardLayout>} />
+        <Route path={ROUTES.STAFF_WAREHOUSE} element={<DashboardLayout mode="staff"><StaffWarehouseManagementPage /></DashboardLayout>} />
       </Route>
 
       {/* Auth Routes */}

@@ -27,11 +27,11 @@ export const getBrandById = async (brandId: number): Promise<ViewBrandDto> => {
  */
 export const filterBrands = async (params?: {
   name?: string
-  status?: 'Active' | 'Inactive'
+  status?: 'Active' | 'Inactive' | number
 }): Promise<ViewBrandDto[]> => {
   const queryParams = new URLSearchParams()
   if (params?.name) queryParams.append('name', params.name)
-  if (params?.status) queryParams.append('status', params.status)
+  if (params?.status !== undefined) queryParams.append('status', params.status.toString())
 
   const endpoint = `/Brand/filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
   const response = await apiGet<ViewBrandDto[]>(endpoint)
