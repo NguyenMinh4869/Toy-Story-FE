@@ -44,6 +44,10 @@ export const ROUTES = {
   
   // User
   PROFILE: '/profile',
+  PROFILE_ORDERS: '/profile/orders',
+  PROFILE_WISHLIST: '/profile/wishlist',
+  PROFILE_ADDRESSES: '/profile/addresses',
+  PROFILE_CHANGE_PASSWORD: '/profile/change-password',
   ORDERS: '/orders',
   
   // Other

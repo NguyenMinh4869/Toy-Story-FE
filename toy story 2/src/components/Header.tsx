@@ -1,16 +1,42 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { ROUTES } from '../routes/routePaths'
-import { Search, User, ShoppingBag, ChevronDown } from 'lucide-react'
+import { Search, User, ShoppingBag, ChevronDown, LogOut, UserCircle } from 'lucide-react'
 import { useCart } from '../context/CartContext'
+import { useAuth } from '../hooks/useAuth'
 import ProductsDropdown from './ProductsDropdown'
 
 const Header: React.FC = () => {
   const { getTotalItems, openCart } = useCart()
+  const { isAuthenticated, user, logout } = useAuth()
   const [isProductsDropdownOpen, setIsProductsDropdownOpen] = useState(false)
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
+  const userDropdownRef = useRef<HTMLDivElement>(null)
   
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>): void => {
     e.currentTarget.style.display = 'none'
+  }
+
+  // Close user dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
+        setIsUserDropdownOpen(false)
+      }
+    }
+
+    if (isUserDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isUserDropdownOpen])
+
+  const handleLogout = () => {
+    setIsUserDropdownOpen(false)
+    logout()
   }
 
   return (
@@ -36,10 +62,61 @@ const Header: React.FC = () => {
           </div>
         </div>
         <div className="flex gap-6 items-center">
-          <Link to="/login" className="flex items-center gap-2 cursor-pointer no-underline text-inherit">
-            <User size={22} stroke="white" strokeWidth={2} className="w-[22px] h-[22px] flex-shrink-0" />
-            <span className="font-tilt-warp text-xs text-white">Đăng nhập</span>
-          </Link>
+          {/* Conditional Auth UI */}
+          {isAuthenticated && user ? (
+            // Authenticated State - User Profile Dropdown
+            <div className="relative" ref={userDropdownRef}>
+              <button
+                onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                className="flex items-center gap-2 cursor-pointer bg-transparent border-none text-white hover:opacity-80 transition-opacity"
+              >
+                <User size={22} stroke="white" strokeWidth={2} className="w-[22px] h-[22px] flex-shrink-0" />
+                <span className="font-tilt-warp text-xs text-white">
+                  Xin chào, {user.name || 'Người dùng'}
+                </span>
+                <ChevronDown 
+                  size={16} 
+                  stroke="white" 
+                  strokeWidth={2} 
+                  className={`w-4 h-4 flex-shrink-0 transition-transform ${isUserDropdownOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+
+              {/* User Dropdown Menu */}
+              {isUserDropdownOpen && (
+                <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                  <Link
+                    to={ROUTES.PROFILE}
+                    onClick={() => setIsUserDropdownOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-100 transition-colors no-underline"
+                  >
+                    <UserCircle size={18} className="flex-shrink-0" />
+                    <span className="font-tilt-warp text-sm">Trang cá nhân</span>
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors bg-transparent border-none cursor-pointer text-left"
+                  >
+                    <LogOut size={18} className="flex-shrink-0" />
+                    <span className="font-tilt-warp text-sm">Đăng xuất</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            // Guest State - Login and Register Buttons
+            <>
+              <Link to={ROUTES.LOGIN} className="flex items-center gap-2 cursor-pointer no-underline text-inherit hover:opacity-80 transition-opacity">
+                <User size={22} stroke="white" strokeWidth={2} className="w-[22px] h-[22px] flex-shrink-0" />
+                <span className="font-tilt-warp text-xs text-white">Đăng nhập</span>
+              </Link>
+              <Link to={ROUTES.REGISTER} className="flex items-center gap-2 cursor-pointer no-underline text-inherit hover:opacity-80 transition-opacity">
+                <User size={22} stroke="white" strokeWidth={2} className="w-[22px] h-[22px] flex-shrink-0" />
+                <span className="font-tilt-warp text-xs text-white">Đăng ký</span>
+              </Link>
+            </>
+          )}
+          
           <button 
             onClick={openCart}
             className="flex items-center gap-2 cursor-pointer bg-transparent border-none"
