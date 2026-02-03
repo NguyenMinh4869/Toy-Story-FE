@@ -1,6 +1,24 @@
 import { apiGet, apiPostForm, apiPutForm } from './apiClient'
 import type { ViewVoucherDto, ViewVoucherSummaryDto, CreateVoucherDto, UpdateVoucherDto } from '../types/VoucherDTO'
 
+/**
+ * Get vouchers for customer listing (public endpoint)
+ * GET /api/Voucher/customer-filter
+ * Optional query: name, type (DiscountType 0|1|2|3)
+ */
+export const getCustomerFilterVouchers = async (params?: {
+  name?: string
+  type?: number
+}): Promise<ViewVoucherSummaryDto[]> => {
+  const queryParams = new URLSearchParams()
+  if (params?.name) queryParams.append('name', params.name)
+  if (params?.type !== undefined) queryParams.append('type', String(params.type))
+
+  const endpoint = `/Voucher/customer-filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+  const response = await apiGet<ViewVoucherSummaryDto[]>(endpoint)
+  return response.data
+}
+
 export const getVouchers = async (): Promise<ViewVoucherSummaryDto[]> => {
   const response = await apiGet<ViewVoucherSummaryDto[]>('/Voucher')
   return response.data

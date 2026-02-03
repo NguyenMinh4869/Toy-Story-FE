@@ -20,11 +20,26 @@ export const getPromotions = async (): Promise<ViewPromotionSummaryDto[]> => {
 }
 
 /**
- * Get promotions using customer-filter endpoint (no auth required)
- * Use this for staff/public access
+ * Get promotions for customer listing (FR-4)
+ * GET /api/Promotion/customer-filter
+ * Optional query: name, discountType, productId, categoryId, brandId
  */
-export const getPromotionsCustomerFilter = async (): Promise<ViewPromotionSummaryDto[]> => {
-  const response = await apiGet<ViewPromotionSummaryDto[]>('/Promotion/customer-filter')
+export const getPromotionsCustomerFilter = async (params?: {
+  name?: string
+  discountType?: number
+  productId?: number
+  categoryId?: number
+  brandId?: number
+}): Promise<ViewPromotionDto[]> => {
+  const queryParams = new URLSearchParams()
+  if (params?.name) queryParams.append('name', params.name)
+  if (params?.discountType !== undefined) queryParams.append('discountType', String(params.discountType))
+  if (params?.productId !== undefined) queryParams.append('productId', String(params.productId))
+  if (params?.categoryId !== undefined) queryParams.append('categoryId', String(params.categoryId))
+  if (params?.brandId !== undefined) queryParams.append('brandId', String(params.brandId))
+
+  const endpoint = `/Promotion/customer-filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+  const response = await apiGet<ViewPromotionDto[]>(endpoint)
   return response.data
 }
 

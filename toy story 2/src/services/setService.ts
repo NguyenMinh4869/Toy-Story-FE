@@ -6,8 +6,17 @@ export const getSets = async (): Promise<ViewSetDetailDto[]> => {
   return response.data
 }
 
-export const getSetsCustomerFilter = async (): Promise<ViewSetDetailDto[]> => {
-  const response = await apiGet<ViewSetDetailDto[]>('/Set/customer-filter')
+/**
+ * Get sets for customer listing (FR-5)
+ * GET /api/Set/customer-filter
+ * Optional query: name
+ */
+export const getSetsCustomerFilter = async (params?: { name?: string }): Promise<ViewSetDetailDto[]> => {
+  const queryParams = new URLSearchParams()
+  if (params?.name) queryParams.append('name', params.name)
+
+  const endpoint = `/Set/customer-filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+  const response = await apiGet<ViewSetDetailDto[]>(endpoint)
   return response.data
 }
 

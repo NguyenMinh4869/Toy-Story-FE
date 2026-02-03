@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { FilterSidebar, ProductGrid, Pagination } from '../components/productpage'
 import { BreadcrumbHeader } from '../components/BreadcrumbHeader'
-import { getActiveProducts } from '../services/productService'
+import { getCustomerFilterProducts } from '../services/productService'
 import type { ViewProductDto } from '../types/ProductDTO'
 
 // Breadcrumb items for the products page
@@ -30,7 +30,7 @@ export const ProductsPage: React.FC = () => {
       try {
         setIsLoading(true)
         setError(null)
-        const data = await getActiveProducts()
+        const data = await getCustomerFilterProducts()
         setProducts(data)
         setFilteredProducts(data)
       } catch (err) {

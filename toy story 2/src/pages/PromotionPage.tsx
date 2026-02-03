@@ -5,17 +5,17 @@
 
 import React, { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { getActivePromotions } from '../services/promotionService'
+import { getPromotionsCustomerFilter } from '../services/promotionService'
 import { filterProducts } from '../services/productService'
 import { BreadcrumbHeader } from '../components/BreadcrumbHeader'
 import { ProductCard } from '../components/ProductCard'
-import type { ViewPromotionSummaryDto } from '../types/PromotionDTO'
+import type { ViewPromotionDto } from '../types/PromotionDTO'
 import type { ViewProductDto } from '../types/ProductDTO'
 import { useNavigate } from 'react-router-dom'
 import { PRODUCT_IMAGE_87 } from '../constants/imageAssets'
 
 export const PromotionPage: React.FC = () => {
-  const [promotions, setPromotions] = useState<ViewPromotionSummaryDto[]>([])
+  const [promotions, setPromotions] = useState<ViewPromotionDto[]>([])
   const [productsByPromo, setProductsByPromo] = useState<Record<number, ViewProductDto[]>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -26,7 +26,7 @@ export const PromotionPage: React.FC = () => {
       try {
         setLoading(true)
         setError(null)
-        const promos = await getActivePromotions()
+        const promos = await getPromotionsCustomerFilter()
         setPromotions(promos)
         
         // Fetch products for each promotion (skip first banner)

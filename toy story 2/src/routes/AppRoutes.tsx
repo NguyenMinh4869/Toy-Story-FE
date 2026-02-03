@@ -9,6 +9,8 @@ import CamNangPage from '../pages/CamNangPage'
 import CamNangDetailPage from '../pages/CamNangDetailPage'
 import { ROUTES } from './routePaths'
 import PromotionPage from '../pages/PromotionPage'
+import VoucherPage from '../pages/VoucherPage'
+import SetPage from '../pages/SetPage'
 import DashboardLayout from '../layouts/DashboardLayout'
 import ProtectedRoute from './ProtectedRoute'
 
@@ -72,6 +74,12 @@ const AppRoutes: React.FC = () => {
 
       {/* Promotion Route */}
       <Route path="/promotion" element={<PromotionPage />} />
+
+      {/* Voucher Route (FR-3: customer-filter) */}
+      <Route path={ROUTES.VOUCHERS} element={<VoucherPage />} />
+
+      {/* Set Route (FR-5: customer-filter) */}
+      <Route path={ROUTES.SETS} element={<SetPage />} />
       
       {/* Other Pages */}
       <Route path={ROUTES.CAM_NANG} element={<CamNangPage />} />
