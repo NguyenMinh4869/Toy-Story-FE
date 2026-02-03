@@ -1,112 +1,100 @@
-import React, { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { useParams, Link } from 'react-router-dom'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import ProductSection from '../components/ProductSection'
 import type { ProductDTO } from '../types/ProductDTO'
 import { ProductCard } from '../types/ProductCard'
 import { formatPrice, formatDiscount } from '../utils/formatPrice'
 import { useCart } from '../context/CartContext'
+import { getProductById } from '../services/productService'
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
+  const [product, setProduct] = useState<ProductDTO | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [quantity, setQuantity] = useState<number>(1)
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0)
   const { addToCart } = useCart()
 
-  // Mock data - structure ready for API call with useEffect
-  const product: ProductDTO = {
-    id: id || '1',
-    name: 'Mô Hình Đồ Chơi Xe Tập Đi Đa Năng Có Nhạc Và Đèn Cho Bé VTECH 80-505600',
-    price: 1245300,
-    originalPrice: 1779000,
-    description: `Khám phá thế giới kỳ diệu qua từng mặt khối!
-Bé sẽ hoàn toàn bị cuốn hút vào hành trình khám phá đầy màu sắc và bất ngờ với đồ chơi hình khối 6 mặt PEEK A BOO – mã PAB055. Sản phẩm là sự kết hợp hoàn hảo giữa học và chơi, giúp bé phát triển đa giác quan, khả năng vận động, nhận thức và tư duy logic ngay từ giai đoạn đầu đời.
-
-6 mặt – 6 trải nghiệm học hỏi độc đáo
-Mỗi mặt của khối đồ chơi được thiết kế như một mini-game nhỏ:
-- Mặt 1 – Bánh răng xoay: Bé sẽ học cách phối hợp tay mắt và nhận biết nguyên lý vận hành.
-- Mặt 2 –  Mặt trống vui nhộn-  Giúp bé làm phát triên vận động tinh, xúc giác qua việc chạm và lắng nghe âm thanh
-- Mặt 3 – Cửa sổ lật mở và đàn piano: Rèn luyện kỹ năng điều khiển ngón tay linh hoạt, tạo cảm giác vui khi khám phá điều bất ngờ phía sau.
-
-Lợi ích nổi bật cho bé
-- Phát triển vận động tinh và sự khéo léo của bàn tay.
-- Khuyến khích sự tò mò, tư duy giải quyết vấn đề.
-- Tăng khả năng ghi nhớ, quan sát và phản xạ.
-- Tạo nền tảng cho kỹ năng xã hội thông qua việc tự chơi hoặc chơi cùng người lớn.`,
-    brandName: 'SKIBIDI TOILET',
-    categoryName: 'PEEK TODDLERS TOY',
-    imageUrl: 'https://www.figma.com/api/mcp/asset/ddd8d83c-d216-4677-adb5-899a3f1d6fff',
-    images: [
-      'https://www.figma.com/api/mcp/asset/ddd8d83c-d216-4677-adb5-899a3f1d6fff',
-      'https://www.figma.com/api/mcp/asset/ddd8d83c-d216-4677-adb5-899a3f1d6fff',
-      'https://www.figma.com/api/mcp/asset/ddd8d83c-d216-4677-adb5-899a3f1d6fff'
-    ] as string[],
-    sku: 'ST1310',
-    ageRange: '6 tháng tuổi trở lên',
-    origin: 'Việt Nam',
-    manufacturer: 'Trung Quốc',
-    gender: 'Preschool',
-    stock: 24,
-    storeName: '[CHA193] MYKINGDOM YÊN BÁI ĐÀ NẴNG',
-    storeAddress: 'Số 21 Yên Bái Phường Hải Châu 1, Quận Hải Châu Thành phố Đà Nẵng',
-    storePhone: '+842363522379',
-    discount: 30
-  }
-
-  // Mock related products - convert ProductDTO to ProductCard format
-  const relatedProducts: ProductCard[] = [
-    {
-      image: product.imageUrl,
-      name: product.name,
-      price: formatPrice(product.price),
-      originalPrice: formatPrice(product.originalPrice),
-      discount: product.discount ? formatDiscount(product.discount) : '-30%'
-    },
-    {
-      image: product.imageUrl,
-      name: product.name,
-      price: formatPrice(product.price),
-      originalPrice: formatPrice(product.originalPrice),
-      discount: product.discount ? formatDiscount(product.discount) : '-30%'
-    },
-    {
-      image: product.imageUrl,
-      name: product.name,
-      price: formatPrice(product.price),
-      originalPrice: formatPrice(product.originalPrice),
-      discount: product.discount ? formatDiscount(product.discount) : '-30%'
-    },
-    {
-      image: product.imageUrl,
-      name: product.name,
-      price: formatPrice(product.price),
-      originalPrice: formatPrice(product.originalPrice),
-      discount: product.discount ? formatDiscount(product.discount) : '-30%'
+  useEffect(() => {
+    if (!id) return
+    const productId = Number(id)
+    if (Number.isNaN(productId)) {
+      setError('Mã sản phẩm không hợp lệ')
+      setIsLoading(false)
+      return
     }
-  ]
+    const fetchProduct = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+        const data = await getProductById(productId)
+        const mapped: ProductDTO = {
+          ...data,
+          id: String(data.productId ?? id),
+          images: data.imageUrl ? [data.imageUrl] : [],
+        }
+        setProduct(mapped)
+      } catch (err) {
+        console.error('Error fetching product:', err)
+        setError('Không thể tải chi tiết sản phẩm. Vui lòng thử lại sau.')
+        setProduct(null)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchProduct()
+  }, [id])
 
-  // TODO: Replace with actual API call
-  // useEffect(() => {
-  //   fetch(`/api/products/${id}`)
-  //     .then(res => res.json())
-  //     .then(data => setProduct(data))
-  // }, [id])
+  // Related products from current product (single item placeholder when no API)
+  const relatedProducts: ProductCard[] = product
+    ? [
+        {
+          image: product.imageUrl ?? undefined,
+          name: product.name ?? '',
+          price: formatPrice(product.price),
+          originalPrice: product.originalPrice != null ? formatPrice(product.originalPrice) : formatPrice(product.price),
+          discount: product.discount != null ? formatDiscount(product.discount) : '-',
+        },
+      ]
+    : []
 
   const handleQuantityChange = (change: number): void => {
     setQuantity(prev => Math.max(1, prev + change))
   }
 
   const handleAddToCart = (): void => {
-    addToCart(product, quantity)
-    // Cart popup will open automatically via context
+    if (product) addToCart(product, quantity)
   }
 
+  if (isLoading) {
+    return (
+      <div className="bg-white min-h-screen flex items-center justify-center py-20">
+        <p className="font-red-hat text-[15px] text-[#484848]">Đang tải chi tiết sản phẩm...</p>
+      </div>
+    )
+  }
+
+  if (error || !product) {
+    return (
+      <div className="bg-white min-h-screen flex flex-col items-center justify-center py-20 px-5">
+        <p className="font-red-hat text-[15px] text-red-600 mb-4">{error ?? 'Sản phẩm không tồn tại.'}</p>
+        <Link to="/products" className="font-tilt-warp text-[15px] text-[#1500b1] underline">
+          Quay lại danh sách sản phẩm
+        </Link>
+      </div>
+    )
+  }
+
+  const imageSources = (product.images?.length ? product.images : [product.imageUrl].filter(Boolean)) as string[]
+  const hasStoreInfo = product.storeName ?? product.storeAddress ?? product.storePhone
 
   return (
     <div className="bg-white min-h-screen">
       {/* Breadcrumb */}
       <div className="bg-[#f2f2f2] border-[0.2px] border-black py-3.5 px-[58px] font-rowdies text-[10px] text-[#484848] max-md:px-5 max-md:text-[8px]">
-        <span>Trang chủ</span>
+        <Link to="/" className="text-[#484848] hover:text-black">Trang chủ</Link>
         <span> {'>'} </span>
         <span className="text-black">{product.name}</span>
       </div>
@@ -115,30 +103,36 @@ Lợi ích nổi bật cho bé
       <div className="max-w-[1800px] mx-auto py-9 px-5 grid grid-cols-[524px_1fr] gap-10 max-xl:grid-cols-1 max-xl:max-w-[600px] max-md:p-5 max-md:gap-5">
         {/* Image Gallery */}
         <div className="relative max-xl:w-full">
-          <div className="w-[524px] h-[524px] rounded-xl overflow-hidden mb-5 max-xl:w-full max-xl:h-auto max-xl:aspect-square">
-            <img 
-              src={(product.images || [product.imageUrl])[selectedImageIndex]} 
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
+          <div className="w-[524px] h-[524px] rounded-xl overflow-hidden mb-5 max-xl:w-full max-xl:h-auto max-xl:aspect-square bg-[#f2f2f2] flex items-center justify-center">
+            {imageSources.length > 0 ? (
+              <img
+                src={imageSources[selectedImageIndex] ?? imageSources[0]}
+                alt={product.name ?? ''}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="font-red-hat text-[15px] text-[#888]">Chưa có ảnh</span>
+            )}
           </div>
-          <div className="flex gap-2.5 items-center justify-center relative">
-            <button className="bg-none border-none cursor-pointer p-2 text-[#333] transition-colors hover:text-[#ca002a]" aria-label="Previous image">
-              <ChevronLeft size={24} stroke="currentColor" strokeWidth={2} />
-            </button>
-            {(product.images || [product.imageUrl]).map((img, index) => (
-              <div 
-                key={index}
-                className={`w-[120px] h-[120px] rounded-lg overflow-hidden cursor-pointer transition-opacity opacity-50 hover:opacity-100 ${selectedImageIndex === index ? 'opacity-100' : ''} max-md:w-20 max-md:h-20 max-[480px]:w-[60px] max-[480px]:h-[60px]`}
-                onClick={() => setSelectedImageIndex(index)}
-              >
-                <img src={img} alt={`${product.name} - view ${index + 1}`} className="w-full h-full object-cover" />
-              </div>
-            ))}
-            <button className="bg-none border-none cursor-pointer p-2 text-[#333] transition-colors hover:text-[#ca002a]" aria-label="Next image">
-              <ChevronRight size={24} stroke="currentColor" strokeWidth={2} />
-            </button>
-          </div>
+          {imageSources.length > 1 && (
+            <div className="flex gap-2.5 items-center justify-center relative">
+              <button className="bg-none border-none cursor-pointer p-2 text-[#333] transition-colors hover:text-[#ca002a]" aria-label="Previous image">
+                <ChevronLeft size={24} stroke="currentColor" strokeWidth={2} />
+              </button>
+              {imageSources.map((img, index) => (
+                <div
+                  key={index}
+                  className={`w-[120px] h-[120px] rounded-lg overflow-hidden cursor-pointer transition-opacity opacity-50 hover:opacity-100 ${selectedImageIndex === index ? 'opacity-100' : ''} max-md:w-20 max-md:h-20 max-[480px]:w-[60px] max-[480px]:h-[60px]`}
+                  onClick={() => setSelectedImageIndex(index)}
+                >
+                  <img src={img} alt={`${product.name} - view ${index + 1}`} className="w-full h-full object-cover" />
+                </div>
+              ))}
+              <button className="bg-none border-none cursor-pointer p-2 text-[#333] transition-colors hover:text-[#ca002a]" aria-label="Next image">
+                <ChevronRight size={24} stroke="currentColor" strokeWidth={2} />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Product Info */}
@@ -147,16 +141,22 @@ Lợi ích nổi bật cho bé
           
           <div className="flex items-center gap-[15px] text-[15px] flex-wrap max-md:text-[13px]">
             <span className="font-red-hat text-[#454040]">Thương hiệu</span>
-            <span className="font-rowdies text-[#1500b1]">{product.brandName}</span>
-            <span className="font-red-hat text-[#454040]">SKU</span>
-            <span className="font-rowdies text-black">{product.sku}</span>
+            <span className="font-rowdies text-[#1500b1]">{product.brandName ?? '-'}</span>
+            {product.sku != null && (
+              <>
+                <span className="font-red-hat text-[#454040]">SKU</span>
+                <span className="font-rowdies text-black">{product.sku}</span>
+              </>
+            )}
           </div>
 
           <div className="flex flex-col gap-2.5">
             <span className="font-red-hat text-xl text-[#454040]">Giá Bán:</span>
             <div className="flex items-center gap-5">
               <span className="font-red-hat text-[22px] text-red-600 font-semibold max-md:text-lg">{formatPrice(product.price)}</span>
-              <span className="font-red-hat text-lg text-black line-through max-md:text-sm">{formatPrice(product.originalPrice)}</span>
+              {product.originalPrice != null && (
+                <span className="font-red-hat text-lg text-black line-through max-md:text-sm">{formatPrice(product.originalPrice)}</span>
+              )}
             </div>
           </div>
 
@@ -198,17 +198,22 @@ Lợi ích nổi bật cho bé
             </div>
           </div>
 
-          {/* Store Availability */}
-          <div className="border border-[#d9d9d9] p-5 rounded-lg">
-            <h3 className="font-tilt-warp text-[15px] text-black m-0 mb-[15px]">Dự kiến các cửa hàng còn sản phẩm</h3>
-            <div>
-              <p className="font-tilt-warp text-sm text-black m-2 leading-[1.5]">
-                <strong>{product.storeName}</strong> - <span className="text-red-600 font-bold">{product.stock}</span> có sẵn
-              </p>
-              <p className="font-red-hat text-sm m-2 leading-[1.5]">{product.storeAddress}</p>
-              <p className="font-red-hat text-sm m-2 leading-[1.5]">{product.storePhone}</p>
+          {/* Store Availability - only when API provides store info */}
+          {hasStoreInfo && (
+            <div className="border border-[#d9d9d9] p-5 rounded-lg">
+              <h3 className="font-tilt-warp text-[15px] text-black m-0 mb-[15px]">Dự kiến các cửa hàng còn sản phẩm</h3>
+              <div>
+                {product.storeName != null && (
+                  <p className="font-tilt-warp text-sm text-black m-2 leading-[1.5]">
+                    <strong>{product.storeName}</strong>
+                    {product.stock != null && <> - <span className="text-red-600 font-bold">{product.stock}</span> có sẵn</>}
+                  </p>
+                )}
+                {product.storeAddress != null && <p className="font-red-hat text-sm m-2 leading-[1.5]">{product.storeAddress}</p>}
+                {product.storePhone != null && <p className="font-red-hat text-sm m-2 leading-[1.5]">{product.storePhone}</p>}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Product Specifications */}
           <div className="border border-[#d9d9d9] p-5 rounded-lg">
@@ -217,32 +222,40 @@ Lợi ích nổi bật cho bé
               <tbody>
                 <tr className="border-b border-[#d9d9d9]">
                   <td className="py-3 font-red-hat text-[15px] text-black w-[40%] max-[480px]:text-xs max-[480px]:py-2">Chủ đề</td>
-                  <td className="py-3 font-red-hat text-[15px] text-black font-medium max-[480px]:text-xs max-[480px]:py-2">{product.categoryName}</td>
+                  <td className="py-3 font-red-hat text-[15px] text-black font-medium max-[480px]:text-xs max-[480px]:py-2">{product.categoryName ?? '-'}</td>
                 </tr>
-                <tr className="border-b border-[#d9d9d9]">
-                  <td className="py-3 font-red-hat text-[15px] text-black w-[40%] max-[480px]:text-xs max-[480px]:py-2">Mã sản phẩm</td>
-                  <td className="py-3 font-red-hat text-[15px] text-black font-medium max-[480px]:text-xs max-[480px]:py-2">{product.sku}</td>
-                </tr>
+                {product.sku != null && (
+                  <tr className="border-b border-[#d9d9d9]">
+                    <td className="py-3 font-red-hat text-[15px] text-black w-[40%] max-[480px]:text-xs max-[480px]:py-2">Mã sản phẩm</td>
+                    <td className="py-3 font-red-hat text-[15px] text-black font-medium max-[480px]:text-xs max-[480px]:py-2">{product.sku}</td>
+                  </tr>
+                )}
                 <tr className="border-b border-[#d9d9d9]">
                   <td className="py-3 font-red-hat text-[15px] text-black w-[40%] max-[480px]:text-xs max-[480px]:py-2">Tuổi</td>
-                  <td className="py-3 font-red-hat text-[15px] text-black font-medium max-[480px]:text-xs max-[480px]:py-2">{product.ageRange}</td>
+                  <td className="py-3 font-red-hat text-[15px] text-black font-medium max-[480px]:text-xs max-[480px]:py-2">{product.ageRange ?? '-'}</td>
                 </tr>
                 <tr className="border-b border-[#d9d9d9]">
                   <td className="py-3 font-red-hat text-[15px] text-black w-[40%] max-[480px]:text-xs max-[480px]:py-2">Thương hiệu</td>
-                  <td className="py-3 font-red-hat text-[15px] text-black font-medium max-[480px]:text-xs max-[480px]:py-2">{product.brandName}</td>
+                  <td className="py-3 font-red-hat text-[15px] text-black font-medium max-[480px]:text-xs max-[480px]:py-2">{product.brandName ?? '-'}</td>
                 </tr>
                 <tr className="border-b border-[#d9d9d9]">
                   <td className="py-3 font-red-hat text-[15px] text-black w-[40%] max-[480px]:text-xs max-[480px]:py-2">Xuất xứ thương hiệu</td>
-                  <td className="py-3 font-red-hat text-[15px] text-black font-medium max-[480px]:text-xs max-[480px]:py-2">{product.origin}</td>
+                  <td className="py-3 font-red-hat text-[15px] text-black font-medium max-[480px]:text-xs max-[480px]:py-2">{product.origin ?? '-'}</td>
                 </tr>
                 <tr className="border-b border-[#d9d9d9]">
                   <td className="py-3 font-red-hat text-[15px] text-black w-[40%] max-[480px]:text-xs max-[480px]:py-2">Giới tính</td>
-                  <td className="py-3 font-red-hat text-[15px] text-black font-medium max-[480px]:text-xs max-[480px]:py-2">{product.gender}</td>
+                  <td className="py-3 font-red-hat text-[15px] text-black font-medium max-[480px]:text-xs max-[480px]:py-2">{product.gender ?? '-'}</td>
                 </tr>
                 <tr className="border-b border-[#d9d9d9]">
-                  <td className="py-3 font-red-hat text-[15px] text-black w-[40%] max-[480px]:text-xs max-[480px]:py-2">Nơi sản xuất</td>
-                  <td className="py-3 font-red-hat text-[15px] text-black font-medium max-[480px]:text-xs max-[480px]:py-2">{product.manufacturer}</td>
+                  <td className="py-3 font-red-hat text-[15px] text-black w-[40%] max-[480px]:text-xs max-[480px]:py-2">Chất liệu</td>
+                  <td className="py-3 font-red-hat text-[15px] text-black font-medium max-[480px]:text-xs max-[480px]:py-2">{product.material ?? '-'}</td>
                 </tr>
+                {product.manufacturer != null && (
+                  <tr className="border-b border-[#d9d9d9]">
+                    <td className="py-3 font-red-hat text-[15px] text-black w-[40%] max-[480px]:text-xs max-[480px]:py-2">Nơi sản xuất</td>
+                    <td className="py-3 font-red-hat text-[15px] text-black font-medium max-[480px]:text-xs max-[480px]:py-2">{product.manufacturer}</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

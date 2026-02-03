@@ -8,7 +8,31 @@ import type { ViewProductDto } from '../types/ProductDTO'
 import type { CreateProductDto, UpdateProductDto } from '../types/ProductDTO'
 
 /**
- * Get active products (public endpoint)
+ * Get products for customer listing (public endpoint)
+ * GET /api/Product/customer-filter
+ * Returns only products visible to customers (e.g. "Đang bán").
+ */
+export const getCustomerFilterProducts = async (params?: {
+  searchTerm?: string
+  genderTarget?: number
+  ageRange?: number
+  categoryId?: number
+  brandId?: number
+}): Promise<ViewProductDto[]> => {
+  const queryParams = new URLSearchParams()
+  if (params?.searchTerm) queryParams.append('searchTerm', params.searchTerm)
+  if (params?.genderTarget !== undefined) queryParams.append('genderTarget', String(params.genderTarget))
+  if (params?.ageRange !== undefined) queryParams.append('ageRange', String(params.ageRange))
+  if (params?.categoryId !== undefined) queryParams.append('categoryId', String(params.categoryId))
+  if (params?.brandId !== undefined) queryParams.append('brandId', String(params.brandId))
+
+  const endpoint = `/Product/customer-filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+  const response = await apiGet<ViewProductDto[]>(endpoint)
+  return response.data
+}
+
+/**
+ * Get active products (public endpoint) - uses admin filter for backward compatibility
  */
 export const getActiveProducts = async (): Promise<ViewProductDto[]> => {
   return filterProducts({ status: 'Active' })

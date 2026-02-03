@@ -37,6 +37,8 @@ export const ROUTES = {
   CATEGORY: '/category/:category',
   BRANDS: '/brands',
   BRAND_DETAIL: '/brands/:id',
+  VOUCHERS: '/vouchers',
+  SETS: '/sets',
   
   // Cart & Checkout
   CART: '/cart',
