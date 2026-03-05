@@ -1,7 +1,9 @@
 import type { components } from './generated'
 
 export type ViewSetDetailDto = components['schemas']['ViewSetDetailDto']
+export type ViewSetDto = ViewSetDetailDto
 export type ViewSetProductDto = components['schemas']['ViewSetProductDto']
+
 export type CreateSetProductDto = components['schemas']['CreateSetProductDto']
 export type CreateSetResponseDto = components['schemas']['CreateSetResponseDto']
 

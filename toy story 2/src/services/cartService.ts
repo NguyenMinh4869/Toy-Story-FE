@@ -5,7 +5,7 @@ import { apiGet, apiPost, apiDelete } from './apiClient'
  * POST /api/cart/items?productId={id}&quantity={qty}
  */
 export const addToCartServer = async (productId: number, quantity: number): Promise<void> => {
-    await apiPost(`/cart/items?productId=${productId}&quantity=${quantity}`, {})
+    await apiPost(`/accounts/carts/items?productId=${productId}&quantity=${quantity}`, {})
 }
 
 /**
@@ -13,7 +13,7 @@ export const addToCartServer = async (productId: number, quantity: number): Prom
  * DELETE /api/cart
  */
 export const clearCartServer = async (): Promise<void> => {
-    await apiDelete('/cart')
+    await apiDelete('/accounts/carts')
 }
 
 /**
@@ -21,6 +21,6 @@ export const clearCartServer = async (): Promise<void> => {
  * GET /api/cart
  */
 export const getCartServer = async (): Promise<any> => {
-    const response = await apiGet('/cart')
+    const response = await apiGet('/accounts/carts')
     return response.data
 }
