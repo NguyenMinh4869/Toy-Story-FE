@@ -1,18 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
-
-interface Article {
-  id: number;
-  title: string;
-  excerpt: string;
-  author: string;
-  date: string;
-  imageUrl: string;
-  category: string;
-}
+import type { ViewArticleDto } from "../../types/ArticleDTO";
 
 interface ArticleCardProps {
-  article: Article;
+  article: ViewArticleDto;
 }
 
 export const ArticleCard = ({ article }: ArticleCardProps): React.JSX.Element => {

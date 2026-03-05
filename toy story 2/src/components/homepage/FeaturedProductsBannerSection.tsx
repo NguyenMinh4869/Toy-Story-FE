@@ -1,5 +1,5 @@
 import React from "react";
-import { BANNER_LC2000, DECOR_LANTERNS_ENVELOPES } from "../../constants/imageAssets";
+import { BANNER_LC2000 } from "../../constants/imageAssets";
 
 export const FeaturedProductsBannerSection = (): React.JSX.Element => {
   return (

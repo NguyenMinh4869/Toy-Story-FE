@@ -1,17 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { ROUTES } from "../../routes/routePaths";
-
-interface RelatedArticle {
-  id: number;
-  title: string;
-  date: string;
-  author: string;
-  imageUrl: string;
-}
+import type { ViewArticleDto } from "../../types/ArticleDTO";
 
 interface RelatedArticleCardProps {
-  article: RelatedArticle;
+  article: ViewArticleDto;
 }
 
 export const RelatedArticleCard = ({ article }: RelatedArticleCardProps): React.JSX.Element => {

@@ -294,8 +294,8 @@ const CheckoutPage: React.FC = () => {
                                 {cartItems.map((item, index) => (
                                     <div key={index} className="flex gap-4 p-4 rounded-2xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100">
                                         <img
-                                            src={item.product.imageUrl ?? undefined}
-                                            alt={item.product.name}
+                                            src={item.product.imageUrl || ''}
+                                            alt={item.product.name || ''}
                                             className="w-20 h-20 rounded-xl object-cover bg-gray-100 border border-gray-200"
                                         />
                                         <div className="flex-1 min-w-0 py-1">
