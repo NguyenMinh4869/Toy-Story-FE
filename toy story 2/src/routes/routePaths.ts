@@ -26,11 +26,11 @@ export const ROUTES = {
 
   // Public
   HOME: '/',
-  
+
   // Auth
   LOGIN: '/login',
   REGISTER: '/register',
-  
+
   // Shop
   PRODUCTS: '/products',
   PRODUCT_DETAIL: '/product/:id',
@@ -39,11 +39,12 @@ export const ROUTES = {
   BRAND_DETAIL: '/brands/:id',
   VOUCHERS: '/vouchers',
   SETS: '/sets',
-  
+  PROMOTION: '/promotion',
+
   // Cart & Checkout
   CART: '/cart',
   CHECKOUT: '/checkout',
-  
+
   // User
   PROFILE: '/profile',
   PROFILE_ORDERS: '/profile/orders',
@@ -51,7 +52,7 @@ export const ROUTES = {
   PROFILE_ADDRESSES: '/profile/addresses',
   PROFILE_CHANGE_PASSWORD: '/profile/change-password',
   ORDERS: '/orders',
-  
+
   // Other
   CAM_NANG: '/cam-nang',
   CAM_NANG_DETAIL: '/cam-nang/:id',

@@ -34,12 +34,12 @@ export const DECOR_RED_ENVELOPE = decorRedEnvelope;
 export const BANNER_LC2000 = bannerLC2000;
 export const FAV_TOY_DECOR = favToyDecor;
 
-// Section Icons (all use same image)
-export const SECTION_ICON = "https://www.figma.com/api/mcp/asset/90b57607-01f4-436a-84b7-bf19c8142dc8";
+// Section Icons
+export const SECTION_ICON = "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?q=80&w=100&auto=format&fit=crop";
 
 // Product Images
 export const PRODUCT_IMAGE_87 = prdCardBg; // Product card background frame
-export const PRODUCT_IMAGE_107 = "https://www.figma.com/api/mcp/asset/874014bc-9737-4521-b8c4-90b3db0362b4"; // Favorite/wishlist icon
+export const PRODUCT_IMAGE_107 = "https://cdn-icons-png.flaticon.com/512/833/833472.png"; // Heart icon fallback
 
 // Decorative Elements
 export const DECOR_DYNAMIC_BRAND = decorDynamicBrand24;

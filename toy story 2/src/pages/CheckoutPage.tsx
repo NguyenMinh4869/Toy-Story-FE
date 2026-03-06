@@ -3,11 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../hooks/useAuth'
 import { formatPrice } from '../utils/formatPrice'
-import { calculatePrice, checkout, createPayment } from '../services/checkoutService'
-import { CalculatePriceResponse } from '../types/CheckoutDTO'
-import { addToCartServer, clearCartServer, getCartServer } from '../services/cartService'
-import { updateUser } from '../services/authService'
-import { ShoppingBag, ArrowLeft, CreditCard, Loader2, CheckCircle2 } from 'lucide-react'
+import { checkout, createPayment } from '../services/checkoutService'
+import { ShoppingBag, ArrowLeft, CreditCard, Loader2 } from 'lucide-react'
 import { ROUTES } from '../routes/routePaths'
 
 interface CheckoutFormData {
@@ -23,9 +20,7 @@ const CheckoutPage: React.FC = () => {
     const { cartItems, getTotalPrice, clearCart } = useCart()
     const { user } = useAuth()
 
-    const [isCalculating, setIsCalculating] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [calculation, setCalculation] = useState<CalculatePriceResponse | null>(null)
     const [error, setError] = useState<string | null>(null)
 
     // Form state
@@ -65,53 +60,6 @@ const CheckoutPage: React.FC = () => {
         setFormData(prev => ({ ...prev, [name]: value }))
     }
 
-    const handleCalculate = async () => {
-        if (cartItems.length === 0) return
-
-        setIsCalculating(true)
-        setError(null)
-
-        try {
-            // 1. Sync cart with server (backend relies on session/db cart)
-            await clearCartServer()
-            for (const item of cartItems) {
-                const pId = item.product.productId || (item.product.id ? parseInt(String(item.product.id)) : 0)
-                if (pId > 0) {
-                    await addToCartServer(pId, item.quantity)
-                }
-            }
-
-            try {
-                // 2. Try the dedicated calculation endpoint
-                const items = cartItems.map(item => ({
-                    productId: item.product.productId || (item.product.id ? parseInt(String(item.product.id)) : 0),
-                    quantity: item.quantity
-                }))
-                const result = await calculatePrice({ items })
-                setCalculation(result)
-            } catch (calcErr: any) {
-                // 3. Fallback: Get server-side total from cart if calculate endpoint 404s
-                console.log('Calculation endpoint failed or not found, using cart total fallback')
-                const serverCart = await getCartServer()
-                if (serverCart && serverCart.totalPrice !== undefined) {
-                    setCalculation({
-                        subtotal: serverCart.totalPrice,
-                        discount: 0,
-                        total: serverCart.totalPrice,
-                        message: 'Tính toán dựa trên giỏ hàng hiện tại.'
-                    })
-                } else {
-                    throw calcErr // Re-throw if even fallback fails
-                }
-            }
-        } catch (err: any) {
-            console.error('Calculation error:', err)
-            setError(err.message || 'Không thể tính phí đơn hàng. Vui lòng thử lại.')
-        } finally {
-            setIsCalculating(false)
-        }
-    }
-
     const handleCheckout = async (e: React.FormEvent) => {
         if (e && e.preventDefault) e.preventDefault()
 
@@ -127,44 +75,28 @@ const CheckoutPage: React.FC = () => {
         setError(null)
 
         try {
-            // 1. Sync User Profile (Backend may use profile info for checkout)
-            try {
-                await updateUser({
-                    name: formData.name,
-                    phoneNumber: formData.phoneNumber,
-                    address: formData.address,
-                    email: formData.email || undefined
-                })
-            } catch (profileErr) {
-                console.warn('Profile sync failed, continuing checkout anyway:', profileErr)
-                // We continue because some backends might handle this differently
-            }
+            // 1. Perform checkout (POST /api/checkout)
+            const checkoutResult = await checkout({
+                name: formData.name,
+                phoneNumber: formData.phoneNumber,
+                address: formData.address,
+                email: formData.email,
+                notes: formData.notes
+            })
 
-            // 2. Synchronize cart one last time before checkout
-            if (!calculation) {
-                await handleCalculate()
-            }
-
-            // 3. Perform checkout
-            const checkoutResult = await checkout()
-
-            // Handle cases where checkout might return empty body but success
             const invoiceId = checkoutResult?.invoiceId
 
             if (!invoiceId) {
-                // If no invoiceId from checkout, try to find the latest invoice for account
-                console.warn('No invoiceId returned from checkout, attempting to proceed...')
-                // fallback or more logic could go here
                 throw new Error('Không thể tạo hóa đơn thanh toán. Vui lòng liên hệ hỗ trợ.')
             }
 
-            // 4. Create payment link
+            // 2. Create payment link (POST /api/payments/create)
             const paymentResult = await createPayment(invoiceId)
 
-            // 5. Clear local cart
+            // 3. Clear local cart
             clearCart()
 
-            // 6. Redirect to PayOS
+            // 4. Redirect to PayOS
             if (paymentResult?.checkoutUrl) {
                 window.location.href = paymentResult.checkoutUrl
             } else {
@@ -172,7 +104,6 @@ const CheckoutPage: React.FC = () => {
             }
         } catch (err: any) {
             console.error('Checkout error:', err)
-            // Extract detailed error if available
             const detailMsg = err.errors ? Object.values(err.errors).flat().join(', ') : ''
             setError(detailMsg || err.message || 'Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.')
             setIsSubmitting(false)
@@ -325,36 +256,11 @@ const CheckoutPage: React.FC = () => {
                                         <span className="font-medium">{formatPrice(getTotalPrice())}</span>
                                     </div>
 
-                                    {calculation && (
-                                        <>
-                                            <div className="flex justify-between text-gray-600">
-                                                <span>Giảm giá</span>
-                                                <span className="text-green-600 font-medium">-{formatPrice(calculation.discount)}</span>
-                                            </div>
-                                            <div className="h-px bg-gray-100 my-2"></div>
-                                            <div className="flex justify-between text-lg font-bold text-gray-900">
-                                                <span>Tổng tiền</span>
-                                                <span className="text-red-600 text-2xl font-tilt-warp">{formatPrice(calculation.total)}</span>
-                                            </div>
-                                        </>
-                                    )}
-
-                                    {!calculation && !isCalculating && (
-                                        <button
-                                            onClick={handleCalculate}
-                                            className="w-full mt-4 py-3 bg-white border-2 border-red-500 text-red-600 rounded-2xl font-bold hover:bg-red-50 transition-all flex items-center justify-center gap-2"
-                                        >
-                                            <CheckCircle2 size={18} />
-                                            Xem lời chào & phí
-                                        </button>
-                                    )}
-
-                                    {isCalculating && (
-                                        <div className="w-full mt-4 py-3 bg-red-50 text-red-400 rounded-2xl flex items-center justify-center gap-2">
-                                            <Loader2 size={18} className="animate-spin" />
-                                            Đang tính toán...
-                                        </div>
-                                    )}
+                                    <div className="h-px bg-gray-100 my-2"></div>
+                                    <div className="flex justify-between text-lg font-bold text-gray-900">
+                                        <span>Tổng tiền</span>
+                                        <span className="text-red-600 text-2xl font-tilt-warp">{formatPrice(getTotalPrice())}</span>
+                                    </div>
 
                                     {error && (
                                         <div className="p-3 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm mt-4 animate-in fade-in slide-in-from-top-1">
@@ -364,9 +270,9 @@ const CheckoutPage: React.FC = () => {
 
                                     <div className="pt-6">
                                         <button
-                                            disabled={isSubmitting || isCalculating}
+                                            disabled={isSubmitting}
                                             onClick={handleCheckout}
-                                            className={`w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-lg transition-all transform hover:-translate-y-1 active:scale-95 ${isSubmitting || isCalculating
+                                            className={`w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-lg transition-all transform hover:-translate-y-1 active:scale-95 ${isSubmitting
                                                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                                 : 'bg-red-600 text-white hover:bg-red-700 hover:shadow-red-200'
                                                 }`}

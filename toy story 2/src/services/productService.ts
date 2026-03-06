@@ -33,6 +33,7 @@ export const filterProductsPublic = async (params?: {
   ageRange?: 'ZeroToSixMonths' | 'SixToTwelveMonths' | 'OneToThreeYears' | 'ThreeToSixYears' | 'AboveSixYears' | number
   categoryId?: number
   brandId?: number
+  promotionId?: number
 }): Promise<ViewProductDto[]> => {
   const queryParams = new URLSearchParams()
   if (params?.searchTerm) queryParams.append('searchTerm', params.searchTerm)
@@ -40,6 +41,7 @@ export const filterProductsPublic = async (params?: {
   if (params?.ageRange !== undefined) queryParams.append('ageRange', String(params.ageRange))
   if (params?.categoryId !== undefined) queryParams.append('categoryId', String(params.categoryId))
   if (params?.brandId !== undefined) queryParams.append('brandId', String(params.brandId))
+  if (params?.promotionId !== undefined) queryParams.append('promotionId', String(params.promotionId))
 
   const endpoint = `/products/customer-filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
   const response = await apiGet<ViewProductDto[]>(endpoint)

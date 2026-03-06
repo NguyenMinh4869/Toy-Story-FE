@@ -6,7 +6,7 @@ import type { ProductDTO } from '../types/ProductDTO'
 import { ProductCard } from '../types/ProductCard'
 import { formatPrice, formatDiscount } from '../utils/formatPrice'
 import { useCart } from '../context/CartContext'
-import { getProductById } from '../services/productService'
+import { getProductById, getProductsByCategoryId } from '../services/productService'
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -15,7 +15,13 @@ const ProductDetail: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
   const [quantity, setQuantity] = useState<number>(1)
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0)
+  const [activeTab, setActiveTab] = useState<'description' | 'reviews' | 'shipping'>('description')
+  const [relatedProducts, setRelatedProducts] = useState<ProductCard[]>([])
   const { addToCart } = useCart()
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [id])
 
   useEffect(() => {
     if (!id) return
@@ -36,6 +42,25 @@ const ProductDetail: React.FC = () => {
           images: data.imageUrl ? [data.imageUrl] : [],
         }
         setProduct(mapped)
+
+        // Fetch related products
+        if (data.categoryId) {
+          const related = await getProductsByCategoryId(data.categoryId)
+          const formattedRelated: ProductCard[] = related
+            .filter(p => p.productId !== productId)
+            .map(p => {
+              const prod = p as any; // Cast safely for FE-only fields
+              return {
+                id: String(p.productId),
+                image: p.imageUrl ?? '',
+                name: p.name ?? 'Sản phẩm mới',
+                price: formatPrice(p.price ?? 0),
+                originalPrice: prod.originalPrice != null ? formatPrice(prod.originalPrice) : formatPrice(p.price ?? 0),
+                discount: prod.discount != null ? formatDiscount(prod.discount) : '-',
+              };
+            })
+          setRelatedProducts(formattedRelated)
+        }
       } catch (err) {
         console.error('Error fetching product:', err)
         setError('Không thể tải chi tiết sản phẩm. Vui lòng thử lại sau.')
@@ -47,18 +72,7 @@ const ProductDetail: React.FC = () => {
     fetchProduct()
   }, [id])
 
-  // Related products from current product
-  const relatedProducts: ProductCard[] = product
-    ? [
-        {
-          image: product.imageUrl ?? '',
-          name: product.name ?? '',
-          price: formatPrice(product.price ?? 0),
-          originalPrice: product.originalPrice != null ? formatPrice(product.originalPrice) : formatPrice(product.price ?? 0),
-          discount: product.discount != null ? formatDiscount(product.discount) : '-',
-        },
-      ]
-    : []
+  // Placeholder removed, now using state
 
   const handleQuantityChange = (change: number): void => {
     setQuantity(prev => Math.max(1, prev + change))
@@ -138,7 +152,7 @@ const ProductDetail: React.FC = () => {
         {/* Product Info */}
         <div className="flex flex-col gap-5">
           <h1 className="font-rowdies text-xl leading-[1.4] text-black m-0 max-md:text-base max-[480px]:text-sm">{product.name}</h1>
-          
+
           <div className="flex items-center gap-[15px] text-[15px] flex-wrap max-md:text-[13px]">
             <span className="font-red-hat text-[#454040]">Thương hiệu</span>
             <span className="font-rowdies text-[#1500b1]">{product.brandName ?? '-'}</span>
@@ -176,7 +190,7 @@ const ProductDetail: React.FC = () => {
             <div className="font-tilt-warp text-[15px] text-black">Số lượng</div>
             <div className="flex gap-[15px] items-center max-md:flex-col max-md:w-full">
               <div className="bg-[#f2f2f2] rounded-lg flex items-center w-[199px] h-10 justify-between px-[13px] max-md:w-full">
-                <button 
+                <button
                   className="bg-none border-none font-tilt-warp text-[15px] cursor-pointer py-[5px] px-2.5 text-black"
                   onClick={() => handleQuantityChange(-1)}
                   aria-label="Decrease quantity"
@@ -184,7 +198,7 @@ const ProductDetail: React.FC = () => {
                   -
                 </button>
                 <span className="font-tilt-warp text-[15px] text-black min-w-[30px] text-center">{quantity}</span>
-                <button 
+                <button
                   className="bg-none border-none font-tilt-warp text-[15px] cursor-pointer py-[5px] px-2.5 text-black"
                   onClick={() => handleQuantityChange(1)}
                   aria-label="Increase quantity"
@@ -262,53 +276,157 @@ const ProductDetail: React.FC = () => {
         </div>
       </div>
 
-      {/* Product Description */}
-      <div className="max-w-[1800px] mx-auto my-10 px-5">
-        <h2 className="font-tilt-warp text-[15px] text-black mb-5">Mô tả sản phẩm</h2>
-        <div className="font-red-hat text-[13px] text-black leading-[1.8] max-[480px]:text-xs">
-          {(product.description || '').split('\n').map((paragraph, index) => (
-            <p key={index} className="m-2.5_0">{paragraph}</p>
-          ))}
+      {/* Detailed Information Tabs */}
+      <div className="max-w-[1800px] mx-auto my-16 px-5 lg:px-[111px]">
+        <div className="flex border-b border-[#eee] mb-10 overflow-x-auto scrollbar-hide">
+          <button
+            onClick={() => setActiveTab('description')}
+            className={`pb-4 px-8 font-tilt-warp text-lg transition-all relative ${activeTab === 'description' ? 'text-[#ca002a]' : 'text-[#888] hover:text-[#333]'}`}
+          >
+            Mô tả sản phẩm
+            {activeTab === 'description' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#ca002a] rounded-t-full shadow-[0_-2px_8px_rgba(202,0,42,0.3)]" />}
+          </button>
+          <button
+            onClick={() => setActiveTab('reviews')}
+            className={`pb-4 px-8 font-tilt-warp text-lg transition-all relative ${activeTab === 'reviews' ? 'text-[#ca002a]' : 'text-[#888] hover:text-[#333]'}`}
+          >
+            Đánh giá sản phẩm
+            {activeTab === 'reviews' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#ca002a] rounded-t-full shadow-[0_-2px_8px_rgba(202,0,42,0.3)]" />}
+          </button>
+          <button
+            onClick={() => setActiveTab('shipping')}
+            className={`pb-4 px-8 font-tilt-warp text-lg transition-all relative ${activeTab === 'shipping' ? 'text-[#ca002a]' : 'text-[#888] hover:text-[#333]'}`}
+          >
+            Chính sách vận chuyển
+            {activeTab === 'shipping' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#ca002a] rounded-t-full shadow-[0_-2px_8px_rgba(202,0,42,0.3)]" />}
+          </button>
         </div>
-      </div>
 
-      {/* Reviews Section */}
-      <div className="max-w-[1800px] mx-auto my-10 px-5">
-        <h2 className="font-tilt-warp text-[13px] text-black mb-5">Đánh giá sản phẩm</h2>
-        <div className="flex items-center gap-5 mb-[30px]">
-          <div className="font-tilt-warp text-2xl text-black">5.0/5</div>
-          <div className="flex gap-1.5">
-            {[...Array(5)].map((_, i) => (
-              <span key={i} className="text-xl text-[#ffd900]">★</span>
-            ))}
-          </div>
-        </div>
-        <div className="border border-[#f0f0f0] rounded-[17px] p-5 mb-5">
-          <div className="relative">
-            <div className="flex items-center gap-3 mb-2.5">
-              <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center font-red-hat text-[8px] text-black">C</div>
-              <span className="font-tilt-warp text-[8px] text-black">Minh Nguyen</span>
+        <div className="min-h-[300px]">
+          {activeTab === 'description' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="font-red-hat text-base text-[#444] leading-[1.8] max-w-[1000px]">
+                {(product.description || '').split('\n').map((paragraph, index) => (
+                  <p key={index} className="mb-6 last:mb-0">{paragraph}</p>
+                ))}
+              </div>
             </div>
-            <div className="flex gap-[3px] mb-2.5">
-              {[...Array(5)].map((_, i) => (
-                <span key={i} className="text-xs text-[#ffd900]">★</span>
-              ))}
+          )}
+
+          {activeTab === 'reviews' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-12">
+                {/* Rating Summary */}
+                <div className="space-y-8">
+                  <div className="bg-[#fcf8f8] border border-[#f5ecec] rounded-2xl p-8 text-center shadow-sm">
+                    <div className="font-tilt-warp text-5xl text-black mb-2">5.0<span className="text-xl text-[#888]">/5</span></div>
+                    <div className="flex justify-center gap-1.5 mb-2">
+                      {[...Array(5)].map((_, i) => (
+                        <span key={i} className="text-2xl text-[#ffd900]">★</span>
+                      ))}
+                    </div>
+                    <p className="font-red-hat text-sm text-[#888]">Dựa trên 1 đánh giá</p>
+                  </div>
+
+                  {/* Star Progress Bars */}
+                  <div className="space-y-3">
+                    {[5, 4, 3, 2, 1].map((star) => (
+                      <div key={star} className="flex items-center gap-4">
+                        <span className="font-red-hat text-sm text-[#444] min-w-[30px]">{star} ★</span>
+                        <div className="flex-1 h-2 bg-[#f0f0f0] rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-[#ffd900]"
+                            style={{ width: star === 5 ? '100%' : '0%' }}
+                          />
+                        </div>
+                        <span className="font-red-hat text-sm text-[#888] min-w-[30px]">{star === 5 ? '100%' : '0%'}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Review List */}
+                <div className="space-y-6">
+                  {/* Single Review Card */}
+                  <div className="bg-white border border-[#eee] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#ca002a] to-[#ff4d4d] flex items-center justify-center font-rowdies text-lg text-white shadow-inner">
+                          M
+                        </div>
+                        <div>
+                          <h4 className="font-tilt-warp text-base text-black mb-1">Minh Nguyen</h4>
+                          <div className="flex gap-1">
+                            {[...Array(5)].map((_, i) => (
+                              <span key={i} className="text-sm text-[#ffd900]">★</span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <span className="font-red-hat text-sm text-[#888]">01/08/2026</span>
+                    </div>
+                    <p className="font-red-hat text-[#444] leading-relaxed pl-16 max-md:pl-0">
+                      Sản phẩm robot rất thông minh, bé nhà mình rất thích các hiệu ứng đèn và nhạc. Giao hàng nhanh và đóng gói rất cẩn thận!
+                    </p>
+                  </div>
+
+                  {/* Review CTA */}
+                  <div className="bg-[#f9f9f9] border border-dashed border-[#ccc] rounded-2xl p-8 text-center">
+                    <p className="font-tilt-warp text-base text-black mb-2">Thêm đánh giá của bạn</p>
+                    <p className="font-red-hat text-sm text-[#666] max-w-[400px] mx-auto mb-4">
+                      Hãy chia sẻ cảm nhận của bạn về sản phẩm này để giúp những khách hàng khác có lựa chọn tốt hơn.
+                    </p>
+                    <div className="inline-block px-6 py-2 bg-[#eee] rounded-full font-red-hat text-xs text-[#888]">
+                      Bạn cần đăng nhập và đã mua hàng để gửi đánh giá
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <p className="font-red-hat text-[8px] text-black m-2.5_0">Ngon</p>
-            <span className="font-red-hat text-[8px] text-black absolute right-0 top-8">01/08/2026</span>
-          </div>
-        </div>
-        <div className="border border-[#f0f0f0] rounded-[17px] p-5 text-center">
-          <p className="font-red-hat text-[8px] text-black m-[5px_0]">Nhấn để đánh giá</p>
-          <p className="text-[8px] text-[#666] m-[5px_0]">Chỉ khách hàng đã mua hàng mới được đánh giá</p>
+          )}
+
+          {activeTab === 'shipping' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="max-w-[1000px] space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="bg-blue-50/50 p-8 rounded-2xl border border-blue-100">
+                    <h4 className="font-tilt-warp text-lg text-[#1500b1] mb-4">Vận chuyển hỏa tốc</h4>
+                    <p className="font-red-hat text-sm text-[#444] leading-relaxed">
+                      Áp dụng cho các khu vực nội thành. Cam kết giao hàng trong vòng 4 tiếng kể từ khi xác nhận đơn hàng.
+                    </p>
+                  </div>
+                  <div className="bg-red-50/50 p-8 rounded-2xl border border-red-100">
+                    <h4 className="font-tilt-warp text-lg text-[#ca002a] mb-4">Vận chuyển tiêu chuẩn</h4>
+                    <p className="font-red-hat text-sm text-[#444] leading-relaxed">
+                      Miễn phí cho đơn hàng từ 500.000 ₫. Thời gian nhận hàng từ 2-4 ngày làm việc tùy khu vực.
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-[#fcfcfc] p-8 rounded-2xl border border-[#eee]">
+                  <h4 className="font-tilt-warp text-lg text-black mb-4">Chính sách trả hàng</h4>
+                  <p className="font-red-hat text-sm text-[#444] leading-relaxed mb-4">
+                    Toy Story hỗ trợ đổi trả sản phẩm trong vòng 7 ngày kể từ ngày nhận hàng với các điều kiện:
+                  </p>
+                  <ul className="list-disc pl-5 space-y-2 font-red-hat text-sm text-[#444]">
+                    <li>Sản phẩm còn nguyên bao bì, chưa qua sử dụng.</li>
+                    <li>Có hóa đơn mua hàng hoặc bằng chứng giao dịch hợp lệ.</li>
+                    <li>Sản phẩm gặp lỗi từ nhà sản xuất.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Related Products */}
-      <ProductSection 
-        title="Sản phẩm liên quan"
-        products={relatedProducts}
-      />
+      <div className="bg-[#fcf8f8] py-1">
+        <ProductSection
+          title="Sản phẩm liên quan"
+          products={relatedProducts}
+          isDark={true}
+        />
+      </div>
     </div>
   )
 }
