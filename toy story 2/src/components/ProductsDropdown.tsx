@@ -230,7 +230,8 @@ export const ProductsDropdown: React.FC<ProductsDropdownProps> = ({ isOpen, onCl
           </div>
         </div>
       </div>
-      )
+    </div>
+  )
 }
 
-      export default ProductsDropdown
+export default ProductsDropdown
