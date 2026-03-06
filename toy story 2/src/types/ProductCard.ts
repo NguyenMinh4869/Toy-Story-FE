@@ -3,6 +3,7 @@
  * Used in ProductSection component for formatted display
  */
 export interface ProductCard {
+  id: string
   image: string
   name: string
   price: string // Formatted price string (e.g., "1.245.300 Đ")
