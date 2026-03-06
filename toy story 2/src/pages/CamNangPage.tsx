@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { ROUTES } from "../routes/routePaths";
 import { ArticleCard } from "../components/camnang/ArticleCard";
 import { ArticleSidebar } from "../components/camnang/ArticleSidebar";
@@ -13,13 +13,31 @@ import ArticleBanner from "../assets/ArticleBanner.png";
 const imgLine23 = "https://www.figma.com/api/mcp/asset/8ee531aa-c46a-43f0-9a85-9e49cce91501";
 
 export const CamNangPage = (): React.JSX.Element => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const categoryFromUrl = searchParams.get("category");
+
   const [articles, setArticles] = useState<ViewArticleDto[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(categoryFromUrl);
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Sync state with URL parameter
+  useEffect(() => {
+    setSelectedCategory(categoryFromUrl);
+  }, [categoryFromUrl]);
+
+  // Function to handle category change (updates both state and URL)
+  const handleCategorySelect = (category: string | null) => {
+    if (category) {
+      setSearchParams({ category });
+    } else {
+      setSearchParams({});
+    }
+  };
+
   const articlesPerPage = 5; 
   const articlesSectionRef = useRef<HTMLDivElement>(null);
 
@@ -112,7 +130,7 @@ export const CamNangPage = (): React.JSX.Element => {
               <ArticleSidebar
                 categories={categories}
                 selectedCategory={selectedCategory}
-                onCategorySelect={setSelectedCategory}
+                onCategorySelect={handleCategorySelect}
               />
             </div>
 

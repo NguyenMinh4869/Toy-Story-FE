@@ -4,8 +4,32 @@ import { ROUTES } from "../routes/routePaths";
 import { RelatedArticleCard } from "../components/camnang/RelatedArticleCard";
 import { getArticleById, getArticles, getArticleCategories } from "../services/articleService";
 import type { ViewArticleDto } from "../types/ArticleDTO";
-import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
-import { BLOCKS, INLINES } from '@contentful/rich-text-types';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Document, Block, Inline, Text } from '@contentful/rich-text-types';
+
+// Helper to extract raw text string from Contentful's Rich Text JSON Document
+const extractTextFromRichText = (document: Document): string => {
+  if (!document || !document.content) return '';
+  
+  let text = '';
+  const processNode = (node: Block | Inline | Text) => {
+    if (node.nodeType === 'text') {
+      text += (node as Text).value;
+    } else if (node.nodeType === 'paragraph') {
+      if (text.length > 0 && !text.endsWith('\n\n')) text += '\n\n';
+      // @ts-ignore
+      node.content?.forEach(processNode);
+      text += '\n\n';
+    } else if ((node as Block | Inline).content) {
+      // @ts-ignore
+      (node as Block | Inline).content.forEach(processNode);
+    }
+  };
+
+  document.content.forEach(processNode);
+  return text.trim();
+};
 
 // Image assets from Figma
 const imgLine31 = "https://www.figma.com/api/mcp/asset/4ae28e2f-a133-474c-90d1-707371c50559";
@@ -77,47 +101,6 @@ export const CamNangDetailPage = (): React.JSX.Element => {
       </div>
     );
   }
-
-  // Custom renderer for Contentful Rich Text
-  const richTextOptions = {
-    renderNode: {
-      [BLOCKS.PARAGRAPH]: (_node: any, children: React.ReactNode) => <p className="mb-4">{children}</p>,
-      [BLOCKS.HEADING_2]: (_node: any, children: React.ReactNode) => (
-        <h2 className="font-red-hat font-semibold text-black text-[24px] mb-[20px] mt-[40px]">{children}</h2>
-      ),
-      [BLOCKS.HEADING_3]: (_node: any, children: React.ReactNode) => (
-        <h3 className="font-red-hat font-bold text-black text-[18px] mb-[15px] mt-[30px]">{children}</h3>
-      ),
-      [BLOCKS.UL_LIST]: (_node: any, children: React.ReactNode) => (
-        <ul className="list-disc list-inside space-y-2 mb-[20px] ml-4">{children}</ul>
-      ),
-      [BLOCKS.OL_LIST]: (_node: any, children: React.ReactNode) => (
-        <ol className="list-decimal list-inside space-y-2 mb-[20px] ml-4">{children}</ol>
-      ),
-      [BLOCKS.LIST_ITEM]: (_node: any, children: React.ReactNode) => <li>{children}</li>,
-      [BLOCKS.HR]: () => <hr className="my-8 border-gray-300" />,
-      [BLOCKS.QUOTE]: (_node: any, children: React.ReactNode) => (
-        <blockquote className="border-l-4 border-[#b20000] pl-4 italic my-6 text-gray-700">{children}</blockquote>
-      ),
-      [BLOCKS.EMBEDDED_ASSET]: (node: any) => {
-        const { url, description, title } = node.data.target.fields;
-        return (
-          <div className="my-[40px]">
-            <img 
-              src={`https:${url}`} 
-              alt={description || title || 'Article image'} 
-              className="w-full h-auto rounded-[15px] object-cover"
-            />
-          </div>
-        );
-      },
-      [INLINES.HYPERLINK]: (node: any, children: React.ReactNode) => (
-        <a href={node.data.uri} target="_blank" rel="noopener noreferrer" className="text-[#2600ff] underline hover:no-underline">
-          {children}
-        </a>
-      ),
-    },
-  };
 
   return (
     <div className="relative w-full bg-[#f2f2f2]">
@@ -196,9 +179,25 @@ export const CamNangDetailPage = (): React.JSX.Element => {
               </div>
 
               {/* Article Content / Rich Text */}
-              <div className="article-content prose prose-lg max-w-none font-red-hat text-[#333] text-[16px] leading-[1.8] whitespace-pre-wrap">
+              <div className="article-content prose prose-lg max-w-none font-red-hat text-[16px] leading-[1.8] whitespace-pre-wrap">
                 {article.content ? (
-                  documentToReactComponents(article.content, richTextOptions)
+                  <ReactMarkdown 
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      h1: ({node, ...props}) => <h1 className="font-sansation text-[#20147b] text-[28px] md:text-[32px] font-bold mt-[40px] mb-[20px]" {...props} />,
+                      h2: ({node, ...props}) => <h2 className="font-red-hat font-semibold text-black text-[24px] mb-[20px] mt-[40px]" {...props} />,
+                      h3: ({node, ...props}) => <h3 className="font-red-hat font-bold text-black text-[18px] mb-[15px] mt-[30px]" {...props} />,
+                      p: ({node, ...props}) => <p className="mb-4 text-[#333]" {...props} />,
+                      ul: ({node, ...props}) => <ul className="list-disc list-inside space-y-2 mb-[20px] ml-4 text-[#333]" {...props} />,
+                      ol: ({node, ...props}) => <ol className="list-decimal list-inside space-y-2 mb-[20px] ml-4 text-[#333]" {...props} />,
+                      li: ({node, ...props}) => <li className="text-[#333]" {...props} />,
+                      blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-[#b20000] pl-4 italic my-6 text-gray-700" {...props} />,
+                      a: ({node, ...props}) => <a className="text-[#2600ff] underline hover:no-underline" target="_blank" rel="noopener noreferrer" {...props} />,
+                      strong: ({node, ...props}) => <strong className="font-bold text-black" {...props} />,
+                    }}
+                  >
+                    {extractTextFromRichText(article.content)}
+                  </ReactMarkdown>
                 ) : (
                   <p>{article.excerpt || "Nội dung đang được cập nhật..."}</p>
                 )}
