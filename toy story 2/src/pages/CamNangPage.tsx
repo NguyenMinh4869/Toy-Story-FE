@@ -9,7 +9,7 @@ import { getArticles, getArticleCategories } from "../services/articleService";
 import type { ViewArticleDto } from "../types/ArticleDTO";
 
 // Image assets from Figma
-const imgImage98 = "https://www.figma.com/api/mcp/asset/9c66f851-eb86-472b-80d4-7fb5f1d55775";
+import ArticleBanner from "../assets/ArticleBanner.png";
 const imgLine23 = "https://www.figma.com/api/mcp/asset/8ee531aa-c46a-43f0-9a85-9e49cce91501";
 
 export const CamNangPage = (): React.JSX.Element => {
@@ -86,7 +86,7 @@ export const CamNangPage = (): React.JSX.Element => {
         <div className="relative w-full h-[300px] overflow-hidden">
           <img
             alt="Hero banner"
-            src={imgImage98}
+            src={ArticleBanner}
             className="absolute inset-0 w-full h-full object-cover"
           />
         </div>

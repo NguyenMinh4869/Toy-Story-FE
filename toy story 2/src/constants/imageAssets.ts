@@ -15,8 +15,10 @@ import decorCoinsClouds from "@/assets/0bf7c9e9f403c404a8aa369c23b47f3cd11072a8.
 import decorTetPanel from "@/assets/6c4dec4c8dbb6339a78469d5a6be3fed4152f6ee.png";
 import logoToyStory from "@/assets/7b68a93c4088c0080b43b93064aa13d55301f1be.png";
 import decorMoneyBagFans from "@/assets/87aa1172a83bb68c994ec672fa11ae695b2e7482.png";
+import decorDynamicBrand24 from "@/assets/decor-dynamic-brand-2 4.png";
 import storeFacade from "@/assets/e0e7adb7ab8d88ee2485aef2d9ffac986f0de223.png";
 import prdCardBg from "@/assets/PrdCardBg.png";
+import favToyDecor from "@/assets/FavToyDecor.png";
 
 export const STORE_FACADE = storeFacade;
 export const DECOR_COINS_CLOUDS = decorCoinsClouds;
@@ -30,6 +32,7 @@ export const DECOR_LANTERNS_ENVELOPES = decorLanternsEnvelopes;
 export const DECOR_BANNER_LAST_CHANCE = decorBannerLastChance;
 export const DECOR_RED_ENVELOPE = decorRedEnvelope;
 export const BANNER_LC2000 = bannerLC2000;
+export const FAV_TOY_DECOR = favToyDecor;
 
 // Section Icons (all use same image)
 export const SECTION_ICON = "https://www.figma.com/api/mcp/asset/90b57607-01f4-436a-84b7-bf19c8142dc8";
@@ -39,7 +42,7 @@ export const PRODUCT_IMAGE_87 = prdCardBg; // Product card background frame
 export const PRODUCT_IMAGE_107 = "https://www.figma.com/api/mcp/asset/874014bc-9737-4521-b8c4-90b3db0362b4"; // Favorite/wishlist icon
 
 // Decorative Elements
-export const DECOR_DYNAMIC_BRAND = "https://www.figma.com/api/mcp/asset/c18966b1-02ef-44dc-b6e0-7ce67b29570f";
+export const DECOR_DYNAMIC_BRAND = decorDynamicBrand24;
 export const DECOR_TOP_PRODUCT_CARD = "https://www.figma.com/api/mcp/asset/cb65df8d-ab94-4273-904d-f9d409106b68";
 export const DECOR_LINE_15 = "https://www.figma.com/api/mcp/asset/84873425-9473-446e-bf8a-cc361a15a42a";
 

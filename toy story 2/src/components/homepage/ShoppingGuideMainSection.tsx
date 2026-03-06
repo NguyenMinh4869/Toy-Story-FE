@@ -1,24 +1,18 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { SectionHeader } from "./SectionHeader";
-import { SectionTitle } from "./SectionTitle";
 import { ShoppingGuideSection } from "./ShoppingGuideSection";
 import { ShoppingGuideContentSection } from "./ShoppingGuideContentSection";
-import { SECTION_ICON, DECOR_DYNAMIC_BRAND, POLYGON_ARROW } from "../../constants/imageAssets";
+import { DECOR_DYNAMIC_BRAND, POLYGON_ARROW } from "../../constants/imageAssets";
 import { ROUTES } from "../../routes/routePaths";
 
 export const ShoppingGuideMainSection = (): React.JSX.Element => {
   return (
     <section aria-label="Cẩm nang mua sắm">
       <SectionHeader 
-        iconSrc={SECTION_ICON}
+        title="Cẩm nang mua sắm"
         top="2607px"
-        left="409px"
       />
-  
-      <SectionTitle top="2657px" left="371px">
-        Cẩm nang mua sắm
-      </SectionTitle>
 
       <ShoppingGuideSection />
       <ShoppingGuideContentSection />

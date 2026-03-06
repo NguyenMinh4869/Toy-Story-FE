@@ -1,13 +1,11 @@
 import React, { useEffect, useMemo } from "react";
 import type { ViewProductDto } from "../../types/ProductDTO";
 import { SectionHeader } from "./SectionHeader";
-import { SectionTitle } from "./SectionTitle";
 
-import { SECTION_ICON, DECOR_RED_ENVELOPE } from "../../constants/imageAssets";
+import { DECOR_DYNAMIC_BRAND, FAV_TOY_DECOR } from "../../constants/imageAssets";
 
 // Figma MCP Asset URLs
 const image20 = "https://www.figma.com/api/mcp/asset/f8d42236-59cd-4852-bcb7-126b11fed0d1";
-const favoriteCardFrame = "https://www.figma.com/api/mcp/asset/65922a4e-cf15-4803-971c-a52562301534";
 
 interface FavoriteProductsSectionProps {
   products: ViewProductDto[];
@@ -48,14 +46,9 @@ export const FavoriteProductsSection = ({
   return (
     <section aria-label="Đồ chơi yêu thích">
       <SectionHeader 
-        iconSrc={SECTION_ICON}
+        title="Đồ chơi yêu thích"
         top="1700px"
-        left="391px"
       />
-
-      <SectionTitle top="1750px" left="400px">
-        Đồ chơi yêu thích
-      </SectionTitle>
 
       {products.length > 0 ? (
         <div className="absolute top-[1842px] left-[126px] w-[940px] h-[260px] overflow-hidden">
@@ -70,11 +63,11 @@ export const FavoriteProductsSection = ({
               >
                 {pageProducts.map((product) => (
                   <div key={product.productId} className="relative w-[220px] h-[240px]">
-                    {/* Trang trí lì xì trên thẻ (theo Figma) */}
+                    {/* Trang trí thẻ (decor dynamic brand) */}
                     <img
-                      className="absolute top-0 left-1/2 -translate-x-1/2 w-[70px] h-[75px] object-contain z-20"
-                      alt="Trang trí lì xì"
-                      src={DECOR_RED_ENVELOPE}
+                      className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-auto aspect-[6] object-contain z-20"
+                      alt="Trang trí brand"
+                      src={DECOR_DYNAMIC_BRAND}
                     />
                     {/* Product image (underlay) */}
                     <img
@@ -86,7 +79,7 @@ export const FavoriteProductsSection = ({
                     <img
                       className="absolute top-[22px] left-1/2 -translate-x-1/2 w-[202px] h-[208px] object-cover z-10 pointer-events-none"
                       alt=""
-                      src={favoriteCardFrame}
+                      src={FAV_TOY_DECOR}
                     />
                   </div>
                 ))}

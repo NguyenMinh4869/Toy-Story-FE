@@ -2,7 +2,8 @@ import React from "react";
 import { Link } from "react-router-dom";
 import type { ViewProductDto } from "../types/ProductDTO";
 import { formatPrice } from "../utils/formatPrice";
-import { PRODUCT_IMAGE_87, PRODUCT_IMAGE_107, DECOR_LINE_15 } from "../constants/imageAssets";
+import { PRODUCT_IMAGE_87, DECOR_LINE_15 } from "../constants/imageAssets";
+import { Heart } from "lucide-react";
 
 interface ProductCardProps {
   product: ViewProductDto;
@@ -46,10 +47,10 @@ export const ProductCard = ({
       </div>
       
       {/* White card content */}
-      <div className="absolute top-9 left-[15px] w-[170px] h-[237px] bg-white rounded-[17px] overflow-hidden">
+      <div className="absolute top-9 left-1/2 -translate-x-1/2 w-[170px] h-[237px] bg-white rounded-[17px] overflow-hidden">
         {/* Product Image */}
         <img
-          className="absolute top-[17px] left-[22px] w-[115px] h-[115px] aspect-[1] object-cover"
+          className="absolute top-[17px] left-1/2 -translate-x-1/2 w-[115px] h-[115px] aspect-[1] object-cover"
           alt={productName}
           src={productImage}
         />
@@ -57,7 +58,7 @@ export const ProductCard = ({
         {/* Add to Cart Button */}
         <Link
           to={`/product/${product.productId}`}
-          className="absolute top-[209px] left-[22px] w-[79px] h-[15px] flex bg-[#c40029] rounded-md overflow-hidden hover:bg-[#a00022] transition-colors"
+          className="absolute top-[209px] left-[25px] w-[79px] h-[15px] flex bg-[#c40029] rounded-md overflow-hidden hover:bg-[#a00022] transition-colors"
           aria-label="Thêm vào giỏ hàng"
         >
           <span className="mt-[3px] w-[62px] h-[9px] ml-[7px] [font-family:'Tilt_Warp-Regular',Helvetica] font-normal text-white text-[7px] tracking-[0] leading-[normal]">
@@ -76,14 +77,10 @@ export const ProductCard = ({
         
         {/* Wishlist Button */}
         <button 
-          className="absolute top-[207px] left-[122px] w-5 h-5 cursor-pointer border-0 bg-transparent p-0"
+          className="absolute top-[207px] right-[25px] w-5 h-5 cursor-pointer border-0 bg-transparent p-0 flex items-center justify-center"
           aria-label="Thêm vào yêu thích"
         >
-          <img
-            className="w-full h-full object-cover"
-            alt=""
-            src={PRODUCT_IMAGE_107}
-          />
+          <Heart className="w-[14px] h-[14px] text-gray-400 hover:text-[#ff0000] hover:fill-[#ff0000] transition-colors" strokeWidth={2} />
         </button>
         
         {/* Divider Line */}
@@ -95,7 +92,7 @@ export const ProductCard = ({
       </div>
       
       {/* Product Name */}
-      <p className="absolute top-[173px] left-[27px] w-[158px] [font-family:'Tilt_Warp-Regular',Helvetica] font-normal text-black text-[11px] tracking-[0] leading-[normal] line-clamp-2">
+      <p className="absolute top-[173px] left-[25px] w-[153px] [font-family:'Tilt_Warp-Regular',Helvetica] font-normal text-black text-[11px] tracking-[0] leading-[normal] line-clamp-2">
         {productName}
       </p>
       

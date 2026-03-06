@@ -54,12 +54,12 @@ export const Homepage = (): React.JSX.Element => {
         
         // Filter products by categoryId if found, otherwise by name
         const gundam = gundamCategory 
-          ? allProducts.filter(p => p.categoryId === gundamCategory.categoryId).slice(0, 9)
+          ? allProducts.filter(p => p.categoryId === gundamCategory.categoryId).slice(0, 12)
           : allProducts.filter(p => 
               p.name?.toUpperCase().includes('GUNDAM') || 
               p.categoryName?.toUpperCase().includes('GUNDAM')
-            ).slice(0, 9);
-        setGundamProducts(gundam.length > 0 ? gundam : (allProducts.length > 0 ? allProducts.slice(0, 9) : []));
+            ).slice(0, 12);
+        setGundamProducts(gundam.length > 0 ? gundam : (allProducts.length > 0 ? allProducts.slice(0, 12) : []));
 
         // Fetch favorite products (top products or featured)
         // TODO: Replace with actual top/favorite products endpoint when available
@@ -92,7 +92,7 @@ export const Homepage = (): React.JSX.Element => {
 
 
 
-  const gundamPageCount = Math.max(1, Math.min(3, Math.ceil(gundamProducts.length / 3)));
+  const gundamPageCount = Math.max(1, Math.min(3, Math.ceil(gundamProducts.length / 4)));
   const goGundamNext = () =>
     setGundamPage((p) => (gundamPageCount <= 1 ? 0 : (p + 1) % gundamPageCount));
   const goGundamPrev = () =>
@@ -126,9 +126,9 @@ export const Homepage = (): React.JSX.Element => {
   ];
 
   return (
-    <div className="bg-[#ab0007] w-full min-h-[3508px] relative">
-      <main className="max-w-[1800px] mx-auto relative">
-        <div className="relative" style={{ width: '1200px', margin: '0 auto' }}>
+    <div className="bg-[#ab0007] w-full min-h-[3200px] relative pb-20 overflow-hidden">
+      <main className="max-w-[1800px] mx-auto relative h-[3200px]">
+        <div className="relative h-full" style={{ width: '1200px', margin: '0 auto' }}>
           {error && (
             <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg">
               <p className="[font-family:'Tilt_Warp-Regular',Helvetica] text-sm">{error}</p>

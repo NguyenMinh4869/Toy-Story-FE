@@ -1,9 +1,8 @@
 import React from "react";
 import type { ViewBrandDto } from "../../types/BrandDTO";
 import { SectionHeader } from "./SectionHeader";
-import { SectionTitle } from "./SectionTitle";
 import { Link } from "react-router-dom";
-import { SECTION_ICON, POLYGON_ARROW } from "../../constants/imageAssets";
+import { POLYGON_ARROW } from "../../constants/imageAssets";
 import { ROUTES } from "../../routes/routePaths";
 
 const image24 = "https://www.figma.com/api/mcp/asset/bc780d28-b30d-4701-8754-4995225b004d";
@@ -30,14 +29,9 @@ export const BrandsSection = ({ brands, isLoading }: BrandsSectionProps): React.
   return (
     <section aria-label="Thương hiệu uy tín">
       <SectionHeader 
-        iconSrc={SECTION_ICON}
+        title="Thương hiệu uy tín"
         top="2162px"
-        left="409px"
       />
-
-      <SectionTitle top="2208px" left="371px">
-        Thương hiệu uy tín
-      </SectionTitle>
 
       {brands.length > 0 ? (
         <>

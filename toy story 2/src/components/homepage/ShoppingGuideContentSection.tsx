@@ -2,8 +2,9 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { ROUTES } from "../../routes/routePaths";
 
+import { DECOR_DYNAMIC_BRAND } from "../../constants/imageAssets";
+
 // Figma MCP Asset URLs
-const decorDynamicBrand252 = "https://www.figma.com/api/mcp/asset/c18966b1-02ef-44dc-b6e0-7ce67b29570f"; // Same as decorDynamicBrand21
 const image37 = "https://www.figma.com/api/mcp/asset/b779d896-3a23-4d57-adbf-13e2bd183230";
 
 export const ShoppingGuideContentSection = (): React.JSX.Element => {
@@ -55,7 +56,7 @@ export const ShoppingGuideContentSection = (): React.JSX.Element => {
       <img
         className="top-0 left-1.5 w-[399px] h-[67px] absolute aspect-[6] object-cover"
         alt="Decorative brand element"
-        src={decorDynamicBrand252}
+        src={DECOR_DYNAMIC_BRAND}
       />
     </article>
   );

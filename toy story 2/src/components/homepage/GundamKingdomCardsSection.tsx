@@ -56,18 +56,18 @@ export const GundamKingdomCardsSection = ({
   }, [displayProducts, pageCount]);
 
   return (
-    <section className="absolute top-[1280px] left-[134px] w-[1000px] h-[350px] overflow-hidden">
+    <section className="absolute top-[1280px] left-[111px] w-[991px] h-[350px] overflow-hidden">
       <div
         className="flex h-full transition-transform duration-500 ease-out"
         style={{ transform: `translateX(-${safePage * 100}%)` }}
       >
         {pages.map((pageProducts, pageIndex) => (
-          <div key={`gundam-page-${pageIndex}`} className="w-full shrink-0 h-full">
-            <div className="flex items-end gap-x-[34px]" style={{ paddingLeft: pageIndex === 0 ? "244px" : 0 }}>
+          <div key={`gundam-page-${pageIndex}`} className="w-full shrink-0 h-full flex items-center justify-center">
+            <div className="flex gap-x-[34px]">
               {pageProducts.map((product) => (
                 <article key={product.productId} className="relative w-[203px] h-[309px] shrink-0">
                   <img
-                    className="absolute top-[-20px] left-1/2 -translate-x-1/2 w-[157px] h-[53px] object-contain z-10"
+                    className="absolute top-0 left-1/2 -translate-x-1/2 w-[157px] h-[53px] object-contain z-10 pointer-events-none"
                     alt="Trang trí lì xì"
                     src={DECOR_LANTERNS_ENVELOPES}
                   />
