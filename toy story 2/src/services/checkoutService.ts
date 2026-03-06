@@ -3,7 +3,8 @@ import {
     CalculatePriceRequest,
     CalculatePriceResponse,
     CheckoutResponse,
-    CreatePaymentResponse
+    CreatePaymentResponse,
+    ValidateVoucherResponse
 } from '../types/CheckoutDTO'
 
 /**
@@ -20,9 +21,19 @@ export const calculatePrice = async (request: CalculatePriceRequest): Promise<Ca
  * Perform checkout
  * POST /api/checkout
  */
-export const checkout = async (): Promise<CheckoutResponse> => {
+export const checkout = async (data: any): Promise<CheckoutResponse> => {
     // Usually checkout takes no body if it uses the server-side cart
-    const response = await apiPost<CheckoutResponse>('/checkout', {})
+    // But passing data includes form + optional voucherCode
+    const response = await apiPost<CheckoutResponse>('/checkout', data)
+    return response.data
+}
+
+/**
+ * Validate voucher code
+ * POST /api/checkout/validate-voucher
+ */
+export const validateVoucher = async (voucherCode: string): Promise<ValidateVoucherResponse> => {
+    const response = await apiPost<ValidateVoucherResponse>('/checkout/validate-voucher', { voucherCode })
     return response.data
 }
 

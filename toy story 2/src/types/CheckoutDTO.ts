@@ -42,3 +42,21 @@ export interface CreatePaymentResponse {
     checkoutUrl: string
     qrCode?: string
 }
+
+/**
+ * Request for voucher validation
+ */
+export interface ValidateVoucherRequest {
+    voucherCode: string
+}
+
+/**
+ * Response from voucher validation
+ */
+export interface ValidateVoucherResponse {
+    discounts: {
+        name: string
+    }[]
+    totalDiscount: number
+    finalAmount: number
+}

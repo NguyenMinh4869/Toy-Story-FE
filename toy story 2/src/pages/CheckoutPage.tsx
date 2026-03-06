@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../hooks/useAuth'
 import { formatPrice } from '../utils/formatPrice'
-import { checkout, createPayment } from '../services/checkoutService'
-import { ShoppingBag, ArrowLeft, CreditCard, Loader2 } from 'lucide-react'
+import { checkout, createPayment, validateVoucher } from '../services/checkoutService'
+import { ShoppingBag, ArrowLeft, CreditCard, Loader2, Ticket } from 'lucide-react'
 import { ROUTES } from '../routes/routePaths'
 
 interface CheckoutFormData {
@@ -22,6 +22,11 @@ const CheckoutPage: React.FC = () => {
 
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
+
+    const [voucherCode, setVoucherCode] = useState('')
+    const [isValidatingVoucher, setIsValidatingVoucher] = useState(false)
+    const [voucherError, setVoucherError] = useState<string | null>(null)
+    const [voucherData, setVoucherData] = useState<{ name: string; totalDiscount: number; finalAmount: number } | null>(null)
 
     // Form state
     const [formData, setFormData] = useState<CheckoutFormData>({
@@ -60,6 +65,31 @@ const CheckoutPage: React.FC = () => {
         setFormData(prev => ({ ...prev, [name]: value }))
     }
 
+    const handleApplyVoucher = async () => {
+        if (!voucherCode.trim()) return
+
+        setIsValidatingVoucher(true)
+        setVoucherError(null)
+
+        try {
+            const result = await validateVoucher(voucherCode.trim())
+            setVoucherData({
+                name: result.discounts?.[0]?.name || 'Voucher',
+                totalDiscount: result.totalDiscount,
+                finalAmount: result.finalAmount
+            })
+            // Clear API error if previously set
+            setError(null)
+        } catch (err: any) {
+            console.error('Voucher validation error:', err)
+            const detailMsg = err.response?.data?.message || err.message || 'Mã voucher không hợp lệ'
+            setVoucherError(detailMsg)
+            setVoucherData(null)
+        } finally {
+            setIsValidatingVoucher(false)
+        }
+    }
+
     const handleCheckout = async (e: React.FormEvent) => {
         if (e && e.preventDefault) e.preventDefault()
 
@@ -76,13 +106,19 @@ const CheckoutPage: React.FC = () => {
 
         try {
             // 1. Perform checkout (POST /api/checkout)
-            const checkoutResult = await checkout({
+            const payload: any = {
                 name: formData.name,
                 phoneNumber: formData.phoneNumber,
                 address: formData.address,
                 email: formData.email,
                 notes: formData.notes
-            })
+            }
+
+            if (voucherData && voucherCode.trim()) {
+                payload.voucherCode = voucherCode.trim()
+            }
+
+            const checkoutResult = await checkout(payload)
 
             const invoiceId = checkoutResult?.invoiceId
 
@@ -251,15 +287,57 @@ const CheckoutPage: React.FC = () => {
                                 </h2>
 
                                 <div className="space-y-4 font-reddit-sans">
+                                    {/* Voucher Section */}
+                                    <div className="pt-2 pb-4 border-b border-gray-100">
+                                        <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                                            <Ticket size={16} className="text-gray-500" /> Mã giảm giá
+                                        </label>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={voucherCode}
+                                                onChange={(e) => setVoucherCode(e.target.value)}
+                                                placeholder="Nhập mã voucher"
+                                                className="flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:border-red-400 focus:ring-2 focus:ring-red-50 outline-none transition-all uppercase"
+                                                disabled={isSubmitting || isValidatingVoucher}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={handleApplyVoucher}
+                                                disabled={isSubmitting || isValidatingVoucher || !voucherCode.trim()}
+                                                className={`px-4 py-2 font-medium rounded-xl transition-all whitespace-nowrap ${!voucherCode.trim() || isValidatingVoucher
+                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                    : 'bg-gray-800 text-white hover:bg-gray-900 active:scale-95'}`}
+                                            >
+                                                {isValidatingVoucher ? <Loader2 size={20} className="animate-spin" /> : 'Áp dụng'}
+                                            </button>
+                                        </div>
+                                        {voucherError && (
+                                            <p className="text-red-500 text-sm mt-2">{voucherError}</p>
+                                        )}
+                                    </div>
+
                                     <div className="flex justify-between text-gray-600">
                                         <span>Tạm tính</span>
                                         <span className="font-medium">{formatPrice(getTotalPrice())}</span>
                                     </div>
 
+                                    {voucherData && (
+                                        <div className="flex justify-between text-green-600">
+                                            <span className="flex flex-col">
+                                                <span>Voucher áp dụng</span>
+                                                <span className="text-xs text-green-500">{voucherData.name}</span>
+                                            </span>
+                                            <span className="font-medium">- {formatPrice(voucherData.totalDiscount)}</span>
+                                        </div>
+                                    )}
+
                                     <div className="h-px bg-gray-100 my-2"></div>
                                     <div className="flex justify-between text-lg font-bold text-gray-900">
                                         <span>Tổng tiền</span>
-                                        <span className="text-red-600 text-2xl font-tilt-warp">{formatPrice(getTotalPrice())}</span>
+                                        <span className="text-red-600 text-2xl font-tilt-warp">
+                                            {formatPrice(voucherData ? voucherData.finalAmount : getTotalPrice())}
+                                        </span>
                                     </div>
 
                                     {error && (
