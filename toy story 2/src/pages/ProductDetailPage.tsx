@@ -387,31 +387,64 @@ const ProductDetail: React.FC = () => {
 
           {activeTab === 'shipping' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="max-w-[1000px] space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="bg-blue-50/50 p-8 rounded-2xl border border-blue-100">
-                    <h4 className="font-tilt-warp text-lg text-[#1500b1] mb-4">Vận chuyển hỏa tốc</h4>
-                    <p className="font-red-hat text-sm text-[#444] leading-relaxed">
-                      Áp dụng cho các khu vực nội thành. Cam kết giao hàng trong vòng 4 tiếng kể từ khi xác nhận đơn hàng.
-                    </p>
+              <div className="w-full space-y-6">
+                {/* Vận chuyển hỏa tốc */}
+                <div className="bg-white p-8 rounded-2xl border-l-[6px] border-[#ab0007] shadow-[0_4px_20px_rgba(0,0,0,0.05)] flex items-start gap-6 group hover:shadow-[0_8px_30px_rgba(171,0,7,0.1)] transition-all duration-300">
+                  <div className="w-14 h-14 rounded-2xl bg-[#ab0007]/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <svg className="w-8 h-8 text-[#ab0007]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
                   </div>
-                  <div className="bg-red-50/50 p-8 rounded-2xl border border-red-100">
-                    <h4 className="font-tilt-warp text-lg text-[#ca002a] mb-4">Vận chuyển tiêu chuẩn</h4>
-                    <p className="font-red-hat text-sm text-[#444] leading-relaxed">
-                      Miễn phí cho đơn hàng từ 500.000 ₫. Thời gian nhận hàng từ 2-4 ngày làm việc tùy khu vực.
+                  <div>
+                    <h4 className="font-tilt-warp text-xl text-[#ab0007] mb-2">Vận chuyển hỏa tốc 4H</h4>
+                    <p className="font-red-hat text-base text-[#444] leading-relaxed">
+                      Áp dụng cho các khu vực nội thành. Cam kết giao hàng trong vòng 4 tiếng kể từ khi xác nhận đơn hàng thành công qua điện thoại hoặc tin nhắn.
                     </p>
                   </div>
                 </div>
-                <div className="bg-[#fcfcfc] p-8 rounded-2xl border border-[#eee]">
-                  <h4 className="font-tilt-warp text-lg text-black mb-4">Chính sách trả hàng</h4>
-                  <p className="font-red-hat text-sm text-[#444] leading-relaxed mb-4">
-                    Toy Story hỗ trợ đổi trả sản phẩm trong vòng 7 ngày kể từ ngày nhận hàng với các điều kiện:
-                  </p>
-                  <ul className="list-disc pl-5 space-y-2 font-red-hat text-sm text-[#444]">
-                    <li>Sản phẩm còn nguyên bao bì, chưa qua sử dụng.</li>
-                    <li>Có hóa đơn mua hàng hoặc bằng chứng giao dịch hợp lệ.</li>
-                    <li>Sản phẩm gặp lỗi từ nhà sản xuất.</li>
-                  </ul>
+
+                {/* Vận chuyển tiêu chuẩn */}
+                <div className="bg-white p-8 rounded-2xl border-l-[6px] border-[#ab0007] shadow-[0_4px_20px_rgba(0,0,0,0.05)] flex items-start gap-6 group hover:shadow-[0_8px_30px_rgba(171,0,7,0.1)] transition-all duration-300">
+                  <div className="w-14 h-14 rounded-2xl bg-[#ab0007]/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <svg className="w-8 h-8 text-[#ab0007]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-tilt-warp text-xl text-[#ab0007] mb-2">Vận chuyển tiêu chuẩn toàn quốc</h4>
+                    <p className="font-red-hat text-base text-[#444] leading-relaxed">
+                      Miễn phí vận chuyển cho tất cả đơn hàng từ 500.000 ₫. Thời gian nhận hàng từ 2-4 ngày làm việc tùy vào vị trí địa lý của quý khách.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Chính sách trả hàng */}
+                <div className="bg-white p-8 rounded-2xl border-l-[6px] border-[#ab0007] shadow-[0_4px_20px_rgba(0,0,0,0.05)] flex items-start gap-6 group hover:shadow-[0_8px_30px_rgba(171,0,7,0.1)] transition-all duration-300">
+                  <div className="w-14 h-14 rounded-2xl bg-[#ab0007]/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <svg className="w-8 h-8 text-[#ab0007]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-tilt-warp text-xl text-[#ab0007] mb-2">Chính sách đổi trả dễ dàng</h4>
+                    <p className="font-red-hat text-base text-[#444] leading-relaxed mb-4">
+                      Toy Story hỗ trợ đổi trả sản phẩm trong vòng 7 ngày kể từ ngày nhận hàng với những quy định linh hoạt bảo vệ quyền lợi người mua:
+                    </p>
+                    <ul className="list-none p-0 space-y-3 font-red-hat text-base text-[#444]">
+                      <li className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full bg-[#ab0007]" />
+                        Sản phẩm còn nguyên bao bì, chưa qua sử dụng hoặc lắp ráp.
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full bg-[#ab0007]" />
+                        Có hóa đơn mua hàng hoặc bằng chứng giao dịch hợp lệ từ website.
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full bg-[#ab0007]" />
+                        Hỗ trợ đổi trả miễn phí nếu sản phẩm gặp lỗi từ nhà sản xuất.
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
