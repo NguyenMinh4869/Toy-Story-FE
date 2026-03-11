@@ -1,8 +1,9 @@
 import { apiGet, apiPost, apiDelete } from './apiClient'
+import type { CartDto } from '../types/CartDTO'
 
 /**
  * Add item to server-side cart
- * POST /api/cart/items?productId={id}&quantity={qty}
+ * POST /api/accounts/carts/items?productId={id}&quantity={qty}
  */
 export const addToCartServer = async (productId: number, quantity: number): Promise<void> => {
     await apiPost(`/accounts/carts/items?productId=${productId}&quantity=${quantity}`, {})
@@ -10,7 +11,7 @@ export const addToCartServer = async (productId: number, quantity: number): Prom
 
 /**
  * Clear server-side cart
- * DELETE /api/cart
+ * DELETE /api/accounts/carts
  */
 export const clearCartServer = async (): Promise<void> => {
     await apiDelete('/accounts/carts')
@@ -18,9 +19,9 @@ export const clearCartServer = async (): Promise<void> => {
 
 /**
  * Get server-side cart
- * GET /api/cart
+ * GET /api/accounts/carts
  */
-export const getCartServer = async (): Promise<any> => {
-    const response = await apiGet('/accounts/carts')
+export const getCartServer = async (): Promise<CartDto> => {
+    const response = await apiGet<CartDto>('/accounts/carts')
     return response.data
 }

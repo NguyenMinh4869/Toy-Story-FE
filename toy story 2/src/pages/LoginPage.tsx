@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { loginSchema, LoginFormData, toLoginDto } from '../types/Auth'
 import { login } from '../services/authService'
+import { useAuth } from '../hooks/useAuth'
 import { ROUTES } from '../routes/routePaths'
 import { LOGO_TOY_STORY } from '../constants/imageAssets'
 
@@ -12,6 +13,7 @@ const imgLine38 = "https://www.figma.com/api/mcp/asset/919bffbb-b4c0-4649-a02e-4
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate()
+  const { refreshUser } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -34,16 +36,19 @@ const LoginPage: React.FC = () => {
 
       // Convert form data to LoginDto (removes rememberMe)
       const loginDto = toLoginDto(data)
-      
+
       // Call login API (automatically fetches user details via /me)
       const response = await login(loginDto)
-      
+
       // Login successful - token, role, and user data are stored automatically
       console.log('Login successful:', response.message)
       if (response.user) {
         console.log('User data loaded:', response.user)
       }
-      
+
+      // Update global auth state
+      refreshUser()
+
       // Navigate based on role
       if (response.role === 'Admin' || response.role === 'Staff') {
         navigate(ROUTES.ADMIN_DASHBOARD)
@@ -53,7 +58,7 @@ const LoginPage: React.FC = () => {
     } catch (err: any) {
       // Handle backend validation/error messages
       console.error('Login error:', err)
-      
+
       // If backend returns field-specific validation errors
       if (err.errors && typeof err.errors === 'object') {
         Object.entries(err.errors).forEach(([field, messages]) => {
@@ -89,7 +94,7 @@ const LoginPage: React.FC = () => {
       <div className="relative w-[40%] h-full bg-gradient-to-br from-[#ffa500] to-[#ff8c00] flex items-end justify-center p-10 max-xl:w-full max-xl:h-[40%]" data-name="image 11" data-node-id="51:11">
         <img alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none" src={imgImage11} />
       </div>
-      
+
       <div className="absolute left-[40%] top-0 w-0 h-full flex items-center justify-center z-10 -translate-x-1/2 max-xl:hidden" data-node-id="165:820">
         <img alt="" className="w-screen h-0.5 rotate-90 origin-center" src={imgLine38} />
       </div>
@@ -97,18 +102,18 @@ const LoginPage: React.FC = () => {
       <div className="flex-1 flex flex-col items-center justify-center py-10 pr-[17px] pl-0 bg-white overflow-y-auto max-xl:w-full max-xl:p-5 relative">
         <h1 className="font-tienne text-[42px] font-normal text-black text-center m-0 mb-[15px] w-[654px] max-w-full max-xl:text-[36px] max-md:text-[32px]" data-node-id="51:13">Welcome Back!</h1>
         <p className="font-tienne text-xl font-normal text-black text-center m-0 mb-10 w-[654px] max-w-full max-xl:text-xl max-md:text-lg" data-node-id="51:14">Ready for more fun? Log in to your account.</p>
-        
+
         {error && (
           <div className="w-[620px] max-w-full mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="font-tienne text-base text-red-600 m-0">{error}</p>
           </div>
         )}
-        
+
         <form className="w-[620px] max-w-full flex flex-col gap-5 max-xl:w-full" onSubmit={handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-2.5">
             <label className="font-tienne text-xl font-normal text-black m-0" data-node-id="52:2">Email</label>
-            <input 
-              type="email" 
+            <input
+              type="email"
               className={`w-full h-[60px] px-5 border border-[#2b0000] rounded-[15px] bg-white font-tienne text-base text-black outline-none box-border focus:border-[#f20000] focus:shadow-[0_0_0_2px_rgba(242,0,0,0.1)] ${errors.email ? 'border-[#ff0404] focus:border-[#ff0404] focus:shadow-[0_0_0_2px_rgba(255,4,4,0.2)]' : ''}`}
               data-node-id="51:15"
               {...register('email')}
@@ -123,8 +128,8 @@ const LoginPage: React.FC = () => {
               <label className="font-tienne text-xl font-normal text-black m-0" data-node-id="52:3">Password</label>
               <a href="#" className="font-tienne text-base font-normal text-[#ff0404] no-underline transition-opacity hover:opacity-80" data-node-id="52:15">forgot password?</a>
             </div>
-            <input 
-              type="password" 
+            <input
+              type="password"
               className={`w-full h-[60px] px-5 border border-[#2b0000] rounded-[15px] bg-white font-tienne text-base text-black outline-none box-border focus:border-[#f20000] focus:shadow-[0_0_0_2px_rgba(242,0,0,0.1)] ${errors.password ? 'border-[#ff0404] focus:border-[#ff0404] focus:shadow-[0_0_0_2px_rgba(255,4,4,0.2)]' : ''}`}
               data-node-id="52:5"
               {...register('password')}
@@ -135,10 +140,10 @@ const LoginPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2.5">
-            <input 
-              type="checkbox" 
-              id="remember-me" 
-              className="w-[30px] h-[30px] border border-[#2b0000] rounded-[5px] bg-white cursor-pointer appearance-none relative flex-shrink-0 checked:bg-[#f20000] checked:border-[#f20000] checked:after:content-['✓'] checked:after:absolute checked:after:top-1/2 checked:after:left-1/2 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 checked:after:text-white checked:after:text-xl checked:after:font-bold" 
+            <input
+              type="checkbox"
+              id="remember-me"
+              className="w-[30px] h-[30px] border border-[#2b0000] rounded-[5px] bg-white cursor-pointer appearance-none relative flex-shrink-0 checked:bg-[#f20000] checked:border-[#f20000] checked:after:content-['✓'] checked:after:absolute checked:after:top-1/2 checked:after:left-1/2 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 checked:after:text-white checked:after:text-xl checked:after:font-bold"
               data-node-id="52:7"
               {...register('rememberMe')}
             />
@@ -147,8 +152,8 @@ const LoginPage: React.FC = () => {
             </label>
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={isLoading}
             className={`w-full h-[60px] bg-[#f20000] border border-[#2b0000] rounded-[15px] cursor-pointer flex items-center justify-center transition-colors p-0 mt-2.5 ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#d10000]'}`}
             data-node-id="52:11"
