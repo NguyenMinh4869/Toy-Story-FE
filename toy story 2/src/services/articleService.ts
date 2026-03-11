@@ -4,18 +4,24 @@ import { Document } from '@contentful/rich-text-types';
 import type { ArticleFields, ViewArticleDto } from '../types/ArticleDTO';
 
 // Initialize Contentful Client (Only once per application as per user feedback)
-const client = createClient({
-  space: import.meta.env.VITE_CONTENTFUL_SPACE_ID || '',
-  accessToken: import.meta.env.VITE_CONTENTFUL_ACCESS_TOKEN || '',
-  // environment: 'master', // defaults to 'master', ContentfulClient handles this
-});
+const spaceId = import.meta.env.VITE_CONTENTFUL_SPACE_ID;
+const accessToken = import.meta.env.VITE_CONTENTFUL_ACCESS_TOKEN;
+
+// Initialize Contentful Client safely
+const client = (spaceId && accessToken)
+  ? createClient({
+    space: spaceId,
+    accessToken: accessToken,
+  })
+  : null;
+
 
 /**
  * Standardize Contentful entry to our ViewArticleDto format
  */
 const mapToDto = (entry: Entry<ArticleFields, undefined, string>): ViewArticleDto => {
   const fields = entry.fields;
-  
+
   // Safely extract the image URL from the related Asset
   let imageUrl = 'https://via.placeholder.com/600x400';
   if (fields.coverImage && (fields.coverImage as unknown as Asset).fields?.file?.url) {
@@ -27,8 +33,8 @@ const mapToDto = (entry: Entry<ArticleFields, undefined, string>): ViewArticleDt
   }
 
   // Format date safely
-  const dateStr = fields.publishDate 
-    ? new Date(fields.publishDate as unknown as string).toLocaleDateString('vi-VN') 
+  const dateStr = fields.publishDate
+    ? new Date(fields.publishDate as unknown as string).toLocaleDateString('vi-VN')
     : new Date(entry.sys.createdAt).toLocaleDateString('vi-VN');
 
   return {
@@ -48,12 +54,16 @@ const mapToDto = (entry: Entry<ArticleFields, undefined, string>): ViewArticleDt
  * Fetch all articles
  */
 export const getArticles = async (): Promise<ViewArticleDto[]> => {
+  if (!client) {
+    console.warn('Contentful credentials missing. Please check VITE_CONTENTFUL_SPACE_ID and VITE_CONTENTFUL_ACCESS_TOKEN in .env');
+    return [];
+  }
   try {
     const response = await client.getEntries<ArticleFields>({
       content_type: 'blogArticle', // The default ID Contentful assigns based on your prompt might be "blogArticle"
       order: ['-fields.publishDate'], // Try to order by publish date descending
     });
-    
+
     return response.items.map(mapToDto);
   } catch (error) {
     console.error('Error fetching articles from Contentful:', error);
@@ -66,6 +76,7 @@ export const getArticles = async (): Promise<ViewArticleDto[]> => {
  * Fetch a single article by its ID
  */
 export const getArticleById = async (id: string): Promise<ViewArticleDto | null> => {
+  if (!client) return null;
   try {
     const entry = await client.getEntry<ArticleFields>(id);
     if (entry) {
@@ -83,6 +94,7 @@ export const getArticleById = async (id: string): Promise<ViewArticleDto | null>
  * (A more robust way is a separate Content Type, but this works for MVP)
  */
 export const getArticleCategories = async (): Promise<string[]> => {
+  if (!client) return [];
   try {
     const response = await client.getEntries<ArticleFields>({
       content_type: 'blogArticle',
@@ -93,7 +105,7 @@ export const getArticleCategories = async (): Promise<string[]> => {
     const categories = response.items
       .map(item => item.fields.category as string)
       .filter(category => !!category);
-      
+
     // Return unique set
     return Array.from(new Set(categories));
   } catch (error) {

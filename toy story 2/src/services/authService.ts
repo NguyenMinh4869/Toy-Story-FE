@@ -176,7 +176,7 @@ export const updateUser = async (userData: UpdateUserDto): Promise<{ message: st
  * Requires: Authorization
  */
 export const changePassword = async (passwordData: ChangePasswordDto): Promise<{ message: string }> => {
-  const response = await apiPut<{ message: string }>('/account/change-password', passwordData)
+  const response = await apiPut<{ message: string }>('/accounts/password', passwordData)
   return response.data
 }
 
