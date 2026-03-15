@@ -106,17 +106,9 @@ const CheckoutPage: React.FC = () => {
 
         try {
             // 1. Perform checkout (POST /api/checkout)
-            const payload: any = {
-                name: formData.name,
-                phoneNumber: formData.phoneNumber,
-                address: formData.address,
-                email: formData.email,
-                notes: formData.notes
-            }
-
-            if (voucherData && voucherCode.trim()) {
-                payload.voucherCode = voucherCode.trim()
-            }
+            const payload = voucherData && voucherCode.trim()
+                ? { voucherCode: voucherCode.trim() }
+                : undefined
 
             const checkoutResult = await checkout(payload)
 
