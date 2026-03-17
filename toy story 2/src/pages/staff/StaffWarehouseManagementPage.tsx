@@ -290,7 +290,7 @@ const StaffWarehouseManagementPage: React.FC = () => {
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-xl md:text-2xl font-bold text-gray-800">Warehouse Product Management</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-gray-800">Product Management</h2>
           {warehouseId && (
             <p className="text-xs md:text-sm text-gray-600 mt-1">Managing Warehouse ID: {warehouseId}</p>
           )}
