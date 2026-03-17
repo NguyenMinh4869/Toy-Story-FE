@@ -17,6 +17,36 @@ export interface ApiError {
   errors?: Record<string, string[]>
 }
 
+const isNonEmptyString = (value: unknown): value is string => {
+  return typeof value === 'string' && value.trim().length > 0
+}
+
+const extractApiErrorMessage = (status: number, payload: any): string => {
+  const nestedData = payload?.data
+  const nestedMessage = nestedData?.message
+  const message = payload?.message
+  const detail = payload?.detail
+  const title = payload?.title
+
+  if (isNonEmptyString(nestedMessage)) {
+    return nestedMessage
+  }
+
+  if (isNonEmptyString(detail)) {
+    return detail
+  }
+
+  if (isNonEmptyString(title)) {
+    return title
+  }
+
+  if (isNonEmptyString(message) && message.trim().toLowerCase() !== 'success') {
+    return message
+  }
+
+  return `HTTP error! status: ${status}`
+}
+
 /**
  * Custom fetch wrapper with error handling
  */
@@ -61,9 +91,9 @@ async function apiRequest<T>(
 
     if (!response.ok) {
       const error: ApiError = {
-        message: data.message || `HTTP error! status: ${response.status}`,
+        message: extractApiErrorMessage(response.status, data),
         status: response.status,
-        errors: data.errors
+        errors: data.errors || data.data?.errors
       }
       throw error
     }

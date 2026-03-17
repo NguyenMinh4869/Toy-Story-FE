@@ -6,6 +6,7 @@ import {
     CreatePaymentResponse,
     ValidateVoucherResponse
 } from '../types/CheckoutDTO'
+import type { ApiError } from './apiClient'
 
 /**
  * Synchronize local cart with server
@@ -60,6 +61,19 @@ export const validateVoucher = async (voucherCode: string): Promise<ValidateVouc
  * POST /api/payments/create
  */
 export const createPayment = async (invoiceId: number): Promise<CreatePaymentResponse> => {
-    const response = await apiPost<CreatePaymentResponse>('/payments/create', { invoiceId })
-    return response.data
+    const payload = { invoiceId }
+
+    try {
+        const response = await apiPost<CreatePaymentResponse>('/payments/create', payload)
+        return response.data
+    } catch (error) {
+        const apiError = error as ApiError
+
+        if (apiError.status !== 404) {
+            throw error
+        }
+
+        const fallbackResponse = await apiPost<CreatePaymentResponse>('/payment/create', payload)
+        return fallbackResponse.data
+    }
 }
