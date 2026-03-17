@@ -3507,7 +3507,9 @@ export interface components {
       name: string;
       phoneNumber: string;
       address?: string | null;
-      /** Format: int32 */
+      districtCode?: number | null;
+      provinceCode?: number | null;
+      wardCode?: number | null;
       warehouseId?: number;
     };
     CreateUserDto: {
@@ -3516,7 +3518,6 @@ export interface components {
       confirmPassword: string;
       name: string;
       phoneNumber: string;
-      address?: string | null;
     };
     CreateWarehouseProductDto: {
       /** Format: int32 */
@@ -3675,7 +3676,9 @@ export interface components {
       name?: string | null;
       phoneNumber?: string | null;
       address?: string | null;
-      /** Format: int32 */
+      districtCode?: number | null;
+      provinceCode?: number | null;
+      wardCode?: number | null;
       warehouseId?: number | null;
     };
     UpdateUserDto: {
@@ -3683,6 +3686,9 @@ export interface components {
       name?: string | null;
       phoneNumber?: string | null;
       address?: string | null;
+      districtCode?: number | null;
+      provinceCode?: number | null;
+      wardCode?: number | null;
     };
     ViewBrandDto: {
       /** Format: int32 */
@@ -3808,6 +3814,9 @@ export interface components {
       name?: string | null;
       phoneNumber?: string | null;
       address?: string | null;
+      districtCode?: number | null;
+      provinceCode?: number | null;
+      wardCode?: number | null;
       role?: string | null;
       status?: string | null;
       /** Format: int32 */
@@ -3822,6 +3831,9 @@ export interface components {
       name?: string | null;
       phoneNumber?: string | null;
       address?: string | null;
+      districtCode?: number | null;
+      provinceCode?: number | null;
+      wardCode?: number | null;
       role?: string | null;
       status?: string | null;
     };
@@ -3918,8 +3930,7 @@ export interface components {
       totalProducts?: number;
       /** Format: int32 */
       totalQuantity?: number;
-      };
-    
+    };
   };
   responses: never;
   parameters: never;

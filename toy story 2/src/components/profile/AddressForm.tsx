@@ -1,18 +1,8 @@
-/**
- * Address Form Component
- * Form for adding/editing address with Vietnam location dropdowns
- */
-
 import React, { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { locationService } from "../../hooks/useLocation";
 import type { AddressFormData } from "../../types/Location";
-// Import the DTO types for casting
-import type {
-  Province as DTOProvince,
-  District as DTODistrict,
-  Ward as DTOWard,
-} from "../../types/LocationDTO";
+
 import { updateUser, getCurrentUser } from "../../services/authService";
 import { useAuth } from "../../hooks/useAuth";
 
@@ -30,7 +20,7 @@ const AddressForm: React.FC<AddressFormProps> = ({
   isEditing = false,
 }) => {
   const { refreshUser } = useAuth();
-  const [provinces, setProvinces] = useState<any[]>([]); // Use any to bypass type checking
+  const [provinces, setProvinces] = useState<any[]>([]); 
   const [districts, setDistricts] = useState<any[]>([]);
   const [wards, setWards] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -174,6 +164,9 @@ const AddressForm: React.FC<AddressFormProps> = ({
 
       await updateUser({
         address: fullAddress,
+        provinceCode: parseInt(data.province),
+        districtCode: parseInt(data.district),
+        wardCode: parseInt(data.ward),
       });
 
       await getCurrentUser();
