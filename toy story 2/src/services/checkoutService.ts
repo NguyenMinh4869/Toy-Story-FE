@@ -1,4 +1,4 @@
-import { apiPost } from './apiClient'
+import { apiPost, apiDelete, apiPut } from './apiClient'
 import {
     CalculatePriceRequest,
     CalculatePriceResponse,
@@ -6,6 +6,24 @@ import {
     CreatePaymentResponse,
     ValidateVoucherResponse
 } from '../types/CheckoutDTO'
+
+/**
+ * Synchronize local cart with server
+ */
+export const syncCartToServer = async (items: { productId: number; quantity: number }[]): Promise<void> => {
+    try {
+        await apiDelete('/carts')
+    } catch (err) {
+        // Cart might already be empty, continue
+    }
+
+    // Add items sequentially to avoid race conditions
+    for (const item of items) {
+        if (item.productId && item.quantity > 0) {
+            await apiPut(`/carts/items?productId=${item.productId}&quantity=${item.quantity}`)
+        }
+    }
+}
 
 /**
  * Calculate order price (preview)
