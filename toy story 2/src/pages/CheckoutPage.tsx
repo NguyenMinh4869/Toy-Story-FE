@@ -6,6 +6,8 @@ import { formatPrice } from '../utils/formatPrice'
 import { checkout, createPayment, calculatePrice, syncCartToServer } from '../services/checkoutService'
 import { ShoppingBag, ArrowLeft, CreditCard, Loader2, Ticket } from 'lucide-react'
 import { ROUTES } from '../routes/routePaths'
+import Modal from '../components/ui/Modal'
+
 
 interface CheckoutFormData {
     name: string
@@ -22,6 +24,8 @@ const CheckoutPage: React.FC = () => {
 
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [qrCodeData, setQrCodeData] = useState<string | null>(null)
+
 
     const [voucherCode, setVoucherCode] = useState('')
     const [isValidatingVoucher, setIsValidatingVoucher] = useState(false)
@@ -121,17 +125,9 @@ const CheckoutPage: React.FC = () => {
             )
 
             // 1. Perform checkout (POST /api/checkout)
-            const payload: any = {
-                name: formData.name,
-                phoneNumber: formData.phoneNumber,
-                address: formData.address,
-                email: formData.email,
-                notes: formData.notes
-            }
-
-            if (voucherData && voucherCode.trim()) {
-                payload.voucherCode = voucherCode.trim()
-            }
+            const payload = voucherData && voucherCode.trim()
+                ? { voucherCode: voucherCode.trim() }
+                : undefined
 
             const checkoutResult = await checkout(payload)
 
@@ -147,16 +143,16 @@ const CheckoutPage: React.FC = () => {
             // 3. Clear local cart
             clearCart()
 
-            // 4. Redirect to PayOS
-            if (paymentResult?.checkoutUrl) {
-                // Open in new tab
-                window.open(paymentResult.checkoutUrl, '_blank')
-
-                // Redirect current page to HOME
-                navigate(ROUTES.HOME)
+            // 4. Handle response from Payment
+            if (paymentResult?.qrCode) {
+                setQrCodeData(paymentResult.qrCode)
+                setIsSubmitting(false)
+            } else if (paymentResult?.checkoutUrl) {
+                window.location.href = paymentResult.checkoutUrl
             } else {
                 throw new Error('Không nhận được liên kết thanh toán từ PayOS.')
             }
+
         } catch (err: any) {
             console.error('Checkout error:', err)
             const detailMsg = err.errors ? Object.values(err.errors).flat().join(', ') : ''
@@ -409,8 +405,41 @@ const CheckoutPage: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {qrCodeData && (
+                <Modal 
+                    isOpen={!!qrCodeData} 
+                    onClose={() => { setQrCodeData(null); navigate(ROUTES.PROFILE_ORDERS); }} 
+                    title="Thanh toán qua mã QR" 
+                    size="md"
+                >
+                    <div className="flex flex-col items-center justify-center space-y-4">
+                        <p className="text-gray-600 text-center font-reddit-sans">
+                            Vui lòng quét mã QR dưới đây để thanh toán:
+                        </p>
+                        <div className="p-4 bg-white border border-gray-100 rounded-2xl shadow-sm flex justify-center">
+                            <img 
+                                src={qrCodeData.startsWith('http') || qrCodeData.startsWith('data:') ? qrCodeData : `data:image/png;base64,${qrCodeData}`} 
+                                alt="QR Code" 
+                                className="w-full h-auto max-w-[280px]"
+                            />
+                        </div>
+                        <div className="text-center">
+                            <p className="font-bold text-lg text-gray-800">Thanh toán hoàn tất?</p>
+                            <p className="text-sm text-gray-500">Hệ thống sẽ cập nhật sau vài giây khi thanh toán thành công.</p>
+                        </div>
+                        <button 
+                            onClick={() => { setQrCodeData(null); navigate(ROUTES.PROFILE_ORDERS); }}
+                            className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"
+                        >
+                            <CreditCard size={20} /> Xem Đơn hàng của tôi
+                        </button>
+                    </div>
+                </Modal>
+            )}
         </div>
     )
 }
+
 
 export default CheckoutPage
