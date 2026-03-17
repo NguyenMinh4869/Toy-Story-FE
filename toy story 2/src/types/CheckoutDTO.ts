@@ -23,11 +23,13 @@ export interface CalculatePriceResponse {
  * Response from checkout
  */
 export interface CheckoutResponse {
-    invoiceId?: number
-    InvoiceId?: number
-    orderId?: number
-    OrderId?: number
-    message?: string
+    message: string;
+    checkout: {
+        orderId: number;
+        invoiceId: number;
+        totalAmount: number;
+        status: string;
+    }
 }
 
 /**
@@ -41,17 +43,16 @@ export interface CreatePaymentRequest {
  * Response from payment creation (PayOS link)
  */
 export interface CreatePaymentResponse {
-    checkoutUrl?: string
-    paymentUrl?: string
-    PaymentUrl?: string
-    url?: string
-    Url?: string
-    qrCode?: string
-    QRCode?: string
-    qr?: string
-    Qr?: string
+    message: string;
+    data: {
+        paymentUrl: string;
+        qrCode: string;
+        orderCode: number;
+        status: string;
+        invoiceId: number;
+        amount: number;
+    }
 }
-
 /**
  * Request for voucher validation
  */

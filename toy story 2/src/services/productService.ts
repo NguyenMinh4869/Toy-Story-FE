@@ -68,7 +68,7 @@ export const filterProducts = async (params?: {
   if (params?.status) queryParams.append('status', params.status)
   if (params?.promotionId) queryParams.append('promotionId', params.promotionId.toString())
 
-  const endpoint = `/products/admin-filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+  const endpoint = `/products/customer-filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
   const response = await apiGet<ViewProductDto[]>(endpoint)
   return response.data
 }

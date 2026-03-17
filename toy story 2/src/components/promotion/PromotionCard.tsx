@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 export const PromotionCard: React.FC<{
   promo: ViewPromotionSummaryDto;
   index: number;
-}> = ({ promo, index }) => {
+}> = ({ promo }) => {
   const [products, setProducts] = useState<ViewProductDto[]>([]);
   const [loadingProds, setLoadingProds] = useState(false);
 

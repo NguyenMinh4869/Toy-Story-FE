@@ -34,8 +34,6 @@ const extractTextFromRichText = (document: Document): string => {
   document.content.forEach(processNode);
   return text.trim();
 };
-import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
-import { BLOCKS, INLINES } from "@contentful/rich-text-types";
 import { Calendar, User, Share2 } from "lucide-react";
 
 // Image assets from Figma
@@ -130,71 +128,6 @@ export const CamNangDetailPage = (): React.JSX.Element => {
   }
 
   // Custom renderer for Contentful Rich Text
-  const richTextOptions = {
-    renderNode: {
-      [BLOCKS.PARAGRAPH]: (_node: any, children: React.ReactNode) => (
-        <p className="mb-6 text-[#4a4a4a] text-[17px] leading-relaxed tracking-wide font-sansation">
-          {children}
-        </p>
-      ),
-      [BLOCKS.HEADING_2]: (_node: any, children: React.ReactNode) => (
-        <h2 className="font-tilt-warp text-[#ab0007] text-[28px] md:text-[32px] mb-[24px] mt-[48px] border-b border-gray-100 pb-3">
-          {children}
-        </h2>
-      ),
-      [BLOCKS.HEADING_3]: (_node: any, children: React.ReactNode) => (
-        <h3 className="font-red-hat font-bold text-[#20147b] text-[22px] mb-[18px] mt-[36px]">
-          {children}
-        </h3>
-      ),
-      [BLOCKS.UL_LIST]: (_node: any, children: React.ReactNode) => (
-        <ul className="list-disc list-outside space-y-3 mb-[28px] ml-6 text-[#4a4a4a] text-[17px] font-sansation marker:text-[#ab0007]">
-          {children}
-        </ul>
-      ),
-      [BLOCKS.OL_LIST]: (_node: any, children: React.ReactNode) => (
-        <ol className="list-decimal list-outside space-y-3 mb-[28px] ml-6 text-[#4a4a4a] text-[17px] font-sansation marker:text-[#ab0007] font-semibold">
-          {children}
-        </ol>
-      ),
-      [BLOCKS.LIST_ITEM]: (_node: any, children: React.ReactNode) => (
-        <li className="pl-2 font-normal">{children}</li>
-      ),
-      [BLOCKS.HR]: () => (
-        <hr className="my-10 border-t-2 border-dashed border-gray-200" />
-      ),
-      [BLOCKS.QUOTE]: (_node: any, children: React.ReactNode) => (
-        <blockquote className="relative border-l-[6px] border-[#ab0007] bg-[#fdf8f8] pl-6 pr-4 py-4 rounded-r-xl italic my-8 text-gray-700 font-sansation text-[18px] shadow-sm">
-          <span className="absolute top-2 left-4 text-[#ab0007] text-4xl opacity-20 font-serif">
-            "
-          </span>
-          {children}
-        </blockquote>
-      ),
-      [BLOCKS.EMBEDDED_ASSET]: (node: any) => {
-        const { url, description, title } = node.data.target.fields;
-        return (
-          <div className="my-[40px]">
-            <img
-              src={`https:${url}`}
-              alt={description || title || "Article image"}
-              className="w-full h-auto rounded-[15px] object-cover"
-            />
-          </div>
-        );
-      },
-      [INLINES.HYPERLINK]: (node: any, children: React.ReactNode) => (
-        <a
-          href={node.data.uri}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-[#2600ff] underline hover:no-underline"
-        >
-          {children}
-        </a>
-      ),
-    },
-  };
 
   return (
     <div className="relative w-full bg-[#f2f2f2]">

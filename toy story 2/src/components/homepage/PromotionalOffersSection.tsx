@@ -67,7 +67,7 @@ export const PromotionalOffersSection = ({
         >
           {pages.map((pageProducts, pageIndex) => (
             <div key={`promo-page-${pageIndex}`} className="w-full shrink-0 h-full flex items-center justify-center">
-              <div className="pt-[100px] px-[21px] grid grid-cols-4 gap-x-[34px] w-[991px] justify-items-center">
+              <div className="pt-[100px] px-[21px] grid grid-cols-4 gap-x-[34px] w-full justify-items-center">
                 {pageProducts.map((product) => (
                   <article key={product.productId} className="relative w-[203px] h-[309px] shrink-0">
                     <img

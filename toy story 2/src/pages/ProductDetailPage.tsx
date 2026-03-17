@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import ProductSection from "../components/ProductSection";
 import type { ProductDTO } from "../types/ProductDTO";
-import { ProductCard } from "../types/ProductCard";
-import { formatPrice, formatDiscount } from "../utils/formatPrice";
+import { formatPrice } from "../utils/formatPrice";
 import { useCart } from "../context/CartContext";
 import { getProductById } from "../services/productService";
 
@@ -48,21 +46,21 @@ const ProductDetail: React.FC = () => {
   }, [id]);
 
   // Related products from current product
-  const relatedProducts: ProductCard[] = product
-    ? [
-        {
-          image: product.imageUrl ?? "",
-          name: product.name ?? "",
-          price: formatPrice(product.price ?? 0),
-          originalPrice:
-            product.originalPrice != null
-              ? formatPrice(product.originalPrice)
-              : formatPrice(product.price ?? 0),
-          discount:
-            product.discount != null ? formatDiscount(product.discount) : "-",
-        },
-      ]
-    : [];
+  // const relatedProducts: ProductCard[] = product
+  //   ? [
+  //       {
+  //         image: product.imageUrl ?? "",
+  //         name: product.name ?? "",
+  //         price: formatPrice(product.price ?? 0),
+  //         originalPrice:
+  //           product.originalPrice != null
+  //             ? formatPrice(product.originalPrice)
+  //             : formatPrice(product.price ?? 0),
+  //         discount:
+  //           product.discount != null ? formatDiscount(product.discount) : "-",
+  //       },
+  //     ]
+  //   : [];
 
   const handleQuantityChange = (change: number): void => {
     setQuantity((prev) => Math.max(1, prev + change));

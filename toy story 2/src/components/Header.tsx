@@ -144,13 +144,7 @@ const Header: React.FC = () => {
         </div>
       </div>
       <nav className="max-w-[1800px] mx-auto flex gap-12 items-center justify-center font-tilt-warp text-xs max-xl:gap-6 max-xl:flex-wrap relative">
-        <a href="#exclusive" className="text-white no-underline flex items-center gap-2 hover:opacity-80">ĐỘC QUYỀN ONLINE</a>
-        <a href="#gundam" className="text-white no-underline flex items-center gap-2 hover:opacity-80">
-          GUNDAM
-          <ChevronDown size={17} stroke="white" strokeWidth={2} className="w-[17px] h-2 flex-shrink-0" />
-        </a>
-        <a href="#new" className="text-white no-underline flex items-center gap-2 hover:opacity-80">HÀNG MỚI</a>
-
+      
         {/* Products Dropdown Trigger */}
         <div
           className="relative"
@@ -178,7 +172,6 @@ const Header: React.FC = () => {
 
         <Link to="/promotion" className="text-white no-underline flex items-center gap-2 hover:opacity-80">KHUYẾN MÃI</Link>
         <Link to={ROUTES.BRANDS} className="text-white no-underline flex items-center gap-2 hover:opacity-80">THƯƠNG HIỆU</Link>
-        <Link to={ROUTES.CAM_NANG} className="text-white no-underline flex items-center gap-2 hover:opacity-80">CẨM NANG MUA HÀNG</Link>
       </nav>
     </header>
   )

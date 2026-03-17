@@ -41,8 +41,6 @@ export const calculatePrice = async (request: CalculatePriceRequest): Promise<Ca
  * POST /api/checkout
  */
 export const checkout = async (data: any): Promise<CheckoutResponse> => {
-    // Usually checkout takes no body if it uses the server-side cart
-    // But passing data includes form + optional voucherCode
     const response = await apiPost<CheckoutResponse>('/checkout', data)
     return response.data
 }

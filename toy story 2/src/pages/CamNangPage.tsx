@@ -2,7 +2,6 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ROUTES } from "../routes/routePaths";
 import { ArticleCard } from "../components/camnang/ArticleCard";
-import { ArticleSidebar } from "../components/camnang/ArticleSidebar";
 import { Pagination } from "../components/camnang/Pagination";
 import { Search } from "lucide-react";
 import { getArticles, getArticleCategories } from "../services/articleService";
@@ -13,17 +12,14 @@ const imgLine23 =
   "https://www.figma.com/api/mcp/asset/8ee531aa-c46a-43f0-9a85-9e49cce91501";
 
 export const CamNangPage = (): React.JSX.Element => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const categoryFromUrl = searchParams.get("category");
 
   const [articles, setArticles] = useState<ViewArticleDto[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(
-    categoryFromUrl,
-  );
+  const [selectedCategory] = useState<string | null>(categoryFromUrl);
   const [currentPage, setCurrentPage] = useState(1);
   const articlesPerPage = 5;
   const articlesSectionRef = useRef<HTMLDivElement>(null);
@@ -32,25 +28,12 @@ export const CamNangPage = (): React.JSX.Element => {
     const fetchContent = async () => {
       setIsLoading(true);
       try {
-        const [fetchedArticles, fetchedCategories] = await Promise.all([
+        const [fetchedArticles] = await Promise.all([
           getArticles(),
           getArticleCategories(),
         ]);
         setArticles(fetchedArticles);
         // Fallback categories if none exist yet
-        setCategories(
-          fetchedCategories.length > 0
-            ? fetchedCategories
-            : [
-                "Tổng quan về Toy Story",
-                "Dạy con ngoan hiền",
-                "Chơi cùng con",
-                "Nuôi con khỏe",
-                "Mẹo hữu ích",
-                "Hôm nay cho con ăn gì ?",
-                "Vòng quanh thanh hóa",
-              ],
-        );
       } catch (error) {
         console.error("Failed to fetch articles:", error);
       } finally {
