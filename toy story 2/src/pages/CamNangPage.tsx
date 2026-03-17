@@ -9,7 +9,6 @@ import { getArticles, getArticleCategories } from "../services/articleService";
 import type { ViewArticleDto } from "../types/ArticleDTO";
 
 // Image assets from Figma
-import ArticleBanner from "../assets/ArticleBanner.png";
 const imgLine23 = "https://www.figma.com/api/mcp/asset/8ee531aa-c46a-43f0-9a85-9e49cce91501";
 
 export const CamNangPage = (): React.JSX.Element => {
@@ -19,26 +18,11 @@ export const CamNangPage = (): React.JSX.Element => {
   const [articles, setArticles] = useState<ViewArticleDto[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(categoryFromUrl);
   const [currentPage, setCurrentPage] = useState(1);
-
-  // Sync state with URL parameter
-  useEffect(() => {
-    setSelectedCategory(categoryFromUrl);
-  }, [categoryFromUrl]);
-
-  // Function to handle category change (updates both state and URL)
-  const handleCategorySelect = (category: string | null) => {
-    if (category) {
-      setSearchParams({ category });
-    } else {
-      setSearchParams({});
-    }
-  };
-
-  const articlesPerPage = 5; 
+  const articlesPerPage = 5;
   const articlesSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -52,7 +36,7 @@ export const CamNangPage = (): React.JSX.Element => {
         setArticles(fetchedArticles);
         // Fallback categories if none exist yet
         setCategories(fetchedCategories.length > 0 ? fetchedCategories : [
-          "Tổng quan về Toy Story", "Dạy con ngoan hiền", "Chơi cùng con", 
+          "Tổng quan về Toy Story", "Dạy con ngoan hiền", "Chơi cùng con",
           "Nuôi con khỏe", "Mẹo hữu ích", "Hôm nay cho con ăn gì ?", "Vòng quanh thanh hóa"
         ]);
       } catch (error) {
@@ -68,7 +52,7 @@ export const CamNangPage = (): React.JSX.Element => {
   const filteredArticles = useMemo(() => {
     return articles.filter(article => {
       const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           article.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+        article.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = !selectedCategory || article.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
@@ -100,15 +84,6 @@ export const CamNangPage = (): React.JSX.Element => {
 
       {/* Main Content Container */}
       <div className="bg-white relative w-full -mt-[2px]">
-        {/* Hero Banner */}
-        <div className="relative w-full h-[300px] overflow-hidden">
-          <img
-            alt="Hero banner"
-            src={ArticleBanner}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        </div>
-
         {/* Content Section */}
         <div className="relative w-full px-[69px] pt-[32px] pb-[50px]">
           <div className="flex gap-[66px]">

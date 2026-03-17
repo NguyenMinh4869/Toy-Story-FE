@@ -2,8 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import type { ViewProductDto } from "../types/ProductDTO";
 import { formatPrice } from "../utils/formatPrice";
-import { PRODUCT_IMAGE_87, DECOR_LINE_15 } from "../constants/imageAssets";
-import { Heart } from "lucide-react";
+import { PRODUCT_IMAGE_87 } from "../constants/imageAssets";
 
 interface ProductCardProps {
   product: ViewProductDto;
@@ -76,7 +75,7 @@ export const ProductCard = ({
         )}
         
         {/* Wishlist Button */}
-        <button 
+        <button
           className="absolute top-[207px] right-[25px] w-5 h-5 cursor-pointer border-0 bg-transparent p-0 flex items-center justify-center"
           aria-label="Thêm vào yêu thích"
         >

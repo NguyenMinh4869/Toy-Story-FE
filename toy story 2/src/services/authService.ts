@@ -63,28 +63,35 @@ const decodeJwt = (token: string): any => {
  * Automatically fetches user details after successful login
  */
 export const login = async (credentials: LoginDto): Promise<LoginResponse & { user?: ViewUserDto }> => {
-  const response = await apiPost<LoginResponse>('/auth/login', credentials)
+  const response = await apiPost<any>('/auth/login', credentials)
+
+  // Extract token and role from response - handle various backend patterns
+  // (Directly in data, or nested in data.data, or PascalCase)
+  const rawData = response.data
+  const innerData = rawData?.data || rawData
+
+  const token = innerData?.token || innerData?.accessToken || innerData?.Token || innerData?.AccessToken
+  const role = innerData?.role || innerData?.Role
 
   // Store token and role in localStorage
-  if (response.data.token) {
-    localStorage.setItem('token', response.data.token)
+  if (token) {
+    localStorage.setItem('token', token)
 
     // Normalize and store role
-    const normalizedRole = normalizeRole(response.data.role)
+    const normalizedRole = normalizeRole(role)
     localStorage.setItem('role', normalizedRole)
 
-    // Update response role to be normalized for immediate usage
-    response.data.role = normalizedRole
-
     // Decode token to get user name immediately
-    const decoded = decodeJwt(response.data.token)
+    const decoded = decodeJwt(token)
     const displayName = decoded?.['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] || normalizedRole
 
     // Fetch user details using /auth/me endpoint
     try {
       const user = await getCurrentUser()
       return {
-        ...response.data,
+        ...innerData,
+        token,
+        role: normalizedRole,
         user
       }
     } catch (error) {
@@ -104,13 +111,15 @@ export const login = async (credentials: LoginDto): Promise<LoginResponse & { us
       localStorage.setItem('user', JSON.stringify(minimalUser))
 
       return {
-        ...response.data,
+        ...innerData,
+        token,
+        role: normalizedRole,
         user: minimalUser
       }
     }
   }
 
-  return response.data
+  return innerData
 }
 
 /**
@@ -166,7 +175,7 @@ export const getCurrentUser = async (): Promise<ViewUserDto> => {
  * Requires: Authorization, Member role
  */
 export const updateUser = async (userData: UpdateUserDto): Promise<{ message: string }> => {
-  const response = await apiPut<{ message: string }>('/account', userData)
+  const response = await apiPut<{ message: string }>('/accounts', userData)
   return response.data
 }
 

@@ -46,7 +46,7 @@ const LoginPage: React.FC = () => {
         console.log('User data loaded:', response.user)
       }
 
-      // Update global auth state before navigating
+      // Update global auth state
       refreshUser()
 
       // Navigate based on role

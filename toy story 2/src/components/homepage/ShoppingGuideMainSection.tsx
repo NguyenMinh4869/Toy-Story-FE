@@ -9,7 +9,7 @@ import { ROUTES } from "../../routes/routePaths";
 export const ShoppingGuideMainSection = (): React.JSX.Element => {
   return (
     <section aria-label="Cẩm nang mua sắm">
-      <SectionHeader 
+      <SectionHeader
         title="Cẩm nang mua sắm"
         top="2607px"
       />
@@ -17,7 +17,7 @@ export const ShoppingGuideMainSection = (): React.JSX.Element => {
       <ShoppingGuideSection />
       <ShoppingGuideContentSection />
 
-      <Link 
+      <Link
         to={ROUTES.CAM_NANG}
         className="top-[2738px] left-[514px] w-[172px] h-[54px] absolute flex items-center justify-center gap-2 rounded-[34px] bg-[linear-gradient(180deg,rgba(254,246,204,1)_3%,rgba(243,212,51,1)_100%)] hover:opacity-90 transition-opacity no-underline"
       >

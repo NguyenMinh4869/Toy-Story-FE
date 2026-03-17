@@ -33,6 +33,7 @@ export default {
         'viga': ['Viga', 'sans-serif'],
         'archivo': ['Archivo Black', 'sans-serif'],
         'unbounded': ['Unbounded', 'sans-serif'],
+        'sf-pro': ['"SF Pro Display"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
       },
     },
   },

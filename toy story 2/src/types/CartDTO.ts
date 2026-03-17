@@ -1,21 +1,25 @@
 /**
- * Cart DTOs - Generated from Swagger/OpenAPI spec
- * Source: https://toy-story-xwni.onrender.com/swagger/v1/swagger.json
+ * Cart DTOs
  */
 
-import type { components } from './generated'
+export interface CartItemDto {
+    cartItemId: number;
+    productId: number;
+    productName: string;
+    imageUrl: string;
+    unitPrice: number;
+    quantity: number;
+    totalPrice: number;
+}
 
-/**
- * CartDto - matches backend CartDto exactly
- */
-export type CartDto = components['schemas']['CartDto']
-
-/**
- * CartItemDto - matches backend CartItemDto exactly
- */
-export type CartItemDto = components['schemas']['CartItemDto']
+export interface CartDto {
+    cartId: number;
+    accountId: number;
+    items: CartItemDto[];
+    totalPrice: number;
+    totalItems: number;
+}
 
 // Aliases for backward compatibility
-export type CartDTO = CartDto
-export type CartItemDTO = CartItemDto
-
+export type CartDTO = CartDto;
+export type CartItemDTO = CartItemDto;

@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../hooks/useAuth'
 import { formatPrice } from '../utils/formatPrice'
-import { calculatePrice, checkout, createPayment } from '../services/checkoutService'
+import { calculatePrice, checkout, createPayment, calculatePrice, syncCartToServer } from '../services/checkoutService'
 import { CalculatePriceResponse } from '../types/CheckoutDTO'
 import { addToCartServer, clearCartServer, getCartServer } from '../services/cartService'
 import { updateUser } from '../services/authService'
-import { ShoppingBag, ArrowLeft, CreditCard, Loader2, CheckCircle2 } from 'lucide-react'
+import { ShoppingBag, ArrowLeft, CreditCard, Loader2, Ticket, CheckCircle2 } from 'lucide-react'
 import { ROUTES } from '../routes/routePaths'
+import Modal from '../components/ui/Modal'
+
 
 interface CheckoutFormData {
     name: string
@@ -27,6 +29,13 @@ const CheckoutPage: React.FC = () => {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [calculation, setCalculation] = useState<CalculatePriceResponse | null>(null)
     const [error, setError] = useState<string | null>(null)
+    const [qrCodeData, setQrCodeData] = useState<string | null>(null)
+
+
+    const [voucherCode, setVoucherCode] = useState('')
+    const [isValidatingVoucher, setIsValidatingVoucher] = useState(false)
+    const [voucherError, setVoucherError] = useState<string | null>(null)
+    const [voucherData, setVoucherData] = useState<{ name: string; totalDiscount: number; finalAmount: number } | null>(null)
 
     // Form state
     const [formData, setFormData] = useState<CheckoutFormData>({
@@ -63,6 +72,38 @@ const CheckoutPage: React.FC = () => {
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target
         setFormData(prev => ({ ...prev, [name]: value }))
+    }
+
+    const handleApplyVoucher = async () => {
+        if (!voucherCode.trim()) return
+
+        setIsValidatingVoucher(true)
+        setVoucherError(null)
+
+        try {
+            const result = await calculatePrice({
+                items: cartItems.map(item => ({
+                    productId: Number(item.product.id),
+                    quantity: item.quantity
+                })),
+                voucherCode: voucherCode.trim()
+            })
+
+            setVoucherData({
+                name: 'Voucher áp dụng',
+                totalDiscount: result.discount,
+                finalAmount: result.total
+            })
+            // Clear API error if previously set
+            setError(null)
+        } catch (err: any) {
+            console.error('Voucher calculation error:', err)
+            const detailMsg = err.response?.data?.data?.message || err.message || 'Mã voucher không hợp lệ hoặc giỏ hàng trống'
+            setVoucherError(detailMsg)
+            setVoucherData(null)
+        } finally {
+            setIsValidatingVoucher(false)
+        }
     }
 
     const handleCalculate = async () => {
@@ -127,28 +168,21 @@ const CheckoutPage: React.FC = () => {
         setError(null)
 
         try {
-            // 1. Sync User Profile (Backend may use profile info for checkout)
-            try {
-                await updateUser({
-                    name: formData.name,
-                    phoneNumber: formData.phoneNumber,
-                    address: formData.address,
-                    email: formData.email || undefined
-                })
-            } catch (profileErr) {
-                console.warn('Profile sync failed, continuing checkout anyway:', profileErr)
-                // We continue because some backends might handle this differently
-            }
+            // 0. Sync local cart with server
+            await syncCartToServer(
+                cartItems.map(item => ({
+                    productId: Number(item.product.id),
+                    quantity: item.quantity
+                }))
+            )
 
-            // 2. Synchronize cart one last time before checkout
-            if (!calculation) {
-                await handleCalculate()
-            }
+            // 1. Perform checkout (POST /api/checkout)
+            const payload = voucherData && voucherCode.trim()
+                ? { voucherCode: voucherCode.trim() }
+                : undefined
 
-            // 3. Perform checkout
-            const checkoutResult = await checkout()
+            const checkoutResult = await checkout(payload)
 
-            // Handle cases where checkout might return empty body but success
             const invoiceId = checkoutResult?.invoiceId
 
             if (!invoiceId) {
@@ -164,12 +198,16 @@ const CheckoutPage: React.FC = () => {
             // 5. Clear local cart
             clearCart()
 
-            // 6. Redirect to PayOS
-            if (paymentResult?.checkoutUrl) {
+            // 6. Handle response from Payment
+            if (paymentResult?.qrCode) {
+                setQrCodeData(paymentResult.qrCode)
+                setIsSubmitting(false)
+            } else if (paymentResult?.checkoutUrl) {
                 window.location.href = paymentResult.checkoutUrl
             } else {
                 throw new Error('Không nhận được liên kết thanh toán từ PayOS.')
             }
+
         } catch (err: any) {
             console.error('Checkout error:', err)
             // Extract detailed error if available
@@ -320,10 +358,50 @@ const CheckoutPage: React.FC = () => {
                                 </h2>
 
                                 <div className="space-y-4 font-reddit-sans">
+                                    {/* Voucher Section */}
+                                    <div className="pt-2 pb-4 border-b border-gray-100">
+                                        <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                                            <Ticket size={16} className="text-gray-500" /> Mã giảm giá
+                                        </label>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={voucherCode}
+                                                onChange={(e) => setVoucherCode(e.target.value)}
+                                                placeholder="Nhập mã voucher"
+                                                className="flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:border-red-400 focus:ring-2 focus:ring-red-50 outline-none transition-all uppercase"
+                                                disabled={isSubmitting || isValidatingVoucher}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={handleApplyVoucher}
+                                                disabled={isSubmitting || isValidatingVoucher || !voucherCode.trim()}
+                                                className={`px-4 py-2 font-medium rounded-xl transition-all whitespace-nowrap ${!voucherCode.trim() || isValidatingVoucher
+                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                    : 'bg-gray-800 text-white hover:bg-gray-900 active:scale-95'}`}
+                                            >
+                                                {isValidatingVoucher ? <Loader2 size={20} className="animate-spin" /> : 'Áp dụng'}
+                                            </button>
+                                        </div>
+                                        {voucherError && (
+                                            <p className="text-red-500 text-sm mt-2">{voucherError}</p>
+                                        )}
+                                    </div>
+
                                     <div className="flex justify-between text-gray-600">
                                         <span>Tạm tính</span>
                                         <span className="font-medium">{formatPrice(getTotalPrice())}</span>
                                     </div>
+
+                                    {voucherData && (
+                                        <div className="flex justify-between text-green-600">
+                                            <span className="flex flex-col">
+                                                <span>Voucher áp dụng</span>
+                                                <span className="text-xs text-green-500">{voucherData.name}</span>
+                                            </span>
+                                            <span className="font-medium">- {formatPrice(voucherData.totalDiscount)}</span>
+                                        </div>
+                                    )}
 
                                     {calculation && (
                                         <>
@@ -406,8 +484,41 @@ const CheckoutPage: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {qrCodeData && (
+                <Modal 
+                    isOpen={!!qrCodeData} 
+                    onClose={() => { setQrCodeData(null); navigate(ROUTES.PROFILE_ORDERS); }} 
+                    title="Thanh toán qua mã QR" 
+                    size="md"
+                >
+                    <div className="flex flex-col items-center justify-center space-y-4">
+                        <p className="text-gray-600 text-center font-reddit-sans">
+                            Vui lòng quét mã QR dưới đây để thanh toán:
+                        </p>
+                        <div className="p-4 bg-white border border-gray-100 rounded-2xl shadow-sm flex justify-center">
+                            <img 
+                                src={qrCodeData.startsWith('http') || qrCodeData.startsWith('data:') ? qrCodeData : `data:image/png;base64,${qrCodeData}`} 
+                                alt="QR Code" 
+                                className="w-full h-auto max-w-[280px]"
+                            />
+                        </div>
+                        <div className="text-center">
+                            <p className="font-bold text-lg text-gray-800">Thanh toán hoàn tất?</p>
+                            <p className="text-sm text-gray-500">Hệ thống sẽ cập nhật sau vài giây khi thanh toán thành công.</p>
+                        </div>
+                        <button 
+                            onClick={() => { setQrCodeData(null); navigate(ROUTES.PROFILE_ORDERS); }}
+                            className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"
+                        >
+                            <CreditCard size={20} /> Xem Đơn hàng của tôi
+                        </button>
+                    </div>
+                </Modal>
+            )}
         </div>
     )
 }
+
 
 export default CheckoutPage
