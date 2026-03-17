@@ -101,7 +101,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
           </p>
         </div>
       ) : (
-        <div className={`grid ${viewMode === 'grid' ? 'grid-cols-2' : 'grid-cols-1'} gap-6`}>
+        <div className={`grid ${viewMode === 'grid' ? 'grid-cols-4' : 'grid-cols-2'} gap-6`}>
           {products.map((product) => (
             <ProductGridCard
               key={product.productId}

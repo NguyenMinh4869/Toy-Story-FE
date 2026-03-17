@@ -113,11 +113,7 @@ export const ProductsDropdown: React.FC<ProductsDropdownProps> = ({ isOpen, onCl
                     : 'hover:bg-gray-50'
                 }`}
               >
-                <img 
-                  src={CATEGORY_ICON} 
-                  alt="" 
-                  className="w-[24px] h-[24px] object-cover flex-shrink-0"
-                />
+              
                 <span className="font-unbounded text-[10px] text-black">
                   {category.name}
                 </span>
@@ -162,11 +158,7 @@ export const ProductsDropdown: React.FC<ProductsDropdownProps> = ({ isOpen, onCl
                 >
                   {/* Discount Badge */}
                   <div className="relative">
-                    <img 
-                      src={DISCOUNT_BADGE} 
-                      alt="" 
-                      className="absolute top-0 left-0 w-[35px] h-[35px] z-10"
-                    />
+                  
                     <img 
                       src={product.imageUrl || PRODUCT_PLACEHOLDER} 
                       alt={product.name || 'Product'}

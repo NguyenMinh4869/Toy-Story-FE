@@ -9,7 +9,7 @@ const breadcrumbItems = [
   { label: 'Sản phẩm' },
 ]
 
-const PRODUCTS_PER_PAGE = 8
+const PRODUCTS_PER_PAGE = 12
 
 export const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<ViewProductDto[]>([])
@@ -152,7 +152,7 @@ export const ProductsPage: React.FC = () => {
       <BreadcrumbHeader items={breadcrumbItems} />
 
       {/* Main Content */}
-      <div className="max-w-[1200px] mx-auto px-6 py-8">
+      <div className="max-w-[1500px] mx-auto py-8">
         {/* Error Message */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">

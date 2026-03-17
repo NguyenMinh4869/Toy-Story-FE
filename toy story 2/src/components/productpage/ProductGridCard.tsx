@@ -1,42 +1,42 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import type { ViewProductDto } from '../../types/ProductDTO'
-import { formatPrice } from '../../utils/formatPrice'
-import { Heart } from 'lucide-react'
+import React from "react";
+import { Link } from "react-router-dom";
+import type { ViewProductDto } from "../../types/ProductDTO";
+import { formatPrice } from "../../utils/formatPrice";
+import { useCart } from "@/context/CartContext";
 
 interface ProductGridCardProps {
-  product: ViewProductDto
-  className?: string
+  product: ViewProductDto;
+  className?: string;
 }
 
 // Product image placeholder
-const PRODUCT_PLACEHOLDER = "https://www.figma.com/api/mcp/asset/298b739b-7401-4df7-acd0-41acee837979"
+const PRODUCT_PLACEHOLDER =
+  "https://www.figma.com/api/mcp/asset/298b739b-7401-4df7-acd0-41acee837979";
 
-export const ProductGridCard: React.FC<ProductGridCardProps> = ({ 
+export const ProductGridCard: React.FC<ProductGridCardProps> = ({
   product,
-  className = ''
+  className = "",
 }) => {
-  const productPrice = product.price ?? 0
-  const productName = product.name ?? 'Unnamed Product'
-  const productImage = product.imageUrl ?? PRODUCT_PLACEHOLDER
-  
+  const productPrice = product.price ?? 0;
+  const productName = product.name ?? "Unnamed Product";
+  const productImage = product.imageUrl ?? PRODUCT_PLACEHOLDER;
+  const { addToCart } = useCart();
+
   // Calculate discount (30% for demo)
-  const discount = 30
-  const originalPrice = productPrice / (1 - discount / 100)
+  const discount = 30;
+  const originalPrice = productPrice / (1 - discount / 100);
 
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    // TODO: Implement add to cart functionality
-    console.log('Add to cart:', product.productId)
-  }
+  const handleAddToCart = (e: React.MouseEvent): void => {
+    e.preventDefault();
+    e.stopPropagation();
 
-  const handleWishlist = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    // TODO: Implement wishlist functionality
-    console.log('Add to wishlist:', product.productId)
-  }
+    const cartProduct = {
+      id: String(product.productId),
+      quantity: 1,
+    };
+
+    addToCart(cartProduct, 1);
+  };
 
   return (
     <Link
@@ -50,7 +50,7 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({
           alt={productName}
           className="w-[200px] h-[200px] object-cover rounded-[12px]"
           onError={(e) => {
-            e.currentTarget.src = PRODUCT_PLACEHOLDER
+            e.currentTarget.src = PRODUCT_PLACEHOLDER;
           }}
         />
       </div>
@@ -80,17 +80,10 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({
           >
             Thêm vào giỏ hàng
           </button>
-          <button
-            onClick={handleWishlist}
-            className="w-[40px] h-[40px] flex items-center justify-center border border-gray-200 rounded-full hover:border-[#c40029] hover:text-[#c40029] transition-colors cursor-pointer bg-white"
-            aria-label="Add to wishlist"
-          >
-            <Heart size={20} className="text-gray-400" />
-          </button>
         </div>
       </div>
     </Link>
-  )
-}
+  );
+};
 
-export default ProductGridCard
+export default ProductGridCard;
