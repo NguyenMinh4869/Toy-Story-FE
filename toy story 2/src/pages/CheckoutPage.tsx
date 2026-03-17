@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../hooks/useAuth'
 import { formatPrice } from '../utils/formatPrice'
-import { checkout, createPayment, validateVoucher } from '../services/checkoutService'
+import { checkout, createPayment, calculatePrice, syncCartToServer } from '../services/checkoutService'
 import { ShoppingBag, ArrowLeft, CreditCard, Loader2, Ticket } from 'lucide-react'
 import { ROUTES } from '../routes/routePaths'
 
@@ -72,17 +72,24 @@ const CheckoutPage: React.FC = () => {
         setVoucherError(null)
 
         try {
-            const result = await validateVoucher(voucherCode.trim())
+            const result = await calculatePrice({
+                items: cartItems.map(item => ({
+                    productId: Number(item.product.id),
+                    quantity: item.quantity
+                })),
+                voucherCode: voucherCode.trim()
+            })
+
             setVoucherData({
-                name: result.discounts?.[0]?.name || 'Voucher',
-                totalDiscount: result.totalDiscount,
-                finalAmount: result.finalAmount
+                name: 'Voucher áp dụng',
+                totalDiscount: result.discount,
+                finalAmount: result.total
             })
             // Clear API error if previously set
             setError(null)
         } catch (err: any) {
-            console.error('Voucher validation error:', err)
-            const detailMsg = err.response?.data?.message || err.message || 'Mã voucher không hợp lệ'
+            console.error('Voucher calculation error:', err)
+            const detailMsg = err.response?.data?.data?.message || err.message || 'Mã voucher không hợp lệ hoặc giỏ hàng trống'
             setVoucherError(detailMsg)
             setVoucherData(null)
         } finally {
@@ -105,6 +112,14 @@ const CheckoutPage: React.FC = () => {
         setError(null)
 
         try {
+            // 0. Sync local cart with server
+            await syncCartToServer(
+                cartItems.map(item => ({
+                    productId: Number(item.product.id),
+                    quantity: item.quantity
+                }))
+            )
+
             // 1. Perform checkout (POST /api/checkout)
             const payload: any = {
                 name: formData.name,
@@ -134,7 +149,11 @@ const CheckoutPage: React.FC = () => {
 
             // 4. Redirect to PayOS
             if (paymentResult?.checkoutUrl) {
-                window.location.href = paymentResult.checkoutUrl
+                // Open in new tab
+                window.open(paymentResult.checkoutUrl, '_blank')
+
+                // Redirect current page to HOME
+                navigate(ROUTES.HOME)
             } else {
                 throw new Error('Không nhận được liên kết thanh toán từ PayOS.')
             }

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react'
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { ProductDTO } from '../types/ProductDTO'
 
 export interface CartItem {
@@ -34,13 +34,29 @@ interface CartProviderProps {
 }
 
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+    try {
+      const localData = localStorage.getItem('cartItems')
+      return localData ? JSON.parse(localData) : []
+    } catch (error) {
+      console.error('Failed to parse cartItems from localStorage', error)
+      return []
+    }
+  })
   const [isCartOpen, setIsCartOpen] = useState(false)
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('cartItems', JSON.stringify(cartItems))
+    } catch (error) {
+      console.error('Failed to save cartItems to localStorage', error)
+    }
+  }, [cartItems])
 
   const addToCart = (product: ProductDTO, quantity: number = 1): void => {
     setCartItems(prevItems => {
       const existingItem = prevItems.find(item => item.product.id === product.id)
-      
+
       if (existingItem) {
         return prevItems.map(item =>
           item.product.id === product.id
@@ -48,7 +64,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
             : item
         )
       }
-      
+
       return [...prevItems, { product, quantity }]
     })
     setIsCartOpen(true)
@@ -63,7 +79,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       removeFromCart(productId)
       return
     }
-    
+
     setCartItems(prevItems =>
       prevItems.map(item =>
         item.product.id === productId
