@@ -84,8 +84,8 @@ const ProductSection: React.FC<ProductSectionProps> = ({
                   {/* Image Container */}
                   <div className="bg-[#f9f9f9] rounded-[24px] p-4 mb-5 flex items-center justify-center relative aspect-square overflow-hidden group-hover/card:bg-white transition-colors duration-500">
                     <img
-                      src={product.image}
-                      alt={product.name}
+                      src={product?.image || undefined}
+                      alt={product?.name}
                       className="w-full h-full object-contain transform group-hover/card:scale-110 transition-transform duration-700"
                       onError={handleImageError}
                     />

@@ -23,8 +23,10 @@ export interface CalculatePriceResponse {
  * Response from checkout
  */
 export interface CheckoutResponse {
-    invoiceId: number
-    orderId: number
+    invoiceId?: number
+    InvoiceId?: number
+    orderId?: number
+    OrderId?: number
     message?: string
 }
 
@@ -39,8 +41,15 @@ export interface CreatePaymentRequest {
  * Response from payment creation (PayOS link)
  */
 export interface CreatePaymentResponse {
-    checkoutUrl: string
+    checkoutUrl?: string
+    paymentUrl?: string
+    PaymentUrl?: string
+    url?: string
+    Url?: string
     qrCode?: string
+    QRCode?: string
+    qr?: string
+    Qr?: string
 }
 
 /**
