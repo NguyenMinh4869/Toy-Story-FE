@@ -14,3 +14,8 @@ export const getOrderById = async (orderId: number): Promise<ViewOrderDto> => {
     const response = await apiGet<ViewOrderDto>(`/accounts/orders/${orderId}`)
     return response.data
 }
+
+export const assignWarehouse = async (orderId: number): Promise<> => {
+    const response = await apiPut<>(`/orders/${orderId}`)
+    return response.data
+}
