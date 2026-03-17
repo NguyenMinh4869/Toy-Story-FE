@@ -8,6 +8,8 @@ export const ROUTES = {
   ADMIN_PRODUCTS: "/admin/products",
   ADMIN_STAFF: "/admin/staff",
   ADMIN_ORDERS: "/admin/orders",
+  ADMIN_INVOICES: "/admin/invoices",
+
   ADMIN_BRANDS: "/admin/brands",
   ADMIN_PROMOTIONS: "/admin/promotions",
   ADMIN_SETS: "/admin/sets",
@@ -49,6 +51,7 @@ export const ROUTES = {
 
   // User
   PROFILE: "/profile",
+  PROFILE_INVOICES: "/profile/invoices",
   PROFILE_ORDERS: "/profile/orders",
   PROFILE_WISHLIST: "/profile/wishlist",
   PROFILE_ADDRESSES: "/profile/addresses",

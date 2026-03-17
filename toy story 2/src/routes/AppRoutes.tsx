@@ -35,13 +35,16 @@ import StaffWarehouseManagementPage from "../pages/staff/StaffWarehouseManagemen
 
 // User Pages
 import ProfilePage from "../pages/ProfilePage";
-import OrderHistoryPage from "../pages/OrderHistoryPage";
+import InvoicePage from "../pages/InvoicePage";
 import WishlistPage from "../pages/WishlistPage";
 import ChangePasswordPage from "../pages/ChangePasswordPage";
 
 import RegisterPage from "../pages/RegisterPage";
 import PaymentCancelPage from "@/pages/payment/CancelPage";
 import PaymentSuccessPage from "@/pages/payment/SuccessPage";
+import OrderPage from "@/pages/OrderPage";
+import InvoiceManagementPage from "@/pages/admin/InvoiceManagementPage";
+import OrderManagementPage from "@/pages/admin/OrderManagementPage";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -119,7 +122,16 @@ const AppRoutes: React.FC = () => {
           path={ROUTES.ADMIN_ORDERS}
           element={
             <DashboardLayout mode="admin">
-              <div>Orders Page (Under Construction)</div>
+              <OrderManagementPage />
+            </DashboardLayout>
+          }
+        />
+
+        <Route
+          path={ROUTES.ADMIN_INVOICES}
+          element={
+            <DashboardLayout mode="admin">
+              <InvoiceManagementPage />
             </DashboardLayout>
           }
         />
@@ -174,7 +186,9 @@ const AppRoutes: React.FC = () => {
         element={<ProtectedRoute allowedRoles={["Admin", "Staff", "Member"]} />}
       >
         <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
-        <Route path={ROUTES.PROFILE_ORDERS} element={<OrderHistoryPage />} />
+        <Route path={ROUTES.PROFILE_INVOICES} element={<InvoicePage />} />
+        <Route path={ROUTES.PROFILE_ORDERS} element={<OrderPage />} />
+
         <Route path={ROUTES.PROFILE_WISHLIST} element={<WishlistPage />} />
         <Route
           path={ROUTES.PROFILE_CHANGE_PASSWORD}

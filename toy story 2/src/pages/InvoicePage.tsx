@@ -5,7 +5,7 @@ import { getAccountInvoices } from '../services/invoiceService'
 import { formatPrice } from '../utils/formatPrice'
 import { Link } from 'react-router-dom'
 
-const OrderHistoryPage: React.FC = () => {
+const InvoicePage: React.FC = () => {
   const [invoices, setInvoices] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -52,7 +52,7 @@ const OrderHistoryPage: React.FC = () => {
       <div className="min-h-[500px]">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-[#00247d] text-2xl font-bold font-tilt-warp">
-            Lịch Sử Hóa Đơn & Đơn Hàng
+            Lịch Sử Hóa Đơn
           </h2>
           <span className="text-sm font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
             {invoices.length} hóa đơn
@@ -96,52 +96,58 @@ const OrderHistoryPage: React.FC = () => {
             </Link>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
             {filteredInvoices.map((invoice) => (
               <div
                 key={invoice.invoiceId}
                 className="group bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-xl hover:border-red-100 transition-all cursor-pointer"
               >
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-red-600 shrink-0">
-                      <Package size={24} />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900 text-lg mb-1">
-                        Hóa đơn #{invoice.invoiceId}
-                      </h4>
-                      <div className="flex items-center gap-3 text-sm text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Clock size={14} />
-                          {new Date(invoice.issuedAt).toLocaleDateString('vi-VN')}
-                        </span>
-                        <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                        <span>{invoice.orderCode || 'N/A'}</span>
-                      </div>
+                {/* Top section: icon + info */}
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-red-600 shrink-0">
+                    <Package size={24} />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-gray-900 text-lg mb-1">
+                      Hóa đơn #{invoice.invoiceId}
+                    </h4>
+                    <div className="flex items-center gap-3 text-sm text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <Clock size={14} />
+                        {new Date(invoice.issuedAt).toLocaleDateString('vi-VN')}
+                      </span>
+                      <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                      <span>{invoice.orderCode || 'N/A'}</span>
                     </div>
                   </div>
+                </div>
 
-                  <div className="flex items-center justify-between md:justify-end gap-6">
-                    <div className="text-right">
-                      <div className="text-lg font-black text-red-600 mb-1">
-                        {formatPrice(invoice.amountDue)}
-                      </div>
-                      <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${getStatusStyle(invoice.status)}`}>
-                        {getStatusIcon(invoice.status)}
-                        {invoice.status}
-                      </div>
+                {/* Bottom section: amount + status + chevron */}
+                <div className="mt-4 flex items-center justify-between">
+                  <div className="text-right">
+                    <div className="text-lg font-black text-red-600 mb-1">
+                      {formatPrice(invoice.amountDue)}
                     </div>
-                    <ChevronRight size={20} className="text-gray-300 group-hover:text-red-600 transition-colors" />
+                    <div
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${getStatusStyle(invoice.status)}`}
+                    >
+                      {getStatusIcon(invoice.status)}
+                      {invoice.status}
+                    </div>
                   </div>
+                  <ChevronRight
+                    size={20}
+                    className="text-gray-300 group-hover:text-red-600 transition-colors"
+                  />
                 </div>
               </div>
             ))}
           </div>
+
         )}
       </div>
     </ProfileLayout>
   )
 }
 
-export default OrderHistoryPage
+export default InvoicePage

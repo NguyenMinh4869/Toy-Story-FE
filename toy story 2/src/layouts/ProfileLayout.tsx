@@ -22,15 +22,17 @@ const ProfileLayout: React.FC<ProfileLayoutProps> = ({ children }) => {
       exact: true
     },
     {
+      path: '/profile/invoices',
+      label: 'Hóa đơn',
+      icon: ShoppingBag
+    },
+
+    {
       path: '/profile/orders',
       label: 'Lịch sử mua hàng',
       icon: ShoppingBag
     },
-    {
-      path: '/profile/wishlist',
-      label: 'Danh sách yêu thích',
-      icon: Heart
-    },
+
     {
       path: '/profile/change-password',
       label: 'Đổi mật khẩu',
@@ -51,7 +53,7 @@ const ProfileLayout: React.FC<ProfileLayoutProps> = ({ children }) => {
         <h1 className="text-[#00247d] text-[32px] font-bold text-center mb-8 font-tilt-warp">
           Tài Khoản Của Bạn
         </h1>
-        
+
         <div className="flex gap-6 items-start">
           {/* Left Sidebar */}
           <aside className="w-[330px] flex-shrink-0">
@@ -60,23 +62,22 @@ const ProfileLayout: React.FC<ProfileLayoutProps> = ({ children }) => {
               <div className="bg-[#ab0007] text-white py-4 px-6">
                 <h2 className="font-tilt-warp text-base font-bold">Tài Khoản Của Bạn</h2>
               </div>
-              
+
               {/* Menu Items */}
               <nav className="p-4">
                 <ul className="space-y-2">
                   {menuItems.map((item) => {
                     const Icon = item.icon
                     const active = isActive(item.path, item.exact)
-                    
+
                     return (
                       <li key={item.path}>
                         <Link
                           to={item.path}
-                          className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors no-underline ${
-                            active
-                              ? 'bg-red-50 text-[#ab0007] font-medium'
-                              : 'text-gray-700 hover:bg-gray-50'
-                          }`}
+                          className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors no-underline ${active
+                            ? 'bg-red-50 text-[#ab0007] font-medium'
+                            : 'text-gray-700 hover:bg-gray-50'
+                            }`}
                         >
                           <Icon size={20} className="flex-shrink-0" />
                           <span className="text-sm">{item.label}</span>
@@ -89,7 +90,7 @@ const ProfileLayout: React.FC<ProfileLayoutProps> = ({ children }) => {
               </nav>
             </div>
           </aside>
-          
+
           {/* Right Content Area */}
           <div className="flex-1 min-w-0">
             <div className="bg-white rounded-lg shadow-sm p-8">
