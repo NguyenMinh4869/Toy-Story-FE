@@ -9,7 +9,8 @@ import { getArticles, getArticleCategories } from "../services/articleService";
 import type { ViewArticleDto } from "../types/ArticleDTO";
 
 // Image assets from Figma
-const imgLine23 = "https://www.figma.com/api/mcp/asset/8ee531aa-c46a-43f0-9a85-9e49cce91501";
+const imgLine23 =
+  "https://www.figma.com/api/mcp/asset/8ee531aa-c46a-43f0-9a85-9e49cce91501";
 
 export const CamNangPage = (): React.JSX.Element => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -20,7 +21,9 @@ export const CamNangPage = (): React.JSX.Element => {
   const [isLoading, setIsLoading] = useState(true);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(categoryFromUrl);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(
+    categoryFromUrl,
+  );
   const [currentPage, setCurrentPage] = useState(1);
   const articlesPerPage = 5;
   const articlesSectionRef = useRef<HTMLDivElement>(null);
@@ -31,14 +34,23 @@ export const CamNangPage = (): React.JSX.Element => {
       try {
         const [fetchedArticles, fetchedCategories] = await Promise.all([
           getArticles(),
-          getArticleCategories()
+          getArticleCategories(),
         ]);
         setArticles(fetchedArticles);
         // Fallback categories if none exist yet
-        setCategories(fetchedCategories.length > 0 ? fetchedCategories : [
-          "Tổng quan về Toy Story", "Dạy con ngoan hiền", "Chơi cùng con",
-          "Nuôi con khỏe", "Mẹo hữu ích", "Hôm nay cho con ăn gì ?", "Vòng quanh thanh hóa"
-        ]);
+        setCategories(
+          fetchedCategories.length > 0
+            ? fetchedCategories
+            : [
+                "Tổng quan về Toy Story",
+                "Dạy con ngoan hiền",
+                "Chơi cùng con",
+                "Nuôi con khỏe",
+                "Mẹo hữu ích",
+                "Hôm nay cho con ăn gì ?",
+                "Vòng quanh thanh hóa",
+              ],
+        );
       } catch (error) {
         console.error("Failed to fetch articles:", error);
       } finally {
@@ -50,10 +62,12 @@ export const CamNangPage = (): React.JSX.Element => {
   }, []);
 
   const filteredArticles = useMemo(() => {
-    return articles.filter(article => {
-      const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    return articles.filter((article) => {
+      const matchesSearch =
+        article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         article.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = !selectedCategory || article.category === selectedCategory;
+      const matchesCategory =
+        !selectedCategory || article.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
   }, [articles, searchQuery, selectedCategory]);
@@ -64,7 +78,10 @@ export const CamNangPage = (): React.JSX.Element => {
   }, [searchQuery, selectedCategory]);
 
   // Calculate pagination
-  const totalPages = Math.max(1, Math.ceil(filteredArticles.length / articlesPerPage));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredArticles.length / articlesPerPage),
+  );
   const startIndex = (currentPage - 1) * articlesPerPage;
   const endIndex = startIndex + articlesPerPage;
   const currentArticles = filteredArticles.slice(startIndex, endIndex);
@@ -74,10 +91,13 @@ export const CamNangPage = (): React.JSX.Element => {
       {/* Breadcrumb */}
       <div className="bg-[#f2f2f2] border-[0.2px] border-black border-solid h-[36px] w-full flex items-center px-[58px]">
         <p className="font-rowdies text-[#582d2d] text-[10px] leading-[0]">
-          <Link to={ROUTES.HOME} className="font-red-hat text-[#484848] no-underline hover:underline">
+          <Link
+            to={ROUTES.HOME}
+            className="font-red-hat text-[#484848] no-underline hover:underline"
+          >
             Trang chủ
           </Link>
-          <span className="text-black">  &gt;  </span>
+          <span className="text-black"> &gt; </span>
           <span className="font-red-hat text-black">Cẩm nang</span>
         </p>
       </div>
@@ -100,20 +120,16 @@ export const CamNangPage = (): React.JSX.Element => {
                   className="flex-1 border-none outline-none font-sansation text-[12px] text-[rgba(0,0,0,0.44)] placeholder:text-[rgba(0,0,0,0.44)] ml-2 bg-transparent"
                 />
               </div>
-
-              {/* Category Sidebar */}
-              <ArticleSidebar
-                categories={categories}
-                selectedCategory={selectedCategory}
-                onCategorySelect={handleCategorySelect}
-              />
             </div>
 
             {/* Right Content Area */}
             <div className="flex-1">
               {/* Section Title */}
               <div className="mb-[30px]">
-                <div className="h-px bg-black mb-[30px]" style={{ backgroundImage: `url(${imgLine23})` }} />
+                <div
+                  className="h-px bg-black mb-[30px]"
+                  style={{ backgroundImage: `url(${imgLine23})` }}
+                />
                 <p className="font-rowdies text-[15px] text-black not-italic">
                   Tất cả bài viết
                 </p>
@@ -150,7 +166,10 @@ export const CamNangPage = (): React.JSX.Element => {
                     setCurrentPage(page);
                     // Scroll to articles section smoothly
                     setTimeout(() => {
-                      articlesSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                      articlesSectionRef.current?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      });
                     }, 0);
                   }}
                 />
@@ -164,4 +183,3 @@ export const CamNangPage = (): React.JSX.Element => {
 };
 
 export default CamNangPage;
-
