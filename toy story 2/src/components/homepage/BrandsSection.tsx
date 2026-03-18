@@ -4,6 +4,7 @@ import { SectionHeader } from "./SectionHeader";
 import { Link } from "react-router-dom";
 import { POLYGON_ARROW } from "../../constants/imageAssets";
 import { ROUTES } from "../../routes/routePaths";
+import { motion } from "framer-motion";
 
 const image24 = "https://www.figma.com/api/mcp/asset/bc780d28-b30d-4701-8754-4995225b004d";
 
@@ -13,62 +14,63 @@ interface BrandsSectionProps {
 }
 
 export const BrandsSection = ({ brands, isLoading }: BrandsSectionProps): React.JSX.Element => {
-  // Prepare brand logos for display (first 8 brands)
   const displayBrands = brands.slice(0, 8);
-  const brandLogosRow1 = displayBrands.slice(0, 4).map((brand, index) => ({
-    src: brand.imageUrl ?? image24,
-    left: index === 0 ? "132px" : index === 1 ? "372px" : index === 2 ? "625px" : "866px",
-    alt: brand.name ?? 'Brand'
-  }));
-  const brandLogosRow2 = displayBrands.slice(4, 8).map((brand, index) => ({
-    src: brand.imageUrl ?? image24,
-    left: index === 0 ? "132px" : index === 1 ? "372px" : index === 2 ? "625px" : "866px",
-    alt: brand.name ?? 'Brand'
-  }));
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-64 flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
-    <section aria-label="Thương hiệu uy tín">
-      <SectionHeader 
-        title="Thương hiệu uy tín"
-        top="2162px"
-      />
-
-      {brands.length > 0 ? (
-        <>
-          {brandLogosRow1.map((logo, index) => (
-            <img
-              key={index}
-              className="absolute top-[2336px] w-[195px] h-24 aspect-[2.03] object-contain bg-white rounded-lg p-2"
-              style={{ left: logo.left }}
-              alt={logo.alt || "Brand logo"}
-              src={logo.src}
-            />
+    <div className="relative w-full">
+      <SectionHeader title="THƯƠNG HIỆU UY TÍN" variant="dark" />
+      
+      <div className="max-w-5xl mx-auto mt-12 px-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {displayBrands.map((brand, index) => (
+            <motion.div
+              key={brand.brandId ?? index}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1, duration: 0.5 }}
+              whileHover={{ y: -5, scale: 1.05 }}
+              className="bg-white rounded-2xl p-4 shadow-xl flex items-center justify-center h-28 border-4 border-transparent hover:border-red-100 transition-all group"
+            >
+              <img
+                className="w-full h-full object-contain group-hover:scale-110 transition-transform"
+                alt={brand.name ?? "Brand logo"}
+                src={brand.imageUrl ?? image24}
+              />
+            </motion.div>
           ))}
-
-          {brandLogosRow2.map((logo, index) => (
-            <img
-              key={index}
-              className="absolute top-[2451px] w-[195px] h-24 aspect-[2.03] object-contain bg-white rounded-lg p-2"
-              style={{ left: logo.left }}
-              alt={logo.alt || "Brand logo"}
-              src={logo.src}
-            />
-          ))}
-
-          <Link
-            to={ROUTES.BRANDS}
-            className="absolute top-[2273px] left-[514px] w-[172px] h-[54px] flex items-center justify-center gap-2 rounded-[34px] bg-[linear-gradient(180deg,rgba(254,246,204,1)_3%,rgba(243,212,51,1)_100%)] hover:opacity-90 no-underline text-[#c40029] font-tilt-warp text-[15px] whitespace-nowrap"
-          >
-            Xem Thêm
-            <img className="w-2 h-2.5 object-contain" alt="" src={POLYGON_ARROW} />
-          </Link>
-        </>
-      ) : !isLoading && (
-        <div className="absolute top-[2193px] left-[132px] w-[800px] text-center">
-          <p className="[font-family:'Tilt_Warp-Regular',Helvetica] text-white text-lg">Không có thương hiệu</p>
         </div>
-      )}
-    </section>
+
+        <div className="mt-12 flex justify-center">
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Link
+              to={ROUTES.BRANDS}
+              className="group flex items-center justify-center gap-3 px-10 py-4 rounded-full bg-white text-red-600 font-bold shadow-2xl hover:bg-red-50 transition-all border-2 border-transparent hover:border-white/50"
+            >
+              <span className="font-tilt-warp text-lg uppercase tracking-wider">Xem Thêm</span>
+              <motion.img 
+                animate={{ x: [0, 5, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                className="w-3 h-4 object-contain brightness-0 invert-[.5] sepia-0 saturate-100 hue-rotate-0 group-hover:invert-0 group-hover:brightness-100 transition-all" 
+                alt="" 
+                src={POLYGON_ARROW} 
+              />
+            </Link>
+          </motion.div>
+        </div>
+      </div>
+    </div>
   );
 };
 

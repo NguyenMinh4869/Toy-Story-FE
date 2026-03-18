@@ -1,7 +1,8 @@
 import React from "react";
+import { motion } from "framer-motion";
 import { DECOR_FANS_INGOTS, DECOR_FIRECRACKERS_CLOUD } from "../../constants/imageAssets";
 import { HomeCarousel, type CarouselSlide } from "./HomeCarousel";
-// Figma MCP Asset URL (hero slide)
+
 const image36 = "https://www.figma.com/api/mcp/asset/16661e53-92cf-4ab5-9f06-7c063eda908a";
 
 const paroselImagesModules = import.meta.glob("../../assets/parosel/*.{png,jpg,jpeg,webp,gif,svg}", {
@@ -35,36 +36,43 @@ export const HeroBannerSection = ({
   const safePage = Math.max(0, Math.min(page, carouselSlides.length - 1));
 
   return (
-    <section aria-label="Hero banner" className="relative h-[480px]">
-      {/* Banner wrapper so decorations align with banner */}
-      <div className="absolute top-[80px] left-[111px] w-[991px]">
-        <div className="relative w-full">
-          {/* Main Carousel */}
-          <HomeCarousel
-            slides={carouselSlides}
-            autoPlay={true}
-            autoPlayInterval={5000}
-            currentSlide={safePage}
-            onSlideChange={onPageChange}
-            heightClassName="h-[360px]"
-          />
+    <div className="relative w-full max-w-6xl mx-auto px-4">
+      {/* Decorative elements with animations */}
+      <motion.img
+        initial={{ opacity: 0, x: -50, rotate: -10 }}
+        animate={{ opacity: 1, x: 0, rotate: 0 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+        className="absolute -left-12 -top-12 w-48 h-48 object-contain z-20 pointer-events-none hidden lg:block"
+        alt="Trang trí mây và pháo tết"
+        src={DECOR_FIRECRACKERS_CLOUD}
+      />
 
-          {/* Trang trí trái trên: mây và pháo tết (góc trên trái của carousel) */}
-          <img
-            className="absolute -left-[60px] -top-[30px] w-[220px] h-[180px] object-contain z-20 pointer-events-none"
-            alt="Trang trí mây và pháo tết"
-            src={DECOR_FIRECRACKERS_CLOUD}
-          />
+      <motion.img
+        initial={{ opacity: 0, x: 50, rotate: 10 }}
+        animate={{ opacity: 1, x: 0, rotate: 0 }}
+        transition={{ duration: 0.8, delay: 0.4 }}
+        className="absolute -right-12 -bottom-12 w-56 h-56 object-contain z-20 pointer-events-none hidden lg:block"
+        alt="Trang trí quạt, mây và thỏi vàng"
+        src={DECOR_FANS_INGOTS}
+      />
 
-          {/* Trang trí phải dưới: quạt + mây + thỏi vàng (góc dưới phải của carousel) */}
-          <img
-            className="absolute -right-[60px] -bottom-[40px] w-[260px] h-[180px] object-contain z-20 pointer-events-none"
-            alt="Trang trí quạt, mây và thỏi vàng"
-            src={DECOR_FANS_INGOTS}
-          />
-        </div>
-      </div>
-    </section>
+      {/* Main Carousel with shadow and rounded corners */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6 }}
+        className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white"
+      >
+        <HomeCarousel
+          slides={carouselSlides}
+          autoPlay={true}
+          autoPlayInterval={5000}
+          currentSlide={safePage}
+          onSlideChange={onPageChange}
+          heightClassName="h-[300px] md:h-[480px]"
+        />
+      </motion.div>
+    </div>
   );
 };
 

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getPromotionsCustomerFilter } from "../services/promotionService";
 import { filterProducts } from "../services/productService";
 import { BreadcrumbHeader } from "../components/BreadcrumbHeader";
 import { ProductCard } from "../components/ProductCard";
+import { SECTION_ICON } from "../constants/imageAssets";
+import { NavigationButton } from "../components/homepage/NavigationButton";
 import type { ViewPromotionDto } from "../types/PromotionDTO";
 import type { ViewProductDto } from "../types/ProductDTO";
 import { useNavigate } from "react-router-dom";
@@ -99,7 +100,7 @@ const PromotionPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-white min-h-screen flex flex-col">
+    <div className="bg-[#a70001] min-h-screen flex flex-col overflow-x-hidden">
       <BreadcrumbHeader items={[{ label: "Khuyến mãi" }]} />
 
       <main className="flex-1 w-full max-w-[1200px] mx-auto px-4 py-6">
@@ -127,7 +128,7 @@ const PromotionPage: React.FC = () => {
           return (
             <section key={promo.promotionId} className="mb-16">
               {/* Section Title */}
-              <h2 className="font-['Rowdies',sans-serif] text-2xl md:text-[32px] text-[#1503a3] text-center mb-6">
+              <h2 className="font-['Rowdies',sans-serif] text-2xl md:text-[32px] text-white text-center mb-6">
                 {promo.name}
               </h2>
 
@@ -135,12 +136,14 @@ const PromotionPage: React.FC = () => {
               <div className="relative mb-6">
                 <div className="flex gap-4 md:gap-6">
                   {/* Left Navigation Arrow */}
-                  <button
-                    className="absolute left-[-40px] top-1/2 -translate-y-1/2 z-10 hidden xl:block"
-                    aria-label="Previous"
-                  >
-                    <ChevronLeft className="w-6 h-6 text-gray-600 hover:text-red-600" />
-                  </button>
+                  <NavigationButton
+                    config={{
+                      direction: "left",
+                      variant: "white",
+                      className: "absolute left-[-50px] top-1/2 -translate-y-1/2 z-10 hidden xl:flex",
+                      onClick: () => {} // Add logic if needed
+                    }}
+                  />
 
                   {/* Left: Promotional Banner */}
                   <div className="hidden md:block w-[185px] h-[249px] flex-shrink-0 rounded-[12px] overflow-hidden">
@@ -177,12 +180,14 @@ const PromotionPage: React.FC = () => {
                   </div>
 
                   {/* Right Navigation Arrow */}
-                  <button
-                    className="absolute right-[-40px] top-1/2 -translate-y-1/2 z-10 hidden xl:block"
-                    aria-label="Next"
-                  >
-                    <ChevronRight className="w-6 h-6 text-gray-600 hover:text-red-600" />
-                  </button>
+                  <NavigationButton
+                    config={{
+                      direction: "right",
+                      variant: "white",
+                      className: "absolute right-[-50px] top-1/2 -translate-y-1/2 z-10 hidden xl:flex",
+                      onClick: () => {} // Add logic if needed
+                    }}
+                  />
                 </div>
               </div>
 
@@ -190,19 +195,11 @@ const PromotionPage: React.FC = () => {
               <div className="flex justify-center mb-6">
                 <button
                   onClick={() => navigate("/products")}
-                  className="bg-white border border-[#af0000] text-[#b60000] px-4 py-2 rounded-[9px] 
-                    font-['Tilt_Warp',sans-serif] text-[15px] hover:bg-red-50 transition-colors
-                    flex items-center gap-2"
+                  className="bg-white text-red-600 border-none px-10 py-3 rounded-full 
+                    font-tilt-warp text-[16px] hover:bg-black hover:text-white transition-all duration-300
+                    shadow-xl flex items-center gap-2 transform hover:scale-105"
                 >
-                  Xem thêm
-                  <svg
-                    width="7"
-                    height="7"
-                    viewBox="0 0 7 7"
-                    className="rotate-90"
-                  >
-                    <path d="M3.5 0L6.5 6H0.5L3.5 0Z" fill="#b60000" />
-                  </svg>
+                  Xem thêm tất cả
                 </button>
               </div>
 
@@ -210,10 +207,11 @@ const PromotionPage: React.FC = () => {
               <div className="flex items-center justify-center mt-8">
                 <div className="flex items-center w-full max-w-[600px]">
                   <div className="flex-1 h-[4px] bg-[#e6d7d7]" />
-                  <div className="relative w-[53px] h-[53px] flex-shrink-0 mx-4 transform rotate-[13deg]">
+                  <div className="relative w-12 h-12 flex-shrink-0 mx-4">
                     <img
-                      alt=""
-                      className="w-full h-full object-cover rounded-[3px]"
+                      alt="Decorative icon"
+                      src={SECTION_ICON}
+                      className="w-full h-full object-contain brightness-0 invert opacity-80"
                     />
                   </div>
                   <div className="flex-1 h-[4px] bg-[#e6d7d7]" />
