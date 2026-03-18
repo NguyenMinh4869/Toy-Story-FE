@@ -5,6 +5,7 @@ import OrderCard from './OrderCard'
 interface OrderListProps {
   orders: ViewOrderDto[]
   onSelect: (orderId: number) => void
+  
 }
 
 const OrderList: React.FC<OrderListProps> = ({ orders, onSelect }) => {

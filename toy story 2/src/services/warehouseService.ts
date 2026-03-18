@@ -47,15 +47,15 @@ export const createWarehouse = async (
 
   if (data.ProvinceCode !== undefined && data.ProvinceCode !== null) {
     form.append("ProvinceCode", String(data.ProvinceCode));
-  } 
+  }
 
   if (data.DistrictCode !== undefined && data.DistrictCode !== null) {
     form.append("DistrictCode", String(data.DistrictCode));
-  } 
+  }
 
   if (data.WardCode !== undefined && data.WardCode !== null) {
     form.append("WardCode", String(data.WardCode));
-  } 
+  }
 
   if (typeof data.LowStockThreshold === "number") {
     form.append("LowStockThreshold", String(data.LowStockThreshold));
@@ -74,17 +74,20 @@ export const updateWarehouse = async (
   data: UpdateWarehouseDto,
 ): Promise<{ message: string }> => {
   const form = new FormData();
-  if (data.Name !== undefined) form.append("Name", String(data.Name));
-  if (data.Location !== undefined)
-    form.append("Location", String(data.Location));
 
-  if (data.ProvinceCode !== undefined) {
+  if (data.Name !== undefined) form.append("Name", String(data.Name));
+  if (data.Location !== undefined) form.append("Location", String(data.Location));
+
+  // Only append if value exists (not null, not undefined)
+  if (data.ProvinceCode != null) {
     form.append("ProvinceCode", String(data.ProvinceCode));
   }
-  if (data.DistrictCode !== undefined) {
+
+  if (data.DistrictCode != null) {
     form.append("DistrictCode", String(data.DistrictCode));
   }
-  if (data.WardCode !== undefined) {
+
+  if (data.WardCode != null) {
     form.append("WardCode", String(data.WardCode));
   }
 

@@ -95,13 +95,11 @@ const StaffManagementPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  // Properly typed handleSubmit
   const handleSubmit = async (data: CreateStaffDto | Partial<ViewStaffDto>) => {
     try {
       setLoading(true);
       if (currentStaff && currentStaff.accountId) {
-        const { password, confirmPassword, ...updateData } = data as CreateStaffDto;
-        await updateStaff(currentStaff.accountId, updateData);
+        await updateStaff(currentStaff.accountId, data);
       } else {
         await createStaff(data as CreateStaffDto);
       }
@@ -114,7 +112,6 @@ const StaffManagementPage: React.FC = () => {
       setLoading(false);
     }
   };
-
 
   return (
     <div className="p-6">

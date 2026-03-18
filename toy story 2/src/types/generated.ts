@@ -3588,6 +3588,7 @@ export interface components {
       accountName?: string | null;
       phoneNumber?: string | null;
       address?: string | null;
+      
       items?: components["schemas"]["OrderItemDto"][] | null;
       invoice?: components["schemas"]["ViewInvoiceDto"];
     };
@@ -3618,6 +3619,8 @@ export interface components {
       /** Format: int32 */
       accountId?: number;
       accountName?: string | null;
+      manuallyAssign: boolean;
+
     };
     PaymentWebhookDto: {
       /** Format: int64 */
