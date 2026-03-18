@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { GundamKingdomCardsSection } from "../components/homepage/GundamKingdomCardsSection";
 import { PromotionalOffersSection } from "../components/homepage/PromotionalOffersSection";
 import { HeroBannerSection } from "../components/homepage/HeroBannerSection";import { GundamKingdomHeaderSection } from "../components/homepage/GundamKingdomHeaderSection";
-import { FavoriteProductsSection } from "../components/homepage/FavoriteProductsSection";
 import { BrandsSection } from "../components/homepage/BrandsSection";
 import { getActiveProducts } from "../services/productService";
 import { getActiveBrands } from "../services/brandService";
@@ -21,14 +20,12 @@ const fadeInUp = {
 export const Homepage = (): React.JSX.Element => {
   const [promotionalProducts, setPromotionalProducts] = useState<ViewProductDto[]>([]);
   const [gundamProducts, setGundamProducts] = useState<ViewProductDto[]>([]);
-  const [favoriteProducts, setFavoriteProducts] = useState<ViewProductDto[]>([]);
   const [brands, setBrands] = useState<ViewBrandDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [heroPage, setHeroPage] = useState(0);
   const [promotionsPage, setPromotionsPage] = useState(0);
   const [gundamPage, setGundamPage] = useState(0);
-  const [favoritesPage, setFavoritesPage] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,7 +47,6 @@ export const Homepage = (): React.JSX.Element => {
           : allProducts.filter((p) => p.name?.toUpperCase().includes("GUNDAM")).slice(0, 12);
         
         setGundamProducts(gundam.length > 0 ? gundam : allProducts.slice(0, 12));
-        setFavoriteProducts(allProducts.slice(0, 12));
         
         const brandsData = await getActiveBrands();
         setBrands(brandsData);
@@ -123,23 +119,6 @@ export const Homepage = (): React.JSX.Element => {
             />
           </div>
         </motion.section>
-
-        {/* Favorite Products */}
-        <motion.section 
-          {...fadeInUp}
-          className="py-16 md:py-24"
-        >
-          <div className="max-w-7xl mx-auto px-4">
-            <FavoriteProductsSection
-              products={favoriteProducts}
-              isLoading={isLoading}
-              page={favoritesPage}
-              onPageChange={setFavoritesPage}
-              maxPages={3}
-            />
-          </div>
-        </motion.section>
-
         {/* Brands */}
         <motion.section 
           {...fadeInUp}

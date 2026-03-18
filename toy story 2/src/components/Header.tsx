@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ROUTES } from "../routes/routePaths";
 import {
   User,
@@ -15,6 +15,7 @@ import ProductsDropdown from "./ProductsDropdown";
 import { LOGO_TOY_STORY } from "../constants/imageAssets";
 
 const Header: React.FC = () => {
+  const navigate = useNavigate();
   const { getTotalItems, openCart } = useCart();
   const { isAuthenticated, user, role, logout } = useAuth();
   const [isProductsDropdownOpen, setIsProductsDropdownOpen] = useState(false);
@@ -148,16 +149,19 @@ const Header: React.FC = () => {
                       <div className="border-t border-gray-100 my-1" />
                     </>
                   )}
-                  <Link
-                    to={ROUTES.PROFILE}
-                    onClick={() => setIsUserDropdownOpen(false)}
-                    className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-100 transition-colors no-underline"
+                  <button
+                    onClick={() => {
+                      console.log("[Header] Navigating to profile...");
+                      setIsUserDropdownOpen(false);
+                      navigate(ROUTES.PROFILE);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-100 transition-colors no-underline border-none bg-transparent cursor-pointer text-left"
                   >
                     <UserCircle size={18} className="flex-shrink-0" />
                     <span className="font-tilt-warp text-sm">
                       Trang cá nhân
                     </span>
-                  </Link>
+                  </button>
                   <button
                     onClick={handleLogout}
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors bg-transparent border-none cursor-pointer text-left"

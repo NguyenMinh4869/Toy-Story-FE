@@ -31,21 +31,26 @@ export const BrandsSection = ({ brands, isLoading }: BrandsSectionProps): React.
       <div className="max-w-5xl mx-auto mt-12 px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {displayBrands.map((brand, index) => (
-            <motion.div
+            <Link 
+              to={`/brands/${brand.brandId}`}
               key={brand.brandId ?? index}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1, duration: 0.5 }}
-              whileHover={{ y: -5, scale: 1.05 }}
-              className="bg-white rounded-2xl p-4 shadow-xl flex items-center justify-center h-28 border-4 border-transparent hover:border-red-100 transition-all group"
+              className="block"
             >
-              <img
-                className="w-full h-full object-contain group-hover:scale-110 transition-transform"
-                alt={brand.name ?? "Brand logo"}
-                src={brand.imageUrl ?? image24}
-              />
-            </motion.div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.5 }}
+                whileHover={{ y: -5, scale: 1.05 }}
+                className="bg-white rounded-2xl p-4 shadow-xl flex items-center justify-center h-28 border-4 border-transparent hover:border-red-100 transition-all group"
+              >
+                <img
+                  className="w-full h-full object-contain group-hover:scale-110 transition-transform"
+                  alt={brand.name ?? "Brand logo"}
+                  src={brand.imageUrl ?? image24}
+                />
+              </motion.div>
+            </Link>
           ))}
         </div>
 

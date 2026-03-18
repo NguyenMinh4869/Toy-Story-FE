@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { ViewProductDto } from "../types/ProductDTO";
 import { formatPrice } from "../utils/formatPrice";
 import { PRODUCT_IMAGE_87 } from "../constants/imageAssets";
@@ -20,6 +20,7 @@ export const ProductCard = ({
   style,
   discount = 0,
 }: ProductCardProps): React.JSX.Element => {
+  const navigate = useNavigate();
   const productPrice = product.price ?? 0;
   const productName = product.name ?? "Unnamed Product";
   const productImage = product.imageUrl ?? PRODUCT_IMAGE_87;
@@ -29,6 +30,10 @@ export const ProductCard = ({
     ? productPrice / (1 - (discount ?? 0) / 100)
     : productPrice;
 
+  const handleCardClick = () => {
+    navigate(`/product/${product.productId}`);
+  };
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 20 }}
@@ -36,6 +41,7 @@ export const ProductCard = ({
       viewport={{ once: true }}
       whileHover={{ y: -8 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
+      onClick={handleCardClick}
       className={cn(
         "group relative bg-white rounded-[2.5rem] p-6 flex flex-col items-center select-none cursor-pointer",
         "w-[250px] h-[380px] shadow-[0_10px_30px_-15px_rgba(0,0,0,0.2)] hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.3)] transition-shadow duration-300",

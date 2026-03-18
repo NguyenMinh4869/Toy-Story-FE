@@ -16,7 +16,7 @@ const normalizeRole = (role: string | number | UserRole): string => {
     const r = role.trim()
     if (r.toLowerCase() === 'admin' || r === 'Quản trị viên') return 'Admin'
     if (r.toLowerCase() === 'staff' || r === 'Nhân viên') return 'Staff'
-    if (r.toLowerCase() === 'member' || r === 'Người dùng') return 'Member'
+    if (r.toLowerCase() === 'member' || r.toLowerCase() === 'customer' || r === 'Người dùng' || r === 'Khách hàng') return 'Member'
     return r
   }
 
@@ -161,6 +161,9 @@ export const getCurrentUser = async (): Promise<ViewUserDto> => {
   // Store user data in localStorage
   if (response.data) {
     localStorage.setItem('user', JSON.stringify(response.data))
+    if (response.data.role) {
+      localStorage.setItem('role', normalizeRole(response.data.role as any))
+    }
     if (response.data.accountId !== undefined) {
       localStorage.setItem('accountId', response.data.accountId.toString())
     }
@@ -257,7 +260,28 @@ export const isAuthenticated = (): boolean => {
  * Get user role from localStorage
  */
 export const getUserRole = (): string | null => {
-  return localStorage.getItem('role')
+  const role = localStorage.getItem('role')
+  if (role && role !== 'undefined' && role !== 'null') return normalizeRole(role)
+  
+  // Fallback 1: role in stored user object
+  const user = getStoredUser()
+  if (user?.role) return normalizeRole(user.role as any)
+  
+  // Fallback 2: Extract from JWT token
+  const token = localStorage.getItem('token')
+  if (token) {
+    const decoded = decodeJwt(token)
+    const tokenRole = decoded?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || 
+                      decoded?.['role'] || 
+                      decoded?.['Role']
+    if (tokenRole) {
+      const normalized = normalizeRole(tokenRole)
+      localStorage.setItem('role', normalized) // Heal the storage
+      return normalized
+    }
+  }
+  
+  return null
 }
 
 /**
