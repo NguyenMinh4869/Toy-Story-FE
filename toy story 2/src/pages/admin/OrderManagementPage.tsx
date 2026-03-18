@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Package } from 'lucide-react'
-import { getAccountOrders, getOrderById, getOrders } from '@/services/orderService'
+import { getOrderById, getOrders } from '@/services/orderService'
 import { ViewOrderDto, OrderDetailDto } from '@/types/OrderDTO'
 import OrderList from './order/OrderList'
 import OrderDetail from './order/OrderDetail'

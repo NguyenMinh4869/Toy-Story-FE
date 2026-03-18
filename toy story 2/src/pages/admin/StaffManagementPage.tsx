@@ -11,8 +11,7 @@ import {
 import { getWarehouses } from "../../services/warehouseService";
 import type {
   ViewStaffDto,
-  CreateStaffDto,
-  UpdateStaffDto,
+  CreateStaffDto
 } from "../../types/StaffDTO";
 import type { WarehouseSummaryDto } from "../../types/WarehouseDTO";
 import Pagination from "../../components/ui/Pagination";
@@ -55,17 +54,6 @@ const StaffManagementPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentStaff, setCurrentStaff] = useState<ViewStaffDto | null>(null);
 
-  // Form State
-  const [formData, setFormData] = useState<Partial<CreateStaffDto>>({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    phoneNumber: "",
-    address: "",
-    warehouseId: 0,
-  });
-
   useEffect(() => {
     fetchData();
   }, []);
@@ -87,25 +75,6 @@ const StaffManagementPage: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (data: any) => {
-    try {
-      setLoading(true);
-      if (currentStaff && currentStaff.accountId) {
-        const { password, confirmPassword, ...updateData } = data;
-        await updateStaff(currentStaff.accountId, updateData);
-      } else {
-        await createStaff(data);
-      }
-      setIsModalOpen(false);
-      fetchData();
-    } catch (err) {
-      console.error(err);
-      setError("Failed to save staff");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleStatusChange = async (id: number) => {
     try {
       await changeStaffStatus(id);
@@ -118,29 +87,34 @@ const StaffManagementPage: React.FC = () => {
 
   const openCreateModal = () => {
     setCurrentStaff(null);
-    setFormData({
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      phoneNumber: "",
-      address: "",
-      warehouseId: warehouses[0]?.warehouseId || 0,
-    });
     setIsModalOpen(true);
   };
 
   const openEditModal = (staff: ViewStaffDto) => {
     setCurrentStaff(staff);
-    setFormData({
-      name: staff.name || "",
-      email: staff.email || "", // Email might be read-only in backend for update but useful to show
-      phoneNumber: staff.phoneNumber || "",
-      address: staff.address || "",
-      warehouseId: staff.warehouseId || 0,
-    });
     setIsModalOpen(true);
   };
+
+  // Properly typed handleSubmit
+  const handleSubmit = async (data: CreateStaffDto | Partial<ViewStaffDto>) => {
+    try {
+      setLoading(true);
+      if (currentStaff && currentStaff.accountId) {
+        const { password, confirmPassword, ...updateData } = data as CreateStaffDto;
+        await updateStaff(currentStaff.accountId, updateData);
+      } else {
+        await createStaff(data as CreateStaffDto);
+      }
+      setIsModalOpen(false);
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      setError("Failed to save staff");
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   return (
     <div className="p-6">

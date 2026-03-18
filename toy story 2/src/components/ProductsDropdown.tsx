@@ -6,11 +6,8 @@ import { getActiveProducts } from '../services/productService'
 import type { ViewCategoryDto } from '../types/CategoryDTO'
 import type { ViewProductDto } from '../types/ProductDTO'
 
-// Asset URLs from Figma
-const CATEGORY_ICON = "https://www.figma.com/api/mcp/asset/10c04112-c747-4f08-9809-fa8c5dc21525"
 const FEATURED_BG = "https://www.figma.com/api/mcp/asset/05b9a086-cba0-4da8-80e9-b1ff25c8c382"
 const PRODUCT_PLACEHOLDER = "https://www.figma.com/api/mcp/asset/1b629d68-a06d-4580-8dbe-46fefd9ce76a"
-const DISCOUNT_BADGE = "https://www.figma.com/api/mcp/asset/435fa979-5a5c-4f4b-b32a-e5e6318ef070"
 const DECOR_LEFT = "https://www.figma.com/api/mcp/asset/2577a437-6eb6-4b9c-897c-cf94e79a5b2f"
 const DECOR_RIGHT = "https://www.figma.com/api/mcp/asset/a741473c-4a12-4bc2-a7b1-01e25cd2c1ef"
 

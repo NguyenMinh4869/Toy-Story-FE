@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ROUTES } from "../routes/routePaths";
 import {
-  Search,
   User,
   ShoppingBag,
   ChevronDown,

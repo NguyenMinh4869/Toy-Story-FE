@@ -5,7 +5,7 @@
 
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { User, ShoppingBag, Heart, Lock } from 'lucide-react'
+import { User, ShoppingBag, Lock } from 'lucide-react'
 
 interface ProfileLayoutProps {
   children: React.ReactNode

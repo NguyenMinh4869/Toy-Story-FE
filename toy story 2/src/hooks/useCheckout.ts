@@ -1,6 +1,5 @@
 // hooks/useCheckout.ts
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../hooks/useAuth";
 import {
@@ -9,7 +8,6 @@ import {
   createPayment,
 } from "../services/checkoutService";
 import { CalculatePriceResponse } from "../types/CheckoutDTO";
-import { ROUTES } from "../routes/routePaths";
 
 interface CheckoutFormData {
   name: string;
@@ -20,12 +18,11 @@ interface CheckoutFormData {
 }
 
 export const useCheckout = () => {
-  const navigate = useNavigate();
   const { cartItems, getTotalPrice } = useCart();
   const { user } = useAuth();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isCalculating, setIsCalculating] = useState(false);
+  const [isCalculating] = useState(false);
   const [calculation, setCalculation] = useState<CalculatePriceResponse | null>(
     null,
   );
