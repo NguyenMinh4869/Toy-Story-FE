@@ -3,13 +3,9 @@ import { SectionHeader } from "./SectionHeader";
 
 export const GundamKingdomHeaderSection = (): React.JSX.Element => {
   return (
-    <section aria-label="Gundam Kingdom">
-      <SectionHeader 
-        title="GUNDAM KINGDOM"
-        top="1099px"
-        className="gap-[70px]"
-      />
-    </section>
+    <div className="w-full mb-8">
+      <SectionHeader title="GUNDAM KINGDOM" variant="dark" />
+    </div>
   );
 };
 
