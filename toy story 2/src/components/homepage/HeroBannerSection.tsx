@@ -40,7 +40,7 @@ export const HeroBannerSection = ({
       {/* Decorative elements with animations */}
       <motion.img
         initial={{ opacity: 0, x: -50, rotate: -10 }}
-        animate={{ opacity: 1, x: 0, rotate: 0 }}
+        animate={{ opacity: 1, x: 30, y: 30, rotate: 0 }}
         transition={{ duration: 0.8, delay: 0.2 }}
         className="absolute -left-12 -top-12 w-48 h-48 object-contain z-20 pointer-events-none hidden lg:block"
         alt="Trang trí mây và pháo tết"
@@ -49,7 +49,7 @@ export const HeroBannerSection = ({
 
       <motion.img
         initial={{ opacity: 0, x: 50, rotate: 10 }}
-        animate={{ opacity: 1, x: 0, rotate: 0 }}
+        animate={{ opacity: 1, x: -20, y: 30, rotate: 0 }}
         transition={{ duration: 0.8, delay: 0.4 }}
         className="absolute -right-12 -bottom-12 w-56 h-56 object-contain z-20 pointer-events-none hidden lg:block"
         alt="Trang trí quạt, mây và thỏi vàng"
@@ -57,7 +57,7 @@ export const HeroBannerSection = ({
       />
 
       {/* Main Carousel with shadow and rounded corners */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6 }}
