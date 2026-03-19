@@ -8,7 +8,7 @@ import { WarehouseSummaryDto } from '@/types/WarehouseDTO'
 interface OrderDetailProps {
   order: OrderDetailDto | null
   onClose: () => void
-  onRefresh: () => void
+  onRefresh?: () => void
 }
 
 const OrderDetail: React.FC<OrderDetailProps> = ({ order, onClose, onRefresh }) => {
@@ -31,7 +31,9 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onClose, onRefresh }) 
   const handleAssign = async () => {
     if (!selectedWarehouse) return
     await assignWarehouse(order.orderId, selectedWarehouse)
-    onRefresh()
+    if (onRefresh) {
+      onRefresh()
+    }
     onClose()
   }
 

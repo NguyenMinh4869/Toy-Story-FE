@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { ProductDTO } from '../types/ProductDTO'
 import {
   addToCartServer,
   updateCartServer,
@@ -7,18 +6,18 @@ import {
   clearCartServer,
   getCartServer,
 } from '../services/cartService'
-import type { CartItemDto } from '../types/CartDTO'
+import type { CartItemDto, CartProduct } from '../types/CartDTO'
 
 export interface CartItem {
-  product: ProductDTO
+  product: CartProduct
   quantity: number
 }
 
 interface CartContextType {
   cartItems: CartItem[]
   addToCart: (productId?: number, setId?: number, quantity?: number) => void
-  removeFromCart: (productId?: number, setId?: number) => void
-  updateQuantity: (productId?: number, setId?: number, quantity?: number) => void
+  removeFromCart: (item: CartItem) => void
+  updateQuantity: (item: CartItem, quantity: number) => void
   clearCart: () => void
   getTotalPrice: () => number
   getTotalItems: () => number
@@ -26,7 +25,6 @@ interface CartContextType {
   openCart: () => void
   closeCart: () => void
 }
-
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
@@ -41,19 +39,29 @@ interface CartProviderProps {
 }
 
 const mapDtoToCartItem = (dto: CartItemDto): CartItem => {
-  const isProduct = dto.itemType === "product"
-  return {
-    product: {
-      productId: isProduct ? dto.productId : undefined,
-      setId: !isProduct ? dto.setId : undefined,
-      id: String(isProduct ? dto.productId : dto.setId),
-      name: isProduct ? dto.productName : dto.setName,
-      imageUrl: isProduct ? dto.productImage : dto.setImage,
-      price: dto.unitPrice,
-    } as ProductDTO,
-    quantity: dto.quantity,
+  if (dto.itemType === "product") {
+    return {
+      product: {
+        productId: dto.productId!,
+        name: dto.productName!,
+        imageUrl: dto.productImage,
+        price: dto.unitPrice,
+      },
+      quantity: dto.quantity,
+    }
+  } else {
+    return {
+      product: {
+        setId: dto.setId!,
+        name: dto.setName!,
+        imageUrl: dto.setImage,
+        price: dto.unitPrice,
+      },
+      quantity: dto.quantity,
+    }
   }
 }
+
 
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
@@ -77,18 +85,25 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     setIsCartOpen(true)
   }
 
-  const removeFromCart = (productId?: number, setId?: number): void => {
-    removeFromCartServer(productId, setId).then(loadServerCart).catch(() => { })
+  const removeFromCart = (item: CartItem): void => {
+    if ("productId" in item.product) {
+      removeFromCartServer(item.product.productId, undefined).then(loadServerCart)
+    } else {
+      removeFromCartServer(undefined, item.product.setId).then(loadServerCart)
+    }
   }
 
-  const updateQuantity = (productId?: number, setId?: number, quantity?: number): void => {
-    if (quantity! <= 0) {
-      removeFromCart(productId, setId)
+  const updateQuantity = (item: CartItem, quantity: number): void => {
+    if (quantity <= 0) {
+      removeFromCart(item)
       return
     }
-    updateCartServer(productId, setId, quantity).then(loadServerCart).catch(() => { })
+    if ("productId" in item.product) {
+      updateCartServer(item.product.productId, undefined, quantity).then(loadServerCart)
+    } else {
+      updateCartServer(undefined, item.product.setId, quantity).then(loadServerCart)
+    }
   }
-
 
   const clearCart = (): void => {
     clearCartServer().then(() => setCartItems([])).catch(() => { })

@@ -3588,7 +3588,7 @@ export interface components {
       accountName?: string | null;
       phoneNumber?: string | null;
       address?: string | null;
-      
+
       items?: components["schemas"]["OrderItemDto"][] | null;
       invoice?: components["schemas"]["ViewInvoiceDto"];
     };
@@ -3839,6 +3839,7 @@ export interface components {
       wardCode?: number | null;
       role?: string | null;
       status?: string | null;
+      warehouseId?: number;
     };
     ViewVoucherDto: {
       /** Format: int32 */

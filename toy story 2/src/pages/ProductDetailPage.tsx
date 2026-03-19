@@ -67,7 +67,7 @@ const ProductDetail: React.FC = () => {
   };
 
   const handleAddToCart = (): void => {
-    if (product) addToCart(product, quantity);
+    if (product) addToCart(product.productId, undefined, quantity);
   };
 
   if (isLoading) {

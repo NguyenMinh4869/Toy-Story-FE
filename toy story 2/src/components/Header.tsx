@@ -11,13 +11,11 @@ import {
 } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../hooks/useAuth";
-import ProductsDropdown from "./ProductsDropdown";
 import { LOGO_TOY_STORY } from "../constants/imageAssets";
 
 const Header: React.FC = () => {
   const { getTotalItems, openCart } = useCart();
   const { isAuthenticated, user, role, logout } = useAuth();
-  const [isProductsDropdownOpen, setIsProductsDropdownOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const userDropdownRef = useRef<HTMLDivElement>(null);
 

@@ -54,7 +54,7 @@ const CartPage: React.FC = () => {
                 <div className="lg:col-span-2 space-y-4">
                     {cartItems.map((item) => (
                         <div
-                            key={item.product.id ?? item.product.productId}
+                            key={"productId" in item.product ? item.product.productId : item.product.setId}
                             className="bg-white rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row gap-4 items-center"
                         >
                             <img
@@ -75,7 +75,7 @@ const CartPage: React.FC = () => {
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden h-9 bg-gray-50">
                                     <button
-                                        onClick={() => updateQuantity(item.product.id ?? String(item.product.productId), item.quantity - 1)}
+                                        onClick={() => updateQuantity(item, item.quantity - 1)}
                                         className="w-9 h-full flex items-center justify-center hover:bg-gray-200 transition-colors text-gray-600"
                                     >
                                         <Minus size={14} />
@@ -84,7 +84,7 @@ const CartPage: React.FC = () => {
                                         {item.quantity}
                                     </span>
                                     <button
-                                        onClick={() => updateQuantity(item.product.id ?? String(item.product.productId), item.quantity + 1)}
+                                        onClick={() => updateQuantity(item, item.quantity + 1)}
                                         className="w-9 h-full flex items-center justify-center hover:bg-gray-200 transition-colors text-gray-600"
                                     >
                                         <Plus size={14} />
@@ -92,7 +92,7 @@ const CartPage: React.FC = () => {
                                 </div>
 
                                 <button
-                                    onClick={() => removeFromCart(item.product.id ?? String(item.product.productId))}
+                                    onClick={() => removeFromCart(item)}
                                     className="p-2 text-gray-400 hover:text-red-500 transition-colors"
                                 >
                                     <Trash2 size={20} />
