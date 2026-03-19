@@ -4,6 +4,7 @@ import HomePage from "../pages/HomePage";
 import LoginPage from "../pages/LoginPage";
 import ProductDetailPage from "../pages/ProductDetailPage";
 import { BrandPage } from "../pages/BrandPage";
+import BrandDetailPage from "../pages/BrandDetailPage";
 import ProductsPage from "../pages/ProductsPage";
 import CamNangPage from "../pages/CamNangPage";
 import CamNangDetailPage from "../pages/CamNangDetailPage";
@@ -193,7 +194,7 @@ const AppRoutes: React.FC = () => {
 
       {/* Member/User Routes - All authenticated users */}
       <Route
-        element={<ProtectedRoute allowedRoles={["Admin", "Staff", "Member"]} />}
+        element={<ProtectedRoute allowedRoles={["Admin", "Staff", "Member", "Customer"]} />}
       >
         <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
         <Route path={ROUTES.PROFILE_INVOICES} element={<InvoicePage />} />
@@ -217,7 +218,7 @@ const AppRoutes: React.FC = () => {
 
       {/* Brand Routes */}
       <Route path={ROUTES.BRANDS} element={<BrandPage />} />
-      {/* <Route path={ROUTES.BRAND_DETAIL} element={<BrandDetailPage />} /> */}
+      <Route path={ROUTES.BRAND_DETAIL} element={<BrandDetailPage />} />
 
       {/* Promotion Route */}
       <Route path="/promotion" element={<PromotionPage />} />

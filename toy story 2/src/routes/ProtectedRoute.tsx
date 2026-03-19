@@ -23,6 +23,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) => {
   const userRole = getUserRole();
   const location = useLocation();
 
+  console.log(`[ProtectedRoute] Path: ${location.pathname}, Role: ${userRole}, Allowed: ${allowedRoles.join(', ')}`);
+
   // Not authenticated - redirect to login
   if (!userRole) {
     return <Navigate to={ROUTES.LOGIN} state={{ from: location }} replace />;

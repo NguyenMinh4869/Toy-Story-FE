@@ -1,31 +1,52 @@
 import React from "react";
+import { motion } from "framer-motion";
+import { cn } from "../../lib/utils";
 
 interface SectionHeaderProps {
   title: string;
-  top?: string;
-  className?: string; // Additional classes such as custom gap
+  variant?: "light" | "dark";
+  className?: string;
 }
 
 export const SectionHeader = ({ 
   title,
-  top,
-  className = "gap-[23px]",
+  variant = "light",
+  className,
 }: SectionHeaderProps): React.JSX.Element => {
+  const isDark = variant === "dark";
+
   return (
-    <div
-      className={`absolute left-0 w-full flex flex-col items-center ${className}`}
-      style={{
-        top,
-      }}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className={cn(
+        "flex flex-col items-center gap-4 w-full px-4 mb-8",
+        className
+      )}
     >
-      <div className="w-[405px] h-1 bg-[#d8c59e]" />
+      <div className={cn(
+        "w-32 h-1.5 rounded-full",
+        isDark ? "bg-white/30" : "bg-red-100"
+      )} />
       
       <h2 
-        className="[-webkit-text-stroke:1px_#c7b6b6] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(255,217,0,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent] [font-family:'Tilt_Warp-Regular',Helvetica] font-normal text-transparent text-5xl tracking-[0] leading-[normal] whitespace-nowrap"
+        className={cn(
+          "font-tilt-warp text-4xl md:text-5xl tracking-tight text-center uppercase",
+          isDark 
+            ? "text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]" 
+            : "text-red-600 drop-shadow-sm"
+        )}
       >
         {title}
       </h2>
-    </div>
+
+      <div className={cn(
+        "w-16 h-1 rounded-full",
+        isDark ? "bg-white/20" : "bg-red-50"
+      )} />
+    </motion.div>
   );
 };
 
