@@ -1,5 +1,5 @@
 import React from "react";
-import { X, Trash2, ShoppingBag, } from "lucide-react";
+import { X, Trash2, ShoppingBag,  } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { formatPrice } from "../utils/formatPrice";
@@ -50,7 +50,7 @@ const CartPopup: React.FC = () => {
             <>
               {cartItems.map((item) => (
                 <div
-                  key={"productId" in item.product ? item.product.productId : item.product.setId}
+                  key={item.product.id ?? item.product.productId}
                   className="mb-4"
                 >
                   {/* Product Info */}
@@ -70,7 +70,13 @@ const CartPopup: React.FC = () => {
                       <div className="flex items-center gap-3 mb-2">
                         <div className="flex items-center border border-[#c6bfbf] rounded-[5px] overflow-hidden h-[26px]">
                           <button
-                            onClick={() => updateQuantity(item, item.quantity - 1)}
+                            onClick={() =>
+                              updateQuantity(
+                                item.product.id ??
+                                  String(item.product.productId),
+                                item.quantity - 1,
+                              )
+                            }
                             className="w-[27px] h-full flex items-center justify-center hover:bg-gray-100 transition-colors text-black font-tilt-warp text-[14px]"
                           >
                             -
@@ -79,7 +85,13 @@ const CartPopup: React.FC = () => {
                             {item.quantity}
                           </span>
                           <button
-                            onClick={() => updateQuantity(item, item.quantity + 1)}
+                            onClick={() =>
+                              updateQuantity(
+                                item.product.id ??
+                                  String(item.product.productId),
+                                item.quantity + 1,
+                              )
+                            }
                             className="w-[27px] h-full flex items-center justify-center hover:bg-gray-100 transition-colors text-black font-tilt-warp text-[14px]"
                           >
                             +
@@ -88,7 +100,11 @@ const CartPopup: React.FC = () => {
 
                         {/* Delete Button */}
                         <button
-                          onClick={() => removeFromCart(item)}
+                          onClick={() =>
+                            removeFromCart(
+                              item.product.id ?? String(item.product.productId),
+                            )
+                          }
                           className="p-1.5 hover:bg-red-50 rounded transition-colors"
                           aria-label="Remove item"
                         >
@@ -99,7 +115,7 @@ const CartPopup: React.FC = () => {
                   </div>
 
                   {/* Divider */}
-                  < div className="h-px bg-gray-200 mt-3" />
+                  <div className="h-px bg-gray-200 mt-3" />
                 </div>
               ))}
 
@@ -146,7 +162,7 @@ const CartPopup: React.FC = () => {
             </>
           )}
         </div>
-      </div >
+      </div>
     </>
   );
 };

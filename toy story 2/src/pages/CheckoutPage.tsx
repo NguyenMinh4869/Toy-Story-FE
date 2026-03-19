@@ -11,7 +11,6 @@ import CartItemsList from "@/components/checkout/CartItemsList";
 import OrderSummary from "@/components/checkout/OrderSummary";
 import EmptyCart from "@/components/checkout/EmptyCart";
 import QrCodeModal from "@/components/checkout/QrCodeModal";
-
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
   const { cartItems, getTotalPrice } = useCart();
@@ -29,6 +28,7 @@ const CheckoutPage: React.FC = () => {
     isValidatingVoucher,
     setVoucherCode,
     setQrCodeData,
+    handleInputChange,
     handleApplyVoucher,
     handleCheckout,
   } = useCheckout();
@@ -68,8 +68,11 @@ const CheckoutPage: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
-            {/* Read-only form, no onChange/onSubmit */}
-            <CheckoutForm formData={formData} />
+            <CheckoutForm
+              formData={formData}
+              onChange={handleInputChange}
+              onSubmit={handleCheckout}
+            />
             <CartItemsList items={cartItems} />
           </div>
 

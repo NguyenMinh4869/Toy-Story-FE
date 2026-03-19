@@ -1,23 +1,26 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react'
+import { ProductDTO } from '../types/ProductDTO'
+import { useAuthContext } from './AuthContext'
 import {
   addToCartServer,
   updateCartServer,
   removeFromCartServer,
   clearCartServer,
   getCartServer,
+  syncCartServer,
 } from '../services/cartService'
-import type { CartItemDto, CartProduct } from '../types/CartDTO'
+import type { CartItemDto } from '../types/CartDTO'
 
 export interface CartItem {
-  product: CartProduct
+  product: ProductDTO
   quantity: number
 }
 
 interface CartContextType {
   cartItems: CartItem[]
-  addToCart: (productId?: number, setId?: number, quantity?: number) => void
-  removeFromCart: (item: CartItem) => void
-  updateQuantity: (item: CartItem, quantity: number) => void
+  addToCart: (product: ProductDTO, quantity?: number) => void
+  removeFromCart: (productId: string) => void
+  updateQuantity: (productId: string, quantity: number) => void
   clearCart: () => void
   getTotalPrice: () => number
   getTotalItems: () => number
@@ -30,7 +33,9 @@ const CartContext = createContext<CartContextType | undefined>(undefined)
 
 export const useCart = (): CartContextType => {
   const context = useContext(CartContext)
-  if (!context) throw new Error('useCart must be used within a CartProvider')
+  if (!context) {
+    throw new Error('useCart must be used within a CartProvider')
+  }
   return context
 }
 
@@ -38,85 +43,123 @@ interface CartProviderProps {
   children: ReactNode
 }
 
-const mapDtoToCartItem = (dto: CartItemDto): CartItem => {
-  if (dto.itemType === "product") {
-    return {
-      product: {
-        productId: dto.productId!,
-        name: dto.productName!,
-        imageUrl: dto.productImage,
-        price: dto.unitPrice,
-      },
-      quantity: dto.quantity,
-    }
-  } else {
-    return {
-      product: {
-        setId: dto.setId!,
-        name: dto.setName!,
-        imageUrl: dto.setImage,
-        price: dto.unitPrice,
-      },
-      quantity: dto.quantity,
-    }
-  }
-}
-
+const mapDtoToCartItem = (dto: CartItemDto): CartItem => ({
+  product: {
+    productId: dto.productId,
+    id: String(dto.productId),
+    name: dto.productName,
+    imageUrl: dto.imageUrl,
+    price: dto.unitPrice,
+  } as ProductDTO,
+  quantity: dto.quantity,
+})
 
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [isCartOpen, setIsCartOpen] = useState(false)
+  const { isAuthenticated } = useAuthContext()
+  const prevAuthRef = useRef<boolean>(isAuthenticated)
 
   const loadServerCart = async (): Promise<void> => {
     try {
       const cart = await getCartServer()
       setCartItems(cart.items.map(mapDtoToCartItem))
     } catch {
-      // silent fail
+      // silent fail - keep current state
     }
   }
 
   useEffect(() => {
-    loadServerCart()
-  }, [])
+    const wasAuthenticated = prevAuthRef.current
+    prevAuthRef.current = isAuthenticated
 
-  const addToCart = (productId?: number, setId?: number, quantity: number = 1): void => {
-    addToCartServer(productId, setId, quantity).then(loadServerCart).catch(() => { })
+    if (isAuthenticated && !wasAuthenticated) {
+      // Just logged in — sync any local items then load server cart
+      const localItems = cartItems
+      if (localItems.length > 0) {
+        syncCartServer(localItems).then(loadServerCart).catch(loadServerCart)
+      } else {
+        loadServerCart()
+      }
+    } else if (!isAuthenticated && wasAuthenticated) {
+      // Just logged out — clear cart
+      setCartItems([])
+    } else if (isAuthenticated) {
+      // Initial mount while already authenticated
+      loadServerCart()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated])
+
+  const addToCart = (product: ProductDTO, quantity: number = 1): void => {
+    if (isAuthenticated) {
+      const productId = Number(product.productId ?? product.id)
+      addToCartServer(productId, quantity).then(loadServerCart).catch(() => {})
+    } else {
+      setCartItems(prevItems => {
+        const existingItem = prevItems.find(item => item.product.id === product.id)
+        if (existingItem) {
+          return prevItems.map(item =>
+            item.product.id === product.id
+              ? { ...item, quantity: item.quantity + quantity }
+              : item
+          )
+        }
+        return [...prevItems, { product, quantity }]
+      })
+    }
     setIsCartOpen(true)
   }
 
-  const removeFromCart = (item: CartItem): void => {
-    if ("productId" in item.product) {
-      removeFromCartServer(item.product.productId, undefined).then(loadServerCart)
+  const removeFromCart = (productId: string): void => {
+    if (isAuthenticated) {
+      removeFromCartServer(Number(productId)).then(loadServerCart).catch(() => {})
     } else {
-      removeFromCartServer(undefined, item.product.setId).then(loadServerCart)
+      setCartItems(prevItems => prevItems.filter(item => item.product.id !== productId))
     }
   }
 
-  const updateQuantity = (item: CartItem, quantity: number): void => {
+  const updateQuantity = (productId: string, quantity: number): void => {
     if (quantity <= 0) {
-      removeFromCart(item)
+      removeFromCart(productId)
       return
     }
-    if ("productId" in item.product) {
-      updateCartServer(item.product.productId, undefined, quantity).then(loadServerCart)
+    if (isAuthenticated) {
+      updateCartServer(Number(productId), quantity).then(loadServerCart).catch(() => {})
     } else {
-      updateCartServer(undefined, item.product.setId, quantity).then(loadServerCart)
+      setCartItems(prevItems =>
+        prevItems.map(item =>
+          item.product.id === productId
+            ? { ...item, quantity }
+            : item
+        )
+      )
     }
   }
 
   const clearCart = (): void => {
-    clearCartServer().then(() => setCartItems([])).catch(() => { })
+    if (isAuthenticated) {
+      clearCartServer().then(() => setCartItems([])).catch(() => {})
+    } else {
+      setCartItems([])
+    }
   }
 
-  const getTotalPrice = (): number =>
-    cartItems.reduce((total, item) => total + ((item.product.price ?? 0) * item.quantity), 0)
+  const getTotalPrice = (): number => {
+    return cartItems.reduce((total, item) => total + ((item.product.price ?? 0) * item.quantity), 0)
+  }
 
-  const getTotalItems = (): number =>
-    cartItems.reduce((total, item) => total + item.quantity, 0)
+  const getTotalItems = (): number => {
+    return cartItems.reduce((total, item) => total + item.quantity, 0)
+  }
 
-  const openCart = (): void => setIsCartOpen(true)
-  const closeCart = (): void => setIsCartOpen(false)
+  const openCart = (): void => {
+    setIsCartOpen(true)
+  }
+
+  const closeCart = (): void => {
+    setIsCartOpen(false)
+  }
 
   const value: CartContextType = {
     cartItems,

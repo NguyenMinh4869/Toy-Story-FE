@@ -11,12 +11,14 @@ import {
 } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../hooks/useAuth";
+import ProductsDropdown from "./ProductsDropdown";
 import { LOGO_TOY_STORY } from "../constants/imageAssets";
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
   const { getTotalItems, openCart } = useCart();
   const { isAuthenticated, user, role, logout } = useAuth();
+  const [isProductsDropdownOpen, setIsProductsDropdownOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const userDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -68,20 +70,37 @@ const Header: React.FC = () => {
         </Link>
         <div className="flex flex-1 justify-center">
           <nav className="flex gap-8 items-center font-tilt-warp text-xs">
+            <div
+              className="relative"
+              onMouseEnter={() => setIsProductsDropdownOpen(true)}
+              onMouseLeave={() => setIsProductsDropdownOpen(false)}
+            >
+              <button
+                className="text-white flex items-center gap-2 hover:opacity-80 bg-transparent border-none cursor-pointer"
+                onClick={() =>
+                  setIsProductsDropdownOpen(!isProductsDropdownOpen)
+                }
+              >
+                SẢN PHẨM
+                <ChevronDown
+                  size={17}
+                  stroke="white"
+                  strokeWidth={2}
+                  className={`transition-transform ${isProductsDropdownOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+              <ProductsDropdown
+                isOpen={isProductsDropdownOpen}
+                onClose={() => setIsProductsDropdownOpen(false)}
+              />
+            </div>
 
-            <Link to={ROUTES.PRODUCTS} className="text-white hover:opacity-80">
-              SẢN PHẨM
-            </Link>
-            <Link to="/sets" className="text-white hover:opacity-80">
-              BỘ SƯU TẬP
-            </Link>
             <Link to="/promotion" className="text-white hover:opacity-80">
               KHUYẾN MÃI
             </Link>
             <Link to={ROUTES.BRANDS} className="text-white hover:opacity-80">
               THƯƠNG HIỆU
             </Link>
-
           </nav>
         </div>
 

@@ -33,21 +33,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onClick }) => {
           </div>
         </div>
       </div>
-      {order.manuallyAssign && (
-        <div className="mt-3">
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-1 rounded"
-          >
-            Gán kho cho đơn hàng
-          </button>
-          <p className="text-xs text-gray-500 mt-1">
-            Đơn hàng này chưa có kho, vui lòng gán kho để xử lý.
-          </p>
-        </div>
-      )}
+
       <div className="mt-4 flex items-center justify-between">
         <div className="text-right">
           <div className="text-lg font-black text-red-600 mb-1">

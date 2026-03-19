@@ -46,7 +46,6 @@ import PaymentSuccessPage from "@/pages/payment/SuccessPage";
 import OrderPage from "@/pages/OrderPage";
 import InvoiceManagementPage from "@/pages/admin/InvoiceManagementPage";
 import OrderManagementPage from "@/pages/admin/OrderManagementPage";
-import StaffOrderManagementPage from "@/pages/staff/StaffOrderManagementPage";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -178,15 +177,6 @@ const AppRoutes: React.FC = () => {
           element={
             <DashboardLayout mode="staff">
               <StaffWarehouseManagementPage />
-            </DashboardLayout>
-          }
-        />
-
-        <Route
-          path={ROUTES.STAFF_ORDERS}
-          element={
-            <DashboardLayout mode="staff">
-              <StaffOrderManagementPage />
             </DashboardLayout>
           }
         />
