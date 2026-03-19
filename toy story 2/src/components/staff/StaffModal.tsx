@@ -3,12 +3,11 @@ import React, { useEffect, useState } from "react";
 import Modal from "../ui/Modal";
 import { Province, District, Ward } from "../../types/LocationDTO";
 import { locationService } from "@/hooks/useLocation";
-import { CreateStaffDto, UpdateStaffDto } from "@/types/StaffDTO";
 
 interface StaffModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CreateStaffDto | UpdateStaffDto) => Promise<void>;
+  onSubmit: (data: any) => Promise<void>;
   currentStaff?: any | null;
   warehouses: any[];
   loading?: boolean;

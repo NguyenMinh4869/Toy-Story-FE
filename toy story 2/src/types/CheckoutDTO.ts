@@ -1,14 +1,11 @@
 /**
  * Request for price calculation
  */
-export interface CalculatePriceItem {
-    productId?: number
-    setId?: number
-    quantity: number
-}
-
 export interface CalculatePriceRequest {
-    items: CalculatePriceItem[]
+    items: {
+        productId: number
+        quantity: number
+    }[]
     voucherCode?: string
 }
 

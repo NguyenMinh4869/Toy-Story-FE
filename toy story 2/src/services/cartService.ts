@@ -14,42 +14,17 @@ type LocalCartSyncItem = {
  * Add item to server-side cart
  * POST /api/accounts/carts/items?productId={id}&quantity={qty}
  */
-export const addToCartServer = async (
-    productId?: number,
-    setId?: number,
-    quantity: number = 1
-): Promise<void> => {
-    const params = new URLSearchParams();
-    if (productId != null) params.append("productId", String(productId));
-    if (setId != null) params.append("setId", String(setId));
-    params.append("quantity", String(quantity));
+export const addToCartServer = async (productId: number, quantity: number): Promise<void> => {
+    await apiPost(`/carts?productId=${productId}&quantity=${quantity}`, {})
+}
 
-    await apiPost(`/carts?${params.toString()}`, {});
-};
+export const updateCartServer = async (productId: number, quantity: number): Promise<void> => {
+    await apiPut(`/carts/items/${productId}?quantity=${quantity}`, {})
+}
 
-export const updateCartServer = async (
-    productId?: number,
-    setId?: number,
-    quantity: number = 1
-): Promise<void> => {
-    const params = new URLSearchParams();
-    if (productId != null) params.append("productId", String(productId));
-    if (setId != null) params.append("setId", String(setId));
-    params.append("quantity", String(quantity));
-
-    await apiPut(`/carts/items?${params.toString()}`, {});
-};
-
-export const removeFromCartServer = async (
-    productId?: number,
-    setId?: number
-): Promise<void> => {
-    const params = new URLSearchParams();
-    if (productId != null) params.append("productId", String(productId));
-    if (setId != null) params.append("setId", String(setId));
-
-    await apiDelete(`/carts/items?${params.toString()}`);
-};
+export const removeFromCartServer = async (productId: number): Promise<void> => {
+    await apiDelete(`/carts/items/${productId}`)
+}
 
 /**
  * Clear server-side cart

@@ -4,22 +4,12 @@
 
 export interface CartItemDto {
     cartItemId: number;
-    quantity: number;
+    productId: number;
+    productName: string;
+    imageUrl: string;
     unitPrice: number;
+    quantity: number;
     totalPrice: number;
-
-    // Product properties
-    productId?: number;
-    productName?: string;
-    productImage?: string;
-
-    // Set properties
-    setId?: number;
-    setName?: string;
-    setImage?: string;
-
-    // Type indicator
-    itemType: "product" | "set";
 }
 
 export interface CartDto {
@@ -32,25 +22,4 @@ export interface CartDto {
 
 // Aliases for backward compatibility
 export type CartDTO = CartDto;
-
 export type CartItemDTO = CartItemDto;
-interface ProductCart {
-  productId: number
-  name: string
-  imageUrl?: string
-  price: number
-}
-
-interface SetCart {
-  setId: number
-  name: string
-  imageUrl?: string
-  price: number
-}
-
-export type CartProduct = ProductCart | SetCart
-
-export interface CartItem {
-  product: CartProduct
-  quantity: number
-}

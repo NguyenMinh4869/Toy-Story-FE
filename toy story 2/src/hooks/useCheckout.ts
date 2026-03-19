@@ -75,20 +75,10 @@ export const useCheckout = () => {
 
     try {
       const result = await calculatePrice({
-        items: cartItems.map((item) => {
-          if ("productId" in item.product) {
-            return {
-              productId: item.product.productId,
-              quantity: item.quantity,
-            }
-          } else {
-            return {
-              setId: item.product.setId,
-              quantity: item.quantity,
-            }
-          }
-        }
-        ),
+        items: cartItems.map((item) => ({
+          productId: Number(item.product.id),
+          quantity: item.quantity,
+        })),
         voucherCode: voucherCode.trim(),
       });
 
@@ -159,8 +149,8 @@ export const useCheckout = () => {
         : "";
       setError(
         detailMsg ||
-        err.message ||
-        "Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.",
+          err.message ||
+          "Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.",
       );
       setIsSubmitting(false);
     }
