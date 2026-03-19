@@ -9,7 +9,6 @@ interface ProductGridCardProps {
   className?: string;
 }
 
-// Product image placeholder
 const PRODUCT_PLACEHOLDER =
   "https://www.figma.com/api/mcp/asset/298b739b-7401-4df7-acd0-41acee837979";
 
@@ -22,28 +21,20 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({
   const productImage = product.imageUrl ?? PRODUCT_PLACEHOLDER;
   const { addToCart } = useCart();
 
-  // Calculate discount (30% for demo)
   const discount = 30;
   const originalPrice = productPrice / (1 - discount / 100);
 
   const handleAddToCart = (e: React.MouseEvent): void => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const cartProduct = {
-      id: String(product.productId),
-      quantity: 1,
-    };
-
-    addToCart(cartProduct, 1);
-  };
+    e.preventDefault()
+    e.stopPropagation()
+    addToCart(product.productId!, undefined, 1)
+  }
 
   return (
     <Link
       to={`/product/${product.productId}`}
       className={`block bg-white border border-[#5a5050]/20 rounded-[17px] overflow-hidden hover:shadow-lg transition-shadow no-underline ${className}`}
     >
-      {/* Product Image Container */}
       <div className="relative flex justify-center items-center pt-5 pb-4">
         <img
           src={productImage}
@@ -55,14 +46,11 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({
         />
       </div>
 
-      {/* Product Info */}
       <div className="px-[18px] pb-5">
-        {/* Product Name */}
-        <h3 className="font-tilt-warp text-[14px] text-black leading-[1.4] mb-3 min-h-[58px] line-clamp-3">
+        <h3 className="font-tilt-warp text-[14px] text-black leading-[1.4] line-clamp-3">
           {productName}
         </h3>
 
-        {/* Prices */}
         <div className="flex items-center gap-4 mb-4">
           <span className="font-tilt-warp text-[20px] text-[#ff0000]">
             {formatPrice(productPrice)}
@@ -72,7 +60,6 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({
           </span>
         </div>
 
-        {/* Actions */}
         <div className="flex items-center gap-4">
           <button
             onClick={handleAddToCart}
