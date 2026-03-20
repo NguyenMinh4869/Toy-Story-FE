@@ -113,7 +113,7 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
     };
 
   return (
-    <div className="w-64 bg-white flex flex-col flex-shrink-0 border-r border-gray-200">
+    <div className={`w-64 bg-white flex flex-col flex-shrink-0 border-r border-gray-200 ${effectiveMode === 'admin' ? "font-['Red_Hat_Display']" : ''}`}>
       <div className="h-20 flex items-center justify-center border-b border-gray-200">
         <Link to="/" className="relative h-[47px] flex items-center no-underline text-inherit">
           <img
@@ -129,8 +129,8 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
             key={link.to}
             to={link.to}
             className={({ isActive }) =>
-              `flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${isActive
-                ? `${themeColors.activeBg} ${themeColors.activeText}`
+              `flex items-center px-4 py-2 text-sm font-semibold rounded-md transition-colors ${isActive
+                ? `${themeColors.activeBg} ${themeColors.activeText} font-bold`
                 : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
               }`
             }
@@ -143,7 +143,7 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
       <div className="px-6 pb-6">
         <Link
           to={ROUTES.HOME}
-          className={`w-full ${themeColors.buttonBg} text-white text-center font-medium py-2 px-4 rounded-md ${themeColors.buttonHover} transition-colors no-underline block`}
+          className={`w-full ${themeColors.buttonBg} text-white text-center font-semibold py-2 px-4 rounded-md ${themeColors.buttonHover} transition-colors no-underline block`}
         >
           Home page
         </Link>

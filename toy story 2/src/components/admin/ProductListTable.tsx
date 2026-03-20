@@ -17,7 +17,6 @@ const ProductListTable: React.FC<ProductListTableProps> = ({ products, onEdit, o
             <th scope="col" className="px-6 py-3">Product Info</th>
             <th scope="col" className="px-6 py-3">Brand / Category</th>
             <th scope="col" className="px-6 py-3">Price</th>
-            <th scope="col" className="px-6 py-3">Discount</th>
             <th scope="col" className="px-6 py-3">Status</th>
             <th scope="col" className="px-6 py-3">Action</th>
           </tr>
@@ -44,9 +43,6 @@ const ProductListTable: React.FC<ProductListTableProps> = ({ products, onEdit, o
               </td>
               <td className="px-6 py-4 text-red-500 font-semibold">
                 {product.price?.toLocaleString()} VND
-              </td>
-              <td className="px-6 py-4 text-green-600">
-                -
               </td>
               <td className="px-6 py-4">
                 <span
@@ -90,7 +86,7 @@ const ProductListTable: React.FC<ProductListTableProps> = ({ products, onEdit, o
           ))}
           {products.length === 0 && (
             <tr>
-              <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+              <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
                 No products found
               </td>
             </tr>
