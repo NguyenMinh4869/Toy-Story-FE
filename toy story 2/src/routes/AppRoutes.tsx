@@ -12,6 +12,7 @@ import { ROUTES } from "./routePaths";
 import PromotionPage from "../pages/PromotionPage";
 import VoucherPage from "../pages/VoucherPage";
 import SetPage from "../pages/SetPage";
+import SetDetailPage from "../pages/SetDetailPage";
 import CartPage from "../pages/CartPage";
 import CheckoutPage from "../pages/CheckoutPage";
 import DashboardLayout from "../layouts/DashboardLayout";
@@ -228,6 +229,7 @@ const AppRoutes: React.FC = () => {
 
       {/* Set Route (FR-5: customer-filter) */}
       <Route path={ROUTES.SETS} element={<SetPage />} />
+      <Route path={ROUTES.SET_DETAIL} element={<SetDetailPage />} />
 
       {/* Other Pages */}
       <Route path={ROUTES.CAM_NANG} element={<CamNangPage />} />

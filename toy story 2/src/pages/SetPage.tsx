@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { BreadcrumbHeader } from '../components/BreadcrumbHeader'
 import { getSetsCustomerFilter } from '../services/setService'
 import type { ViewSetDetailDto } from '../types/SetDTO'
 import { useCart } from '@/context/CartContext'
+import { ROUTES } from '../routes/routePaths'
 
 const breadcrumbItems = [{ label: 'Set sản phẩm' }]
 
@@ -45,70 +47,93 @@ export const SetPage: React.FC = () => {
       <BreadcrumbHeader items={breadcrumbItems} />
 
       <main className="flex-1 w-full max-w-[1000px] mx-auto px-4 py-8">
-        <h1 className="font-rowdies text-xl text-gray-900 mb-6">Set sản phẩm</h1>
+        <h1 className="font-rowdies text-2xl text-gray-900 mb-8 border-b border-gray-100 pb-4">Bộ sưu tập đặc biệt</h1>
 
         {loading ? (
-          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-[180px] bg-gray-100 animate-pulse rounded-xl" />
+          <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-[200px] bg-gray-50 animate-pulse rounded-2xl border border-gray-100" />
             ))}
           </div>
         ) : sets.length === 0 ? (
-          <p className="font-red-hat text-gray-600">Chưa có set sản phẩm nào.</p>
+          <div className="text-center py-20 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+             <p className="font-red-hat text-gray-500">Chưa có bộ sưu tập nào được mở bán.</p>
+          </div>
         ) : (
-          <ul className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
+          <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2">
             {sets.map((s) => (
-              <li
+              <Link
                 key={s.setId}
-                className="border border-[#d9d9d9] rounded-xl p-5 hover:border-[#ca002a]/40 transition-colors"
+                to={ROUTES.SET_DETAIL.replace(':id', String(s.setId))}
+                className="group relative border border-[#d9d9d9] rounded-2xl p-6 bg-white hover:border-[#ca002a]/40 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1 block overflow-hidden"
               >
-                <div className="flex gap-4">
+                <div className="flex gap-6">
                   {s.imageUrl ? (
-                    <img
-                      src={s.imageUrl}
-                      alt={s.name ?? ''}
-                      className="w-24 h-24 object-cover rounded-lg shrink-0"
-                    />
+                    <div className="relative group/img overflow-hidden rounded-xl shadow-md border border-gray-100">
+                      <img
+                        src={s.imageUrl}
+                        alt={s.name ?? ''}
+                        className="w-32 h-32 object-cover transition-transform duration-500 group-hover/img:scale-110"
+                      />
+                    </div>
                   ) : (
-                    <div className="w-24 h-24 rounded-lg bg-[#f2f2f2] shrink-0 flex items-center justify-center text-[#888] text-xs">
-                      Set
+                    <div className="w-32 h-32 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 shrink-0 flex items-center justify-center text-gray-400 text-xs border border-gray-100">
+                      Set Image
                     </div>
                   )}
-                  <div className="min-w-0 flex-1">
-                    <h2 className="font-tilt-warp text-base text-gray-900">{s.name ?? '—'}</h2>
-                    {s.description && (
-                      <p className="font-red-hat text-sm text-gray-600 mt-1 line-clamp-2">{s.description}</p>
-                    )}
-                    <div className="flex items-center gap-3 mt-2 flex-wrap">
-                      {s.discountPercent != null && (
-                        <span className="text-sm font-semibold text-[#ca002a]">Giảm {s.discountPercent}%</span>
-                      )}
-                      {s.price != null && (
-                        <span className="font-red-hat text-sm text-gray-700">
-                          {s.price.toLocaleString('vi-VN')} ₫
-                        </span>
-                      )}
-                      {s.totalItems != null && (
-                        <span className="font-red-hat text-xs text-gray-500">{s.totalItems} sản phẩm</span>
+                  <div className="min-w-0 flex-1 flex flex-col justify-between">
+                    <div>
+                      <h2 className="font-tilt-warp text-lg text-gray-900 group-hover:text-[#ca002a] transition-colors line-clamp-1">{s.name ?? '—'}</h2>
+                      {s.description && (
+                        <p className="font-red-hat text-sm text-gray-600 mt-2 line-clamp-2 leading-relaxed">{s.description}</p>
                       )}
                     </div>
+                    
+                    <div className="mt-4 flex flex-col gap-2">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        {s.price != null && (
+                          <span className="font-tilt-warp text-xl text-[#ca002a]">
+                            {s.price.toLocaleString('vi-VN')} ₫
+                          </span>
+                        )}
+                        {s.discountPercent != null && s.discountPercent > 0 && (
+                          <span className="text-xs font-bold bg-[#ca002a]/10 text-[#ca002a] px-2 py-1 rounded-full">
+                            -{s.discountPercent}%
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center gap-4 text-xs font-red-hat text-gray-500">
+                        {s.totalItems != null && (
+                          <span className="flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
+                            {s.totalItems} sản phẩm
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-4">
+                  
+                  <div className="flex items-center justify-center">
                     <button
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
                         addToCart(undefined, s.setId!, 1)
                       }}
-                      className="flex-1 bg-[#c40029] hover:bg-[#a00022] text-white font-tilt-warp text-[16px] py-[10px] px-6 rounded-[6px] transition-colors cursor-pointer border-none"
+                      className="w-12 h-12 flex items-center justify-center bg-[#ca002a] hover:bg-[#a00022] text-white rounded-full transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 group-hover:rotate-[360deg]"
+                      title="Thêm vào giỏ hàng"
                     >
-                      Thêm vào giỏ hàng
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                      </svg>
                     </button>
                   </div>
                 </div>
-              </li>
+              </Link>
             ))}
-          </ul>
+          </div>
         )}
       </main>
     </div>

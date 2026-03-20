@@ -41,6 +41,7 @@ export const ROUTES = {
   BRAND_DETAIL: "/brands/:id",
   VOUCHERS: "/vouchers",
   SETS: "/sets",
+  SET_DETAIL: "/sets/:id",
 
   // Cart & Checkout
   CART: "/cart",
