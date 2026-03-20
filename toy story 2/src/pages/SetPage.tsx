@@ -1,12 +1,8 @@
-/**
- * SetPage - Danh sách set sản phẩm (FR-5)
- * Lấy danh sách set từ API Set/customer-filter
- */
-
 import React, { useEffect, useState } from 'react'
 import { BreadcrumbHeader } from '../components/BreadcrumbHeader'
 import { getSetsCustomerFilter } from '../services/setService'
 import type { ViewSetDetailDto } from '../types/SetDTO'
+import { useCart } from '@/context/CartContext'
 
 const breadcrumbItems = [{ label: 'Set sản phẩm' }]
 
@@ -14,6 +10,7 @@ export const SetPage: React.FC = () => {
   const [sets, setSets] = useState<ViewSetDetailDto[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { addToCart } = useCart()
 
   useEffect(() => {
     const fetchSets = async () => {
@@ -95,6 +92,18 @@ export const SetPage: React.FC = () => {
                         <span className="font-red-hat text-xs text-gray-500">{s.totalItems} sản phẩm</span>
                       )}
                     </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        addToCart(undefined, s.setId!, 1)
+                      }}
+                      className="flex-1 bg-[#c40029] hover:bg-[#a00022] text-white font-tilt-warp text-[16px] py-[10px] px-6 rounded-[6px] transition-colors cursor-pointer border-none"
+                    >
+                      Thêm vào giỏ hàng
+                    </button>
                   </div>
                 </div>
               </li>

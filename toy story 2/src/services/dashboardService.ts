@@ -1,8 +1,13 @@
 import { apiGet } from './apiClient'
-import type { DashboardSummaryDto, LowStockItemDto } from '../types/DashboardDTO'
+import type { AdminWidgetDto, DashboardSummaryDto, LowStockItemDto } from '../types/DashboardDTO'
 
-export const getDashboardSummary = async (): Promise<DashboardSummaryDto> => {
-  const response = await apiGet<DashboardSummaryDto>('/dashboard/summary')
+export const getStaffDashboardSummary = async (): Promise<DashboardSummaryDto> => {
+  const response = await apiGet<DashboardSummaryDto>('/dashboard/staff/summary')
+  return response.data
+}
+
+export const getAdminDashboardSummary = async (): Promise<AdminWidgetDto> => {
+  const response = await apiGet<AdminWidgetDto>('/dashboard/admin/summary')
   return response.data
 }
 

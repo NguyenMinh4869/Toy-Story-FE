@@ -103,6 +103,7 @@ export const login = async (credentials: LoginDto): Promise<LoginResponse & { us
           ? parseInt(decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'], 10)
           : 0,
         email: decoded?.['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'] || credentials.email,
+        warehouseId: decoded?.['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/warehouseId'],
         name: displayName,
         role: normalizedRole as any,
         status: 'Active' as any

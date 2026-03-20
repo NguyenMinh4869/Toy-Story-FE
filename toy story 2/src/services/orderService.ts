@@ -11,6 +11,11 @@ export const getOrders = async (): Promise<ViewOrderDto[]> => {
     return response.data
 }
 
+export const getWarehouseOrders = async (): Promise<ViewOrderDto[]> => {
+    const response = await apiGet<ViewOrderDto[]>('/orders/warehouse')
+    return response.data
+}
+
 export const getAccountOrders = async (): Promise<ViewOrderDto[]> => {
     const response = await apiGet<ViewOrderDto[]>('/accounts/orders')
     return response.data
