@@ -46,8 +46,8 @@ export const ROUTES = {
   CART: "/cart",
   CHECKOUT: "/checkout",
 
-  CANCEL: "payment/cancel",
-  SUCCESS: "payment/success",
+  CANCEL: "payments/cancel",
+  SUCCESS: "payments/success",
 
   // User
   PROFILE: "/profile",

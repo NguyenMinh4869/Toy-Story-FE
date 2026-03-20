@@ -1,11 +1,9 @@
 import React, { useEffect, useMemo } from "react";
 import type { ViewProductDto } from "../../types/ProductDTO";
 import { SectionHeader } from "./SectionHeader";
-
-import { DECOR_DYNAMIC_BRAND, FAV_TOY_DECOR } from "../../constants/imageAssets";
-
-// Figma MCP Asset URLs
-const image20 = "https://www.figma.com/api/mcp/asset/f8d42236-59cd-4852-bcb7-126b11fed0d1";
+import { NavigationButton } from "./NavigationButton";
+import { motion } from "framer-motion";
+import { ProductCard } from "../ProductCard";
 
 interface FavoriteProductsSectionProps {
   products: ViewProductDto[];
@@ -25,15 +23,18 @@ export const FavoriteProductsSection = ({
   const pageSize = 4;
   const pageCount = Math.max(1, Math.min(maxPages, Math.ceil(products.length / pageSize)));
   const safePage = Math.max(0, Math.min(page, pageCount - 1));
+
+  const goNext = () => onPageChange?.((safePage + 1) % pageCount);
+  const goPrev = () => onPageChange?.((safePage - 1 + pageCount) % pageCount);
+
+  useEffect(() => {
+    if (safePage !== page) onPageChange?.(safePage);
+  }, [safePage, page, onPageChange]);
+
   const displayProducts = useMemo(
     () => products.slice(0, pageCount * pageSize),
     [products, pageCount]
   );
-
-  useEffect(() => {
-    if (safePage !== page) onPageChange?.(safePage);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [safePage]);
 
   const pages = useMemo(() => {
     const result: ViewProductDto[][] = [];
@@ -43,56 +44,63 @@ export const FavoriteProductsSection = ({
     return result;
   }, [displayProducts, pageCount]);
 
-  return (
-    <section aria-label="Đồ chơi yêu thích">
-      <SectionHeader 
-        title="Đồ chơi yêu thích"
-        top="1700px"
-      />
+  if (isLoading) {
+    return (
+      <div className="w-full h-80 flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-red-200 border-t-red-600 rounded-full animate-spin" />
+      </div>
+    );
+  }
 
-      {products.length > 0 ? (
-        <div className="absolute top-[1842px] left-[126px] w-[940px] h-[260px] overflow-hidden">
-          <div
-            className="flex h-full transition-transform duration-500 ease-out"
-            style={{ transform: `translateX(-${safePage * 100}%)` }}
+  return (
+    <div className="relative w-full">
+      <SectionHeader title="ĐỒ CHƠI YÊU THÍCH" variant="dark" />
+      
+      <div className="relative mt-8 px-12">
+        <div className="overflow-hidden">
+          <motion.div
+            className="flex"
+            animate={{ x: `-${safePage * 100}%` }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
           >
             {pages.map((pageProducts, pageIndex) => (
-              <div
-                key={`fav-page-${pageIndex}`}
-                className="w-full shrink-0 h-full flex justify-between items-start gap-[24px] px-2"
-              >
+              <div key={`fav-page-${pageIndex}`} className="w-full shrink-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 justify-items-center py-8">
                 {pageProducts.map((product) => (
-                  <div key={product.productId} className="relative w-[220px] h-[240px]">
-                    {/* Trang trí thẻ (decor dynamic brand) */}
-                    <img
-                      className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-auto aspect-[6] object-contain z-20"
-                      alt="Trang trí brand"
-                      src={DECOR_DYNAMIC_BRAND}
-                    />
-                    {/* Product image (underlay) */}
-                    <img
-                      className="absolute top-[22px] left-1/2 -translate-x-1/2 w-[199px] h-[199px] object-cover z-0"
-                      alt={product.name ?? "Product"}
-                      src={product.imageUrl ?? image20}
-                    />
-                    {/* Frame overlay (overlap layer) */}
-                    <img
-                      className="absolute top-[22px] left-1/2 -translate-x-1/2 w-[202px] h-[208px] object-cover z-10 pointer-events-none"
-                      alt=""
-                      src={FAV_TOY_DECOR}
-                    />
-                  </div>
+                <div 
+                  key={product.productId} 
+                  className="relative"
+                >
+                  <ProductCard product={product} />
+                </div>
                 ))}
               </div>
             ))}
-          </div>
+          </motion.div>
         </div>
-      ) : !isLoading && (
-        <div className="absolute top-[1869px] left-[132px] w-[800px] text-center">
-          <p className="[font-family:'Tilt_Warp-Regular',Helvetica] text-white text-lg">Không có sản phẩm yêu thích</p>
-        </div>
-      )}
-    </section>
+
+        {/* Navigation Buttons */}
+        {pageCount > 1 && (
+          <>
+            <NavigationButton 
+              config={{ 
+                direction: "left", 
+                onClick: goPrev, 
+                variant: "red",
+                className: "absolute left-0 top-1/2 -translate-y-1/2 z-20 shadow-xl"
+              }} 
+            />
+            <NavigationButton 
+              config={{ 
+                direction: "right", 
+                onClick: goNext, 
+                variant: "red",
+                className: "absolute right-0 top-1/2 -translate-y-1/2 z-20 shadow-xl"
+              }} 
+            />
+          </>
+        )}
+      </div>
+    </div>
   );
 };
 

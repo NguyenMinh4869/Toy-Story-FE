@@ -177,60 +177,61 @@ const ProfileInfo: React.FC = () => {
         </div>
 
         {/* Name */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Họ và tên <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            {...register('name', { required: 'Vui lòng nhập họ tên' })}
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ab0007] focus:border-transparent ${
-              errors.name ? 'border-red-500' : 'border-gray-300'
-            }`}
-            placeholder="Nhập họ và tên"
-          />
-          {errors.name && (
-            <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
-          )}
-        </div>
+        <div className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+              Họ và tên <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              {...register('name', { required: 'Vui lòng nhập họ tên' })}
+              className={`w-full px-4 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ab0007] focus:border-transparent transition-all shadow-sm ${
+                errors.name ? 'border-red-500' : 'border-gray-200'
+              }`}
+              placeholder="Nhập họ và tên"
+            />
+            {errors.name && (
+              <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>
+            )}
+          </div>
 
-        {/* Phone Number */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Số điện thoại <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="tel"
-            {...register('phoneNumber', {
-              required: 'Vui lòng nhập số điện thoại',
-              pattern: {
-                value: /^[0-9]{10}$/,
-                message: 'Số điện thoại không hợp lệ (10 chữ số)'
-              }
-            })}
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ab0007] focus:border-transparent ${
-              errors.phoneNumber ? 'border-red-500' : 'border-gray-300'
-            }`}
-            placeholder="Nhập số điện thoại"
-          />
-          {errors.phoneNumber && (
-            <p className="mt-1 text-sm text-red-500">{errors.phoneNumber.message}</p>
-          )}
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+              Số điện thoại <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="tel"
+              {...register('phoneNumber', {
+                required: 'Vui lòng nhập số điện thoại',
+                pattern: {
+                  value: /^[0-9]{10}$/,
+                  message: 'Số điện thoại không hợp lệ (10 chữ số)'
+                }
+              })}
+              className={`w-full px-4 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ab0007] focus:border-transparent transition-all shadow-sm ${
+                errors.phoneNumber ? 'border-red-500' : 'border-gray-200'
+              }`}
+              placeholder="Nhập số điện thoại"
+            />
+            {errors.phoneNumber && (
+              <p className="mt-1 text-xs text-red-500">{errors.phoneNumber.message}</p>
+            )}
+          </div>
         </div>
 
         {/* Email (Read-only) */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
             Email
           </label>
           <input
             type="email"
             {...register('email')}
             disabled
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50 text-gray-500 cursor-not-allowed shadow-inner"
           />
-          <p className="mt-1 text-xs text-gray-500">
-            Email không thể thay đổi
+          <p className="mt-1.5 text-[11px] text-gray-400 italic">
+            Email là định danh tài khoản và không thể thay đổi
           </p>
         </div>
 
@@ -266,15 +267,30 @@ const ProfileInfo: React.FC = () => {
           )}
         </div>
 
-        {/* Address Form */}
+        {/* Address Modal */}
         {showAddressForm && (
-          <div className="mb-6 p-6 border border-gray-200 rounded-lg bg-gray-50">
-            <AddressForm
-              onSave={handleAddAddress}
-              onCancel={handleCancelAddress}
-              initialAddress={editingAddress ? addresses[0] : undefined}
-              isEditing={editingAddress}
-            />
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden animate-in zoom-in-95 duration-200">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                <h3 className="text-xl font-bold text-[#00247d] font-tilt-warp">
+                  {editingAddress ? 'Chỉnh sửa địa chỉ' : 'Thêm địa chỉ mới'}
+                </h3>
+                <button 
+                  onClick={handleCancelAddress}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <X size={20} className="text-gray-500" />
+                </button>
+              </div>
+              <div className="p-6">
+                <AddressForm
+                  onSave={handleAddAddress}
+                  onCancel={handleCancelAddress}
+                  initialAddress={editingAddress ? addresses[0] : undefined}
+                  isEditing={editingAddress}
+                />
+              </div>
+            </div>
           </div>
         )}
 

@@ -3,13 +3,25 @@ import { Link } from 'react-router-dom'
 import { formatPrice } from '../utils/formatPrice'
 import { getCategories } from '../services/categoryService'
 import { getActiveProducts } from '../services/productService'
+import { 
+  Zap, 
+  Car, 
+  Gamepad2, 
+  Baby, 
+  Utensils, 
+  Sparkles, 
+  Box, 
+  Music, 
+  Bath, 
+  Ghost,
+  Star,
+  Flame
+} from 'lucide-react'
 import type { ViewCategoryDto } from '../types/CategoryDTO'
 import type { ViewProductDto } from '../types/ProductDTO'
 
 const FEATURED_BG = "https://www.figma.com/api/mcp/asset/05b9a086-cba0-4da8-80e9-b1ff25c8c382"
 const PRODUCT_PLACEHOLDER = "https://www.figma.com/api/mcp/asset/1b629d68-a06d-4580-8dbe-46fefd9ce76a"
-const DECOR_LEFT = "https://www.figma.com/api/mcp/asset/2577a437-6eb6-4b9c-897c-cf94e79a5b2f"
-const DECOR_RIGHT = "https://www.figma.com/api/mcp/asset/a741473c-4a12-4bc2-a7b1-01e25cd2c1ef"
 
 interface ProductsDropdownProps {
   isOpen: boolean
@@ -68,13 +80,34 @@ export const ProductsDropdown: React.FC<ProductsDropdownProps> = ({ isOpen, onCl
     return price / 0.7
   }
 
+  // Map category names to icons
+  const getCategoryIcon = (name: string) => {
+    const n = name.toLowerCase()
+    if (n.includes('siêu nhân') || n.includes('robot')) return <Zap size={16} />
+    if (n.includes('mô hình') || n.includes('đua')) return <Car size={16} />
+    if (n.includes('khủng long')) return <Ghost size={16} />
+    if (n.includes('búp bê')) return <Baby size={16} />
+    if (n.includes('bếp')) return <Utensils size={16} />
+    if (n.includes('trang điểm')) return <Sparkles size={16} />
+    if (n.includes('sưu tập')) return <Box size={16} />
+    if (n.includes('âm nhạc')) return <Music size={16} />
+    if (n.includes('tắm')) return <Bath size={16} />
+    return <Gamepad2 size={16} />
+  }
+
   return (
     <div 
       className="absolute left-1/2 -translate-x-1/2 top-full pt-2 z-50"
     >
       <div className="bg-white rounded-[26px] shadow-xl overflow-hidden flex" style={{ width: '800px' }}>
         {/* Left Column - Categories */}
-        <div className="w-[220px] py-4 px-3 border-r border-gray-100">
+        <div 
+          className="w-[220px] py-4 px-3 border-r border-[#885d5d]/10 bg-[#fdfdfd] relative"
+          style={{ 
+            backgroundImage: `radial-gradient(#885d5d10 1px, transparent 1px)`,
+            backgroundSize: '12px 12px'
+          }}
+        >
           {isLoading ? (
             // Loading skeleton
             Array.from({ length: 6 }).map((_, index) => (
@@ -104,14 +137,17 @@ export const ProductsDropdown: React.FC<ProductsDropdownProps> = ({ isOpen, onCl
                 to="/products"
                 onClick={onClose}
                 onMouseEnter={() => setSelectedCategoryId(category.categoryId ?? null)}
-                className={`flex items-center gap-3 py-2 px-3 rounded-[18px] no-underline transition-colors ${
+                className={`flex items-center gap-3 py-2 px-3 rounded-[18px] no-underline transition-all duration-200 ${
                   selectedCategoryId === category.categoryId 
-                    ? 'bg-[rgba(244,130,130,0.18)]' 
-                    : 'hover:bg-gray-50'
+                    ? 'bg-white shadow-sm ring-1 ring-red-100/50 scale-[1.02]' 
+                    : 'hover:bg-red-50/30'
                 }`}
               >
               
-                <span className="font-unbounded text-[10px] text-black">
+                <span className={`transition-colors ${selectedCategoryId === category.categoryId ? 'text-[#af0000]' : 'text-gray-400'}`}>
+                  {getCategoryIcon(category.name || '')}
+                </span>
+                <span className="font-unbounded text-[10px] text-black pt-0.5">
                   {category.name}
                 </span>
               </Link>
@@ -128,10 +164,10 @@ export const ProductsDropdown: React.FC<ProductsDropdownProps> = ({ isOpen, onCl
           }}
         >
           {/* Header */}
-          <div className="bg-[#af0000] rounded-[14px] py-2 px-4 flex items-center justify-center gap-2 mb-4">
-            <img src={DECOR_RIGHT} alt="" className="w-[13px] h-[13px]" />
-            <span className="font-tilt-warp text-[12px] text-white">SẢN PHẨM NỔI BẬT</span>
-            <img src={DECOR_LEFT} alt="" className="w-[13px] h-[13px]" />
+          <div className="bg-[#af0000] rounded-[14px] py-2 px-4 flex items-center justify-center gap-3 mb-4 shadow-sm">
+            <Flame size={14} className="text-yellow-400 animate-pulse fill-yellow-400" />
+            <span className="font-tilt-warp text-[12px] text-white tracking-widest">SẢN PHẨM NỔI BẬT</span>
+            <Star size={14} className="text-yellow-400 animate-bounce fill-yellow-400" />
           </div>
 
           {/* Products Grid */}

@@ -49,7 +49,7 @@ const ProfileLayout: React.FC<ProfileLayoutProps> = ({ children }) => {
 
   return (
     <div className="bg-gray-50">
-      <main className="max-w-[1800px] mx-auto px-[38px] py-8 w-full">
+      <main className="max-w-[1200px] mx-auto px-6 py-8 w-full">
         <h1 className="text-[#00247d] text-[32px] font-bold text-center mb-8 font-tilt-warp">
           Tài Khoản Của Bạn
         </h1>

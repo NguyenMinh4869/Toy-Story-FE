@@ -1,18 +1,16 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { ViewProductDto } from "../types/ProductDTO";
 import { formatPrice } from "../utils/formatPrice";
 import { PRODUCT_IMAGE_87 } from "../constants/imageAssets";
-import { Heart } from "lucide-react";
+import { Heart, ShoppingCart } from "lucide-react";
+import { motion } from "framer-motion";
+import { cn } from "../lib/utils";
 
 interface ProductCardProps {
   product: ViewProductDto;
   className?: string;
   style?: React.CSSProperties;
-  // Optional customization
-  backgroundImage?: string;
-  decorativeLine?: string;
-  // Optional discount percentage (0-100). Show badge/original price only when > 0.
   discount?: number;
 }
 
@@ -20,9 +18,9 @@ export const ProductCard = ({
   product,
   className = "",
   style,
-  backgroundImage = PRODUCT_IMAGE_87,
   discount = 0,
 }: ProductCardProps): React.JSX.Element => {
+  const navigate = useNavigate();
   const productPrice = product.price ?? 0;
   const productName = product.name ?? "Unnamed Product";
   const productImage = product.imageUrl ?? PRODUCT_IMAGE_87;
@@ -32,84 +30,98 @@ export const ProductCard = ({
     ? productPrice / (1 - (discount ?? 0) / 100)
     : productPrice;
 
+  const handleCardClick = () => {
+    navigate(`/product/${product.productId}`);
+  };
+
   return (
-    <article
-      className={`relative w-[203px] h-[285px] ${className}`}
+    <motion.article
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      whileHover={{ y: -8 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      onClick={handleCardClick}
+      className={cn(
+        "group relative bg-white rounded-[2.5rem] p-6 flex flex-col items-center select-none cursor-pointer",
+        "w-[250px] h-[380px] shadow-[0_10px_30px_-15px_rgba(0,0,0,0.2)] hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.3)] transition-shadow duration-300",
+        className
+      )}
       style={style}
     >
-      {/* Decorative background frame */}
-      <div className="absolute top-0 left-0 w-[203px] h-[285px] rounded-[17px]">
-        <img
-          className="w-full h-full object-cover rounded-[17px]"
-          alt="Product card background"
-          src={backgroundImage}
-        />
-        <div className="absolute top-0 left-0 w-full h-full rounded-[17px] border border-solid border-[#d08856] pointer-events-none" />
-      </div>
+      {/* Discount Badge */}
+      {hasDiscount && (
+        <div className="absolute top-6 right-6 z-20 overflow-hidden rounded-xl">
+           <div className="bg-red-600 text-white px-3 py-1.5 text-[11px] font-bold font-archivo tracking-tight shadow-md">
+            -{discount}%
+          </div>
+        </div>
+      )}
 
-      {/* White card content */}
-      <div className="absolute top-9 left-1/2 -translate-x-1/2 w-[170px] h-[237px] bg-white rounded-[17px] overflow-hidden">
-        {/* Product Image */}
-        <img
-          className="absolute top-[17px] left-1/2 -translate-x-1/2 w-[115px] h-[115px] aspect-[1] object-cover"
+      {/* Image Container with Hover Effect */}
+      <div className="relative w-full aspect-square mb-4 bg-gray-50 rounded-2xl overflow-hidden flex items-center justify-center border border-gray-100 group-hover:border-red-100 transition-colors">
+        <motion.img
+          whileHover={{ scale: 1.15, rotate: 2 }}
+          transition={{ type: "spring", stiffness: 300, damping: 15 }}
+          className="w-[85%] h-[85%] object-contain drop-shadow-xl p-2"
           alt={productName}
           src={productImage}
         />
+        
+        {/* Quick Actions Overlay */}
+        <div className="absolute inset-0 bg-red-600/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" />
+      </div>
 
-        {/* Add to Cart Button */}
-        <Link
-          to={`/product/${product.productId}`}
-          className="absolute top-[209px] left-[25px] w-[79px] h-[15px] flex bg-[#c40029] rounded-md overflow-hidden hover:bg-[#a00022] transition-colors"
-          aria-label="Thêm vào giỏ hàng"
-        >
-          <span className="mt-[3px] w-[62px] h-[9px] ml-[7px] [font-family:'Tilt_Warp-Regular',Helvetica] font-normal text-white text-[7px] tracking-[0] leading-[normal]">
-            Thêm vào giỏ hàng
-          </span>
-        </Link>
+      {/* Product Info */}
+      <div className="w-full flex flex-col flex-1 px-1">
+        <h3 className="text-[15px] leading-[1.4] text-gray-800 font-medium line-clamp-2 min-h-[42px] mb-3 group-hover:text-red-600 transition-colors">
+          {productName}
+        </h3>
 
-        {/* Discount Badge */}
-        {hasDiscount && (
-          <div className="absolute top-[7px] left-[118px] w-[39px] h-[13px] flex bg-[#c40029] rounded-md overflow-hidden">
-            <span className="mt-0.5 w-[25px] h-2.5 ml-[7px] [font-family:'Archivo_Black-Regular',Helvetica] text-white text-[9px] whitespace-nowrap font-normal tracking-[0] leading-[normal]">
-              -{discount}%
+        <div className="mt-auto">
+          {/* Pricing */}
+          <div className="flex flex-col mb-3">
+            <span className="text-red-600 font-tilt-warp text-2xl leading-none tracking-tight">
+              {formatPrice(productPrice)}
             </span>
+            {hasDiscount && (
+              <span className="text-gray-400 text-[13px] line-through mt-1">
+                {formatPrice(originalPrice)}
+              </span>
+            )}
           </div>
-        )}
 
-        {/* Wishlist Button */}
-        <button
-          className="absolute top-[207px] right-[25px] w-5 h-5 cursor-pointer border-0 bg-transparent p-0 flex items-center justify-center"
-          aria-label="Thêm vào yêu thích"
-        >
-          <Heart
-            className="w-[14px] h-[14px] text-gray-400 hover:text-[#ff0000] hover:fill-[#ff0000] transition-colors"
-            strokeWidth={2}
-          />
-        </button>
-
-        {/* Divider Line */}
-        <img
-          className="absolute top-48 left-[100px] w-[60px] h-px object-cover"
-          alt=""
-        />
-      </div>
-
-      {/* Product Name */}
-      <p className="absolute top-[173px] left-[25px] w-[153px] [font-family:'Tilt_Warp-Regular',Helvetica] font-normal text-black text-[11px] tracking-[0] leading-[normal] line-clamp-2">
-        {productName}
-      </p>
-
-      {/* Sale Price */}
-      <div className="absolute top-[221px] left-8 w-[60px] [font-family:'Tilt_Warp-Regular',Helvetica] text-[#ff0000] text-[11px] font-normal tracking-[0] leading-[normal]">
-        {formatPrice(productPrice)}
-      </div>
-
-      {/* Original Price (if discounted) */}
-      {hasDiscount && (
-        <div className="absolute top-[221px] left-[116px] w-[59px] [font-family:'Tilt_Warp-Regular',Helvetica] text-black text-[11px] font-normal tracking-[0] leading-[normal] line-through">
-          {formatPrice(originalPrice)}
+          {/* Action Row */}
+          <div className="flex items-center gap-2">
+            <Link
+              to={`/product/${product.productId}`}
+              onClick={(e) => e.stopPropagation()}
+              className="flex-1 bg-red-600 text-white py-3 rounded-[1rem] text-[12px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-black transition-colors duration-300 shadow-sm"
+            >
+              <ShoppingCart className="w-4 h-4" />
+              <span>Thêm</span>
+            </Link>
+            
+            <button 
+              className="p-3 rounded-[1rem] border border-gray-100 text-gray-400 hover:text-red-500 hover:bg-red-50 hover:border-red-100 transition-all shadow-sm"
+              aria-label="Wishlist"
+              onClick={(e) => {
+                e.stopPropagation();
+                // Add to wishlist logic here
+              }}
+            >
+              <Heart className="w-4 h-4 group-hover:scale-110 transition-transform" />
+            </button>
+          </div>
         </div>
-      )}
-    </article>
+      </div>
+
+      {/* Subtle bottom accent line appearing on hover */}
+      <motion.div 
+        initial={{ width: 0 }}
+        whileHover={{ width: "80%" }}
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 h-[2px] bg-red-600/30 rounded-full"
+      />
+    </motion.article>
   );
 };

@@ -1,7 +1,7 @@
 import React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { ProductCard } from "./ProductCard"; // Import the component
+import { ProductCard } from "./ProductCard"; 
 import { ViewProductDto } from "../types/ProductDTO";
+import { NavigationButton } from "./homepage/NavigationButton";
 
 interface ProductSectionProps {
   title: string;
@@ -44,14 +44,19 @@ const ProductSection: React.FC<ProductSectionProps> = ({
         </div>
       </div>
 
-      {/* Products carousel - simplified! */}
+      {/* Products carousel */}
       <div className="relative flex items-center gap-5">
-        <button
-          className="bg-transparent border-none cursor-pointer w-[33px] h-[31px] flex-shrink-0 z-[2]"
-          aria-label="Previous"
-        >
-          <ChevronLeft size={33} stroke="white" strokeWidth={3} />
-        </button>
+        <NavigationButton
+          config={{
+            direction: "left",
+            variant: "white",
+            onClick: () => {
+              const el = document.querySelector('.scroll-smooth');
+              if (el) el.scrollBy({ left: -300, behavior: 'smooth' });
+            },
+            className: "z-[2]"
+          }}
+        />
 
         <div className="flex gap-[50px] overflow-x-auto scroll-smooth flex-1 py-5 [&::-webkit-scrollbar]:hidden">
           {products.map((product) => (
@@ -59,12 +64,17 @@ const ProductSection: React.FC<ProductSectionProps> = ({
           ))}
         </div>
 
-        <button
-          className="bg-transparent border-none cursor-pointer w-[33px] h-[31px] flex-shrink-0 z-[2]"
-          aria-label="Next"
-        >
-          <ChevronRight size={33} stroke="white" strokeWidth={3} />
-        </button>
+        <NavigationButton
+          config={{
+            direction: "right",
+            variant: "white",
+            onClick: () => {
+              const el = document.querySelector('.scroll-smooth');
+              if (el) el.scrollBy({ left: 300, behavior: 'smooth' });
+            },
+            className: "z-[2]"
+          }}
+        />
       </div>
     </section>
   );
