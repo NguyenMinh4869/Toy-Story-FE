@@ -10,7 +10,12 @@ export interface ViewOrderDto {
     totalAmount: number;
     accountId: number;
     accountName: string;
+    warehouseId?: number | null;
+    manuallyAssign: boolean;
+    warehouseName?: string | null;
 }
+
+
 export interface OrderItemDto {
   orderItemId: number;
   productId: number;

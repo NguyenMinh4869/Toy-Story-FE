@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 import { formatPrice } from '@/utils/formatPrice'
 import { OrderDetailDto, OrderItemDto } from '@/types/OrderDTO'
+import { updateOrderStatus } from '@/services/orderService'
+
 import { getSetById } from '@/services/setService'
 import { ViewSetDetailDto } from '@/types/SetDTO'
 interface OrderDetailModalProps {
@@ -81,10 +83,19 @@ const OrderItem: React.FC<{ item: OrderItemDto }> = ({ item }) => {
 const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClose }) => {
     if (!order) return null
 
+    const handleMarkDelivered = async () => {
+        try {
+            await updateOrderStatus(order.orderId)
+            // Optionally refresh order detail here or just close modal
+            onClose()
+        } catch (err) {
+            console.error('Failed to update order status', err)
+        }
+    }
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 relative">
-                {/* Close button */}
                 <button
                     onClick={onClose}
                     className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
@@ -94,7 +105,6 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClose }) =
 
                 <h2 className="text-xl font-bold mb-4">Chi tiết đơn hàng #{order.orderId}</h2>
 
-                {/* Order info */}
                 <div className="mb-4 text-sm text-gray-600">
                     <p>Khách hàng: <span className="font-medium">{order.accountName}</span></p>
                     <p>Số điện thoại: {order.phoneNumber}</p>
@@ -103,7 +113,6 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClose }) =
                     <p>Kho: {order.warehouseName || 'N/A'}</p>
                 </div>
 
-                {/* Items */}
                 {/* Items */}
                 <h3 className="font-semibold mb-2">Sản phẩm</h3>
                 <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
@@ -115,7 +124,6 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClose }) =
                         <p className="text-gray-500">Không có sản phẩm nào</p>
                     )}
                 </div>
-
 
                 {/* Invoice */}
                 {order.invoice && (
@@ -134,6 +142,18 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClose }) =
                         Tổng cộng: {formatPrice(order.totalAmount)}
                     </p>
                 </div>
+
+                {/* Mark as Delivered button */}
+                {order.status === 'Đang giao hàng' && (
+                    <div className="mt-6 text-right">
+                        <button
+                            onClick={handleMarkDelivered}
+                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+                        >
+                            Đã nhận hàng
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     )

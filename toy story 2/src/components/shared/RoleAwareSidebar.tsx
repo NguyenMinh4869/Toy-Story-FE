@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { LayoutDashboard, ShoppingBag, Users, Tag, Percent, Layers, Ticket, Warehouse } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Users, Tag, Percent, Layers, Ticket, Warehouse, List } from 'lucide-react';
 import { ROUTES } from '../../routes/routePaths';
 import { getUserRole } from '../../services/authService';
 
@@ -51,6 +51,11 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
         to: effectiveMode === 'admin' ? ROUTES.ADMIN_WAREHOUSE : ROUTES.STAFF_WAREHOUSE,
         icon: <Warehouse size={20} />,
         label: 'Warehouse'
+      },
+      {
+        to: effectiveMode === 'admin' ? ROUTES.ADMIN_ORDERS : ROUTES.STAFF_ORDERS,
+        icon: <List size={20} />,
+        label: 'Order'
       }
     );
 
@@ -68,14 +73,6 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
         to: ROUTES.ADMIN_INVOICES,
         icon: <Ticket size={20} />,
         label: 'Invoices'
-      });
-    }
-
-    if (effectiveMode === 'admin') {
-      baseLinks.push({
-        to: ROUTES.ADMIN_ORDERS,
-        icon: <Ticket size={20} />,
-        label: 'Orders'
       });
     }
 
