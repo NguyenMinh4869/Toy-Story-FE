@@ -81,8 +81,8 @@ const LoginPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-white via-[#ffc703] to-[#ff4200] flex items-center justify-center p-4 sm:p-6 lg:p-8" data-name="LoginPage" data-node-id="51:6">
-      <div className="relative w-full max-w-[820px] h-[calc(88vh-50px)] min-h-[630px] bg-white rounded-[28px] shadow-2xl overflow-hidden flex max-xl:flex-col max-xl:h-auto max-xl:min-h-0">
+    <div className="!font-sans min-h-screen w-full bg-gradient-to-br from-white via-[#ffc703] to-[#ff4200] flex items-center justify-center p-4 sm:p-6 lg:p-8" data-name="LoginPage" data-node-id="51:6">
+      <div className="relative w-full max-w-[820px] h-[calc(88vh-50px)] min-h-[550px] bg-white rounded-[28px] shadow-2xl overflow-hidden flex max-xl:flex-col max-xl:h-auto max-xl:min-h-0">
         <div className="absolute top-6 left-8 z-50 max-md:left-4 max-md:top-4">
           <Link to="/" className="flex items-center gap-2 no-underline hover:opacity-80 transition-opacity">
             <img src={LOGO_TOY_STORY} alt="TOY STORY" className="h-[60px] w-auto object-contain" />
@@ -98,66 +98,66 @@ const LoginPage: React.FC = () => {
         </div>
 
         <div className="flex-1 flex flex-col items-center justify-center py-10 px-4 bg-white overflow-y-auto max-xl:w-full max-xl:p-6 relative">
-        <h1 className="font-tienne text-[32px] font-normal text-[#c1121f] text-left m-0 mb-0 w-[460px] max-w-[92%] max-xl:text-[28px] max-md:text-[24px]" data-node-id="51:13">Welcome Back!</h1>
-        <p className="font-tienne text-sm font-normal text-[#d46a6a] text-left m-0 mb-0 w-[460px] max-w-[92%]" data-node-id="51:14">Ready for more fun? Log in to your account.</p>
+          <h1 className=" text-[32px] font-black text-[#c1121f] text-left m-0 mb-0 w-[460px] max-w-[92%] max-xl:text-[28px] max-md:text-[24px]" data-node-id="51:13">Welcome Back!</h1>
+          <p className="text-sm font-bold text-[#d46a6a] text-left m-0 mb-0 w-[460px] max-w-[92%]" data-node-id="51:14">Ready for more fun? Log in to your account.</p>
 
-        <div className="w-[460px] max-w-[92%] h-px bg-gradient-to-r from-transparent via-black/20 to-transparent mt-5 mb-10" />
+          <div className="w-[460px] max-w-[92%] h-px bg-gradient-to-r from-transparent via-black/20 to-transparent mt-5 mb-10" />
 
-        {error && (
-          <div className="w-[430px] max-w-[92%] mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="font-tienne text-sm text-red-600 m-0">{error}</p>
-          </div>
-        )}
-
-        <form className="w-[430px] max-w-[92%] flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)}>
-          <div className="flex flex-col gap-2.5 mb-2">
-            <label className="font-tienne text-base font-normal text-black m-0" data-node-id="52:2">Email</label>
-            <input
-              type="email"
-              placeholder="Type your email address"
-              className={`w-full h-[31px] px-3.5 border border-[#2b0000] rounded-[10px] bg-white font-tienne text-sm text-black placeholder:text-gray-400 outline-none box-border focus:border-[#f20000] focus:shadow-[0_0_0_2px_rgba(242,0,0,0.1)] ${errors.email ? 'border-[#ff0404] focus:border-[#ff0404] focus:shadow-[0_0_0_2px_rgba(255,4,4,0.2)]' : ''}`}
-              data-node-id="51:15"
-              {...register('email')}
-            />
-            {errors.email && (
-              <span className="font-tienne text-xs text-[#ff0404] -mt-1">{errors.email.message}</span>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-2.5">
-            <div className="flex justify-between items-center">
-              <label className="font-tienne text-base font-normal text-black m-0" data-node-id="52:3">Password</label>
+          {error && (
+            <div className="w-[430px] max-w-[92%] mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-600 m-0">{error}</p>
             </div>
-            <input
-              type="password"
-              placeholder="Type your password"
-              className={`w-full h-[31px] px-3.5 border border-[#2b0000] rounded-[10px] bg-white font-tienne text-sm text-black placeholder:text-gray-400 outline-none box-border focus:border-[#f20000] focus:shadow-[0_0_0_2px_rgba(242,0,0,0.1)] ${errors.password ? 'border-[#ff0404] focus:border-[#ff0404] focus:shadow-[0_0_0_2px_rgba(255,4,4,0.2)]' : ''}`}
-              data-node-id="52:5"
-              {...register('password')}
-            />
-            {errors.password && (
-              <span className="font-tienne text-xs text-[#ff0404] -mt-1">{errors.password.message}</span>
-            )}
-            <div className="flex justify-end">
-              <a href="#" className="font-tienne text-xs font-normal text-[#ff0404] no-underline transition-opacity hover:opacity-80" data-node-id="52:15">forgot password?</a>
+          )}
+
+          <form className="w-[430px] max-w-[92%] flex flex-col" onSubmit={handleSubmit(onSubmit)}>
+            <div className="flex flex-col gap-2.5 mb-2">
+              <label className="text-base font-bold text-black m-0" data-node-id="52:2">Email</label>
+              <input
+                type="email"
+                placeholder="Type your email address"
+                className={`w-full h-[40px] px-3.5 rounded-2xl bg-white text-sm text-black placeholder:text-gray-400 outline-none box-border focus:border-[#f20000] shadow-md`}
+                data-node-id="51:15"
+                {...register('email')}
+              />
+              {errors.email && (
+                <span className="text-xs text-[#ff0404] -mt-1">{errors.email.message}</span>
+              )}
             </div>
-          </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className={`w-full h-[52px] bg-[#f20000] border border-[#2b0000] rounded-[12px] cursor-pointer flex items-center justify-center transition-colors p-0 mt-2 ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#d10000]'}`}
-            data-node-id="52:11"
-          >
-            <span className="font-tienne text-lg font-normal text-[#fffafa] m-0" data-node-id="52:13">
-              {isLoading ? 'Logging in...' : 'Login to Account'}
-            </span>
-          </button>
+            <div className="flex flex-col gap-2.5">
+              <div className="flex justify-between items-center">
+                <label className=" text-base font-bold text-black m-0" data-node-id="52:3">Password</label>
+              </div>
+              <input
+                type="password"
+                placeholder="Type your password"
+                className={`w-full h-[40px] px-3.5 rounded-2xl bg-white text-sm text-black placeholder:text-gray-400 outline-none box-border focus:border-[#f20000] shadow-md`}
+                data-node-id="52:5"
+                {...register('password')}
+              />
+              {errors.password && (
+                <span className=" text-xs text-[#ff0404] -mt-1">{errors.password.message}</span>
+              )}
+              <div className="flex justify-end">
+                <a href="#" className="text-xs font-normal text-[#ff0404] no-underline transition-opacity hover:opacity-80" data-node-id="52:15">forgot password?</a>
+              </div>
+            </div>
 
-          <p className="font-tienne text-sm font-normal text-black text-center m-[15px_0_0_0]" data-node-id="52:17">
-            Don't have an account? <Link to={ROUTES.REGISTER} className="text-[#ff0404] no-underline transition-opacity hover:opacity-80">Create an account</Link>
-          </p>
-        </form>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`w-full h-[52px] bg-[#f20000] rounded-3xl cursor-pointer flex items-center justify-center transition-colors p-0 mt-2 ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#d10000]'}`}
+              data-node-id="52:11"
+            >
+              <span className="text-lg font-bold text-[#fffafa] m-0" data-node-id="52:13">
+                {isLoading ? 'Logging in...' : 'Login'}
+              </span>
+            </button>
+
+            <p className="text-sm font-bold text-black text-center m-[15px_0_0_0]" data-node-id="52:17">
+              Don't have an account? <Link to={ROUTES.REGISTER} className="text-[#ff0404] no-underline transition-opacity hover:opacity-80">Create an account</Link>
+            </p>
+          </form>
         </div>
       </div>
     </div>
