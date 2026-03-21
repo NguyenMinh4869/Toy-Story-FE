@@ -97,32 +97,15 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
 
   const navLinks = getNavLinks();
 
-  // Staff uses emerald/teal theme, Admin uses red theme
-  const themeColors = effectiveMode === 'staff'
-    ? {
-      activeBg: 'bg-emerald-100',
-      activeText: 'text-emerald-700',
-      buttonBg: 'bg-emerald-600',
-      buttonHover: 'hover:bg-emerald-700'
-    }
-    : {
-      activeBg: 'bg-red-100',
-      activeText: 'text-red-700',
-      buttonBg: 'bg-red-600',
-      buttonHover: 'hover:bg-red-700'
-    };
+  const themeColors = {
+    activeBg: 'bg-red-100',
+    activeText: 'text-red-700',
+    buttonBg: 'bg-red-600',
+    buttonHover: 'hover:bg-red-700'
+  };
 
   return (
     <div className={`w-64 bg-white flex flex-col flex-shrink-0 border-r border-gray-200 ${effectiveMode === 'admin' ? "font-['Red_Hat_Display']" : ''}`}>
-      <div className="h-20 flex items-center justify-center border-b border-gray-200">
-        <Link to="/" className="relative h-[47px] flex items-center no-underline text-inherit">
-          <img
-            src="https://www.figma.com/api/mcp/asset/a3292b82-feb6-483d-a4f2-619ec8b796dd"
-            alt="Logo"
-            className="h-[47px] w-auto"
-          />
-        </Link>
-      </div>
       <nav className="flex-1 px-4 py-6 space-y-2">
         {navLinks.map((link) => (
           <NavLink

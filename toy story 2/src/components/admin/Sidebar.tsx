@@ -2,7 +2,6 @@ import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { LayoutDashboard, ShoppingBag, Users, Tag, Percent, Layers, Ticket, Warehouse } from 'lucide-react';
 import { ROUTES } from '../../routes/routePaths';
-import logoSrc from '../../assets/admin/logo.png';
 
 const Sidebar: React.FC = () => {
   const navLinks = [
@@ -18,15 +17,6 @@ const Sidebar: React.FC = () => {
 
   return (
     <div className="w-64 bg-white flex flex-col flex-shrink-0 border-r border-gray-200 font-['Red_Hat_Display']">
-      <div className="h-20 flex items-center justify-center">
-        <Link to="/" className="relative h-[47px] flex items-center no-underline text-inherit">
-            <img 
-              src={logoSrc} 
-              alt="Logo" 
-              className="h-[47px] w-auto"
-            />
-        </Link>
-      </div>
       <nav className="flex-1 px-4 py-6 space-y-2">
         {navLinks.map((link) => (
           <NavLink

@@ -114,7 +114,7 @@ const Header: React.FC<HeaderProps> = ({ mode }) => {
               className="flex items-center gap-3 hover:bg-gray-50 rounded-lg px-3 py-2 transition-colors"
             >
               <span className="font-semibold text-gray-700 text-right">{userName}</span>
-              <div className={`w-10 h-10 rounded-full ${effectiveMode === 'admin' ? 'bg-red-500' : 'bg-emerald-500'} flex items-center justify-center`}>
+              <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
                 <User size={24} className="text-white" />
               </div>
               <ChevronDown size={16} className={`text-gray-500 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
