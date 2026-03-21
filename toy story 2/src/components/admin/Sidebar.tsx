@@ -2,7 +2,6 @@ import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { LayoutDashboard, ShoppingBag, Users, Tag, Percent, Layers, Ticket, Warehouse } from 'lucide-react';
 import { ROUTES } from '../../routes/routePaths';
-import logoSrc from '../../assets/admin/logo.png';
 
 const Sidebar: React.FC = () => {
   const navLinks = [
@@ -17,25 +16,16 @@ const Sidebar: React.FC = () => {
   ];
 
   return (
-    <div className="w-64 bg-white flex flex-col flex-shrink-0 border-r border-gray-200">
-      <div className="h-20 flex items-center justify-center">
-        <Link to="/" className="relative h-[47px] flex items-center no-underline text-inherit">
-            <img 
-              src={logoSrc} 
-              alt="Logo" 
-              className="h-[47px] w-auto"
-            />
-        </Link>
-      </div>
+    <div className="w-64 bg-white flex flex-col flex-shrink-0 border-r border-gray-200 font-['Red_Hat_Display']">
       <nav className="flex-1 px-4 py-6 space-y-2">
         {navLinks.map((link) => (
           <NavLink
             key={link.to}
             to={link.to}
             className={({ isActive }) =>
-              `flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              `flex items-center px-4 py-2 text-sm font-semibold rounded-md transition-colors ${
                 isActive
-                  ? 'bg-red-100 text-red-700'
+                  ? 'bg-red-100 text-red-700 font-bold'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
               }`
             }
@@ -48,7 +38,7 @@ const Sidebar: React.FC = () => {
       <div className="px-6 pb-6">
         <Link 
           to={ROUTES.HOME} 
-          className="w-full bg-red-600 text-white text-center font-medium py-2 px-4 rounded-md hover:bg-red-700 transition-colors no-underline"
+          className="w-full bg-red-600 text-white text-center font-semibold py-2 px-4 rounded-md hover:bg-red-700 transition-colors no-underline"
         >
           Home page
         </Link>

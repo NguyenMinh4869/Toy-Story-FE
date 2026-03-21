@@ -29,9 +29,6 @@ const RegisterPage: React.FC = () => {
     setError: setFieldError,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
-    defaultValues: {
-      agreeToTerms: false,
-    },
   });
 
   const onSubmit = async (data: RegisterFormData): Promise<void> => {
@@ -82,199 +79,175 @@ const RegisterPage: React.FC = () => {
 
   return (
     <div
-      className="fixed top-0 left-0 w-full h-screen bg-white flex overflow-hidden z-[9999] max-xl:flex-col"
+      className="!font-sans min-h-screen w-full bg-gradient-to-br from-white via-[#ffc703] to-[#ff4200] flex items-center justify-center  sm:p-6 lg:p-8"
       data-name="RegisterPage"
     >
-      <div className="fixed top-6 left-8 z-50">
-        <Link
-          to="/"
-          className="flex items-center gap-2 no-underline hover:opacity-80 transition-opacity"
+      <div className="relative w-full max-w-[820px] h-[calc(88vh-50px)] min-h-[550px] bg-white rounded-[28px] shadow-2xl overflow-hidden flex max-xl:flex-col max-xl:h-auto max-xl:min-h-0">
+        <div className="absolute top-6 left-8 z-50 max-md:left-4 max-md:top-4">
+          <Link
+            to="/"
+            className="flex items-center gap-2 no-underline hover:opacity-80 transition-opacity"
+          >
+            <img
+              src={LOGO_TOY_STORY}
+              alt="TOY STORY"
+              className="h-[60px] w-auto object-contain"
+            />
+          </Link>
+        </div>
+
+        <div
+          className="relative w-[50%] h-full bg-gradient-to-br from-[#ffa500] to-[#ff8c00] flex items-end justify-center p-10 max-xl:w-full max-xl:h-[280px]"
+          data-name="image 11"
         >
           <img
-            src={LOGO_TOY_STORY}
-            alt="TOY STORY"
-            className="h-[60px] w-auto object-contain"
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+            src={imgImage11}
           />
-        </Link>
-      </div>
+        </div>
 
-      <div
-        className="relative w-[40%] h-full bg-gradient-to-br from-[#ffa500] to-[#ff8c00] flex items-end justify-center p-10 max-xl:w-full max-xl:h-[30%]"
-        data-name="image 11"
-      >
-        <img
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-          src={imgImage11}
-        />
-      </div>
+        <div className="absolute left-[50%] top-0 w-0 h-full flex items-center justify-center z-10 -translate-x-1/2 max-xl:hidden">
+          <img
+            alt=""
+            className="w-screen h-0.5 rotate-90 origin-center"
+            src={imgLine38}
+          />
+        </div>
 
-      <div className="absolute left-[40%] top-0 w-0 h-full flex items-center justify-center z-10 -translate-x-1/2 max-xl:hidden">
-        <img
-          alt=""
-          className="w-screen h-0.5 rotate-90 origin-center"
-          src={imgLine38}
-        />
-      </div>
-
-      <div className="flex-1 flex flex-col items-center justify-center py-10 pr-[17px] pl-0 bg-white overflow-y-auto max-xl:w-full max-xl:p-5 relative">
-        <h1 className="font-sans text-3xl font-bold text-black text-center m-0 mb-[10px] w-full max-w-[450px]">
-          Create Account
-        </h1>
-        <p className="font-sans text-sm font-normal text-gray-600 text-center m-0 mb-6 w-full max-w-[450px]">
-          Join us and start your magical journey!
-        </p>
-
-        {error && (
-          <div className="w-full max-w-[450px] mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="font-sans text-sm text-red-600 m-0">{error}</p>
-          </div>
-        )}
-
-        {success && (
-          <div className="w-full max-w-[450px] mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className="font-sans text-sm text-green-600 m-0">
-              {success}
-            </p>
-          </div>
-        )}
-
-        <form
-          className="w-full max-w-[450px] flex flex-col gap-3"
-          onSubmit={handleSubmit(onSubmit)}
-        >
-          <div className="flex flex-col gap-1.5">
-            <label className="font-sans text-xs font-semibold text-gray-700 m-0">
-              Full Name
-            </label>
-            <input
-              type="text"
-              placeholder="Your full name"
-              className={`w-full h-[45px] px-4 border border-gray-300 rounded-[10px] bg-white font-sans text-sm text-black outline-none box-border focus:border-[#f20000] focus:shadow-[0_0_0_2px_rgba(242,0,0,0.1)] ${errors.name ? "border-[#ff0404]" : ""}`}
-              {...register("name")}
-            />
-            {errors.name && (
-              <span className="font-sans text-xs text-[#ff0404]">
-                {errors.name.message}
-              </span>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 max-md:grid-cols-1">
-            <div className="flex flex-col gap-1.5">
-              <label className="font-sans text-xs font-semibold text-gray-700 m-0">
-                Email
-              </label>
-              <input
-                type="email"
-                placeholder="example@mail.com"
-                className={`w-full h-[45px] px-4 border border-gray-300 rounded-[10px] bg-white font-sans text-sm text-black outline-none box-border focus:border-[#f20000] focus:shadow-[0_0_0_2px_rgba(242,0,0,0.1)] ${errors.email ? "border-[#ff0404]" : ""}`}
-                {...register("email")}
-              />
-              {errors.email && (
-                <span className="font-sans text-xs text-[#ff0404]">
-                  {errors.email.message}
-                </span>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="font-sans text-xs font-semibold text-gray-700 m-0">
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                placeholder="09xx xxx xxx"
-                className={`w-full h-[45px] px-4 border border-gray-300 rounded-[10px] bg-white font-sans text-sm text-black outline-none box-border focus:border-[#f20000] focus:shadow-[0_0_0_2px_rgba(242,0,0,0.1)] ${errors.phoneNumber ? "border-[#ff0404]" : ""}`}
-                {...register("phoneNumber")}
-              />
-              {errors.phoneNumber && (
-                <span className="font-sans text-xs text-[#ff0404]">
-                  {errors.phoneNumber.message}
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 max-md:grid-cols-1">
-            <div className="flex flex-col gap-1.5">
-              <label className="font-sans text-xs font-semibold text-gray-700 m-0">
-                Password
-              </label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                className={`w-full h-[45px] px-4 border border-gray-300 rounded-[10px] bg-white font-sans text-sm text-black outline-none box-border focus:border-[#f20000] focus:shadow-[0_0_0_2px_rgba(242,0,0,0.1)] ${errors.password ? "border-[#ff0404]" : ""}`}
-                {...register("password")}
-              />
-              {errors.password && (
-                <span className="font-sans text-xs text-[#ff0404]">
-                  {errors.password.message}
-                </span>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="font-sans text-xs font-semibold text-gray-700 m-0">
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                className={`w-full h-[45px] px-4 border border-gray-300 rounded-[10px] bg-white font-sans text-sm text-black outline-none box-border focus:border-[#f20000] focus:shadow-[0_0_0_2px_rgba(242,0,0,0.1)] ${errors.confirmPassword ? "border-[#ff0404]" : ""}`}
-                {...register("confirmPassword")}
-              />
-              {errors.confirmPassword && (
-                <span className="font-sans text-xs text-[#ff0404]">
-                  {errors.confirmPassword.message}
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 my-1">
-            <input
-              type="checkbox"
-              id="agree-terms"
-              className={`w-5 h-5 border border-gray-300 rounded-[4px] bg-white cursor-pointer appearance-none relative flex-shrink-0 checked:bg-[#f20000] checked:border-[#f20000] checked:after:content-['✓'] checked:after:absolute checked:after:top-1/2 checked:after:left-1/2 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 checked:after:text-white checked:after:text-xs checked:after:font-bold ${errors.agreeToTerms ? "border-[#ff0404]" : ""}`}
-              {...register("agreeToTerms")}
-            />
-            <label
-              htmlFor="agree-terms"
-              className="font-sans text-xs font-normal text-gray-600 cursor-pointer m-0"
-            >
-              I agree to the{" "}
-              <a href="#" className="text-[#ff0404] underline hover:opacity-80">
-                Terms and Conditions
-              </a>
-            </label>
-            {errors.agreeToTerms && (
-              <span className="font-sans text-[10px] text-[#ff0404] block">
-                {errors.agreeToTerms.message}
-              </span>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className={`w-full h-[45px] bg-[#f20000] text-white rounded-[10px] font-bold cursor-pointer flex items-center justify-center transition-colors p-0 mt-1 ${isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-[#d10000]"}`}
-          >
-            <span className="font-sans text-base m-0">
-              {isLoading ? "Creating account..." : "Create Account"}
-            </span>
-          </button>
-
-          <p className="font-sans text-sm font-normal text-gray-600 text-center m-2">
-            Already have an account?{" "}
-            <Link
-              to={ROUTES.LOGIN}
-              className="text-[#ff0404] font-semibold no-underline transition-opacity hover:opacity-80"
-            >
-              Login instead
-            </Link>
+        <div className="flex-1 flex flex-col items-center justify-center px-4 bg-white overflow-y-auto max-xl:w-full max-xl:p-6 relative">
+          <h1 className="text-[32px] font-black text-[#c1121f] text-left w-[460px] max-w-[92%] max-xl:text-[28px] max-md:text-[24px]">
+            Create Account
+          </h1>
+          <p className="text-sm font-bold text-[#d46a6a] text-left w-[460px] max-w-[92%]">
+            Join us and start your magical journey!
           </p>
-        </form>
+
+          <div className="w-[460px] max-w-[92%] h-px bg-gradient-to-r from-transparent via-black/20 to-transparent mt-5 mb-10" />
+
+          {error && (
+            <div className="w-[430px] max-w-[92%] mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className=" text-sm text-red-600 m-0">{error}</p>
+            </div>
+          )}
+
+          {success && (
+            <div className="w-[430px] max-w-[92%] mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+              <p className=" text-sm text-green-600 m-0">
+                {success}
+              </p>
+            </div>
+          )}
+
+          <form
+            className="w-[430px] max-w-[92%] flex flex-col gap-6"
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            <div className="flex flex-col gap-1.5">
+              <label className="text-base font-bold text-black m-0">
+                Full Name
+              </label>
+              <input
+                type="text"
+                className={`w-full h-[40px] px-3.5 rounded-2xl bg-white text-sm text-black placeholder:text-gray-400 outline-none box-border focus:border-[#f20000] shadow-md`}
+                {...register("name")}
+              />
+              {errors.name && (
+                <span className="text-xs text-[#ff0404]">
+                  {errors.name.message}
+                </span>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
+              <div className="flex flex-col gap-1">
+                <label className=" text-base font-bold text-black">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  className={`w-full h-[40px] px-3.5 rounded-2xl bg-white text-sm text-black placeholder:text-gray-400 outline-none box-border focus:border-[#f20000] shadow-md`}
+                  {...register("email")}
+                />
+                {errors.email && (
+                  <span className="f text-xs text-[#ff0404]">
+                    {errors.email.message}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className=" text-base font-bold text-black">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  className={`w-full h-[40px] px-3.5 rounded-2xl bg-white text-sm text-black placeholder:text-gray-400 outline-none box-border focus:border-[#f20000] shadow-md`}
+                  {...register("phoneNumber")}
+                />
+                {errors.phoneNumber && (
+                  <span className="text-xs text-[#ff0404]">
+                    {errors.phoneNumber.message}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
+              <div className="flex flex-col gap-1">
+                <label className="text-base font-bold text-black ">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  className={`w-full h-[40px] px-3.5 rounded-2xl bg-white text-sm text-black placeholder:text-gray-400 outline-none box-border focus:border-[#f20000] shadow-md`}
+                  {...register("password")}
+                />
+                {errors.password && (
+                  <span className=" text-xs text-[#ff0404]">
+                    {errors.password.message}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className=" text-base font-bold text-black m-0">
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  className={`w-full h-[40px] px-3.5 rounded-2xl bg-white text-sm text-black placeholder:text-gray-400 outline-none box-border focus:border-[#f20000] shadow-md`}
+                  {...register("confirmPassword")}
+                />
+                {errors.confirmPassword && (
+                  <span className=" text-xs text-[#ff0404]">
+                    {errors.confirmPassword.message}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`w-full h-[48px] bg-[#f20000] rounded-3xl cursor-pointer flex items-center justify-center transition-colors p-0 ${isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-[#d10000]"}`}
+            >
+              <span className=" text-base font-black text-[#fffafa] ">
+                {isLoading ? "Creating account..." : "Create Account"}
+              </span>
+            </button>
+
+            <p className="text-sm font-bold text-black text-center">
+              Already have an account?{" "}
+              <Link
+                to={ROUTES.LOGIN}
+                className="text-[#ff0404] no-underline transition-opacity hover:opacity-80"
+              >
+                Login
+              </Link>
+            </p>
+          </form>
+        </div>
       </div>
     </div>
   );

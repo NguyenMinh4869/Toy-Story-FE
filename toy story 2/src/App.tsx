@@ -6,16 +6,23 @@ import AppRoutes from './routes/AppRoutes'
 import LoginPage from './pages/LoginPage'
 import CartPopup from './components/CartPopup'
 import { ROUTES } from './routes/routePaths'
+import RegisterPage from './pages/RegisterPage'
 
 const App: React.FC = () => {
   const location = useLocation()
   const isLoginPage = location.pathname === ROUTES.LOGIN
+  const isRegister = location.pathname === ROUTES.REGISTER
+
   const isAdminRoute = location.pathname.startsWith('/admin')
   const isStaffRoute = location.pathname.startsWith('/staff')
 
   // If it's login page, render it separately without layout
   if (isLoginPage) {
     return <LoginPage />
+  }
+
+  if (isRegister) {
+    return <RegisterPage />
   }
 
   // If it's admin or staff page, render it without public layout
