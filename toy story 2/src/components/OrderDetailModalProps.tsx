@@ -1,11 +1,9 @@
 import React from 'react'
 import { X } from 'lucide-react'
 import { formatPrice } from '@/utils/formatPrice'
-import { OrderDetailDto, OrderItemDto } from '@/types/OrderDTO'
+import { OrderDetailDto } from '@/types/OrderDTO'
 import { updateOrderStatus } from '@/services/orderService'
 
-import { getSetById } from '@/services/setService'
-import { ViewSetDetailDto } from '@/types/SetDTO'
 interface OrderDetailModalProps {
     order: OrderDetailDto | null
     onClose: () => void
