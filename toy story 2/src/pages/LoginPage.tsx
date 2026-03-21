@@ -23,10 +23,7 @@ const LoginPage: React.FC = () => {
     formState: { errors },
     setError: setFieldError
   } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      rememberMe: false
-    }
+    resolver: zodResolver(loginSchema)
   })
 
   const onSubmit = async (data: LoginFormData): Promise<void> => {
@@ -34,7 +31,7 @@ const LoginPage: React.FC = () => {
       setIsLoading(true)
       setError(null)
 
-      // Convert form data to LoginDto (removes rememberMe)
+      // Convert form data to LoginDto
       const loginDto = toLoginDto(data)
 
       // Call login API (automatically fetches user details via /me)
@@ -91,15 +88,15 @@ const LoginPage: React.FC = () => {
         </Link>
       </div>
 
-      <div className="relative w-[40%] h-full bg-gradient-to-br from-[#ffa500] to-[#ff8c00] flex items-end justify-center p-10 max-xl:w-full max-xl:h-[40%]" data-name="image 11" data-node-id="51:11">
+      <div className="relative w-[50%] h-full bg-gradient-to-br from-[#ffa500] to-[#ff8c00] flex items-end justify-center p-10 max-xl:w-full max-xl:h-[40%]" data-name="image 11" data-node-id="51:11">
         <img alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none" src={imgImage11} />
       </div>
 
-      <div className="absolute left-[40%] top-0 w-0 h-full flex items-center justify-center z-10 -translate-x-1/2 max-xl:hidden" data-node-id="165:820">
+      <div className="absolute left-[50%] top-0 w-0 h-full flex items-center justify-center z-10 -translate-x-1/2 max-xl:hidden" data-node-id="165:820">
         <img alt="" className="w-screen h-0.5 rotate-90 origin-center" src={imgLine38} />
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center py-10 pr-[17px] pl-0 bg-white overflow-y-auto max-xl:w-full max-xl:p-5 relative">
+      <div className="flex-1 flex flex-col items-center justify-center py-8 px-4 bg-white overflow-y-auto max-xl:w-full max-xl:p-5 relative">
         <h1 className="font-tienne text-[42px] font-normal text-black text-center m-0 mb-[15px] w-[654px] max-w-full max-xl:text-[36px] max-md:text-[32px]" data-node-id="51:13">Welcome Back!</h1>
         <p className="font-tienne text-xl font-normal text-black text-center m-0 mb-10 w-[654px] max-w-full max-xl:text-xl max-md:text-lg" data-node-id="51:14">Ready for more fun? Log in to your account.</p>
 
@@ -109,12 +106,12 @@ const LoginPage: React.FC = () => {
           </div>
         )}
 
-        <form className="w-[620px] max-w-full flex flex-col gap-5 max-xl:w-full" onSubmit={handleSubmit(onSubmit)}>
-          <div className="flex flex-col gap-2.5">
+        <form className="w-[460px] max-w-[92%] flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex flex-col gap-2.5 mb-2">
             <label className="font-tienne text-xl font-normal text-black m-0" data-node-id="52:2">Email</label>
             <input
               type="email"
-              className={`w-full h-[60px] px-5 border border-[#2b0000] rounded-[15px] bg-white font-tienne text-base text-black outline-none box-border focus:border-[#f20000] focus:shadow-[0_0_0_2px_rgba(242,0,0,0.1)] ${errors.email ? 'border-[#ff0404] focus:border-[#ff0404] focus:shadow-[0_0_0_2px_rgba(255,4,4,0.2)]' : ''}`}
+              className={`w-full h-[50px] px-4 border border-[#2b0000] rounded-[12px] bg-white font-tienne text-base text-black outline-none box-border focus:border-[#f20000] focus:shadow-[0_0_0_2px_rgba(242,0,0,0.1)] ${errors.email ? 'border-[#ff0404] focus:border-[#ff0404] focus:shadow-[0_0_0_2px_rgba(255,4,4,0.2)]' : ''}`}
               data-node-id="51:15"
               {...register('email')}
             />
@@ -130,7 +127,7 @@ const LoginPage: React.FC = () => {
             </div>
             <input
               type="password"
-              className={`w-full h-[60px] px-5 border border-[#2b0000] rounded-[15px] bg-white font-tienne text-base text-black outline-none box-border focus:border-[#f20000] focus:shadow-[0_0_0_2px_rgba(242,0,0,0.1)] ${errors.password ? 'border-[#ff0404] focus:border-[#ff0404] focus:shadow-[0_0_0_2px_rgba(255,4,4,0.2)]' : ''}`}
+              className={`w-full h-[50px] px-4 border border-[#2b0000] rounded-[12px] bg-white font-tienne text-base text-black outline-none box-border focus:border-[#f20000] focus:shadow-[0_0_0_2px_rgba(242,0,0,0.1)] ${errors.password ? 'border-[#ff0404] focus:border-[#ff0404] focus:shadow-[0_0_0_2px_rgba(255,4,4,0.2)]' : ''}`}
               data-node-id="52:5"
               {...register('password')}
             />
@@ -139,23 +136,10 @@ const LoginPage: React.FC = () => {
             )}
           </div>
 
-          <div className="flex items-center gap-2.5">
-            <input
-              type="checkbox"
-              id="remember-me"
-              className="w-[30px] h-[30px] border border-[#2b0000] rounded-[5px] bg-white cursor-pointer appearance-none relative flex-shrink-0 checked:bg-[#f20000] checked:border-[#f20000] checked:after:content-['✓'] checked:after:absolute checked:after:top-1/2 checked:after:left-1/2 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 checked:after:text-white checked:after:text-xl checked:after:font-bold"
-              data-node-id="52:7"
-              {...register('rememberMe')}
-            />
-            <label htmlFor="remember-me" className="font-tienne text-lg font-normal text-black cursor-pointer m-0" data-node-id="52:9">
-              Remember me for 30 days
-            </label>
-          </div>
-
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full h-[60px] bg-[#f20000] border border-[#2b0000] rounded-[15px] cursor-pointer flex items-center justify-center transition-colors p-0 mt-2.5 ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#d10000]'}`}
+            className={`w-full h-[52px] bg-[#f20000] border border-[#2b0000] rounded-[12px] cursor-pointer flex items-center justify-center transition-colors p-0 mt-2 ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#d10000]'}`}
             data-node-id="52:11"
           >
             <span className="font-tienne text-2xl font-normal text-[#fffafa] m-0" data-node-id="52:13">

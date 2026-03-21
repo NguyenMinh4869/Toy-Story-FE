@@ -29,9 +29,6 @@ const RegisterPage: React.FC = () => {
     setError: setFieldError,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
-    defaultValues: {
-      agreeToTerms: false,
-    },
   });
 
   const onSubmit = async (data: RegisterFormData): Promise<void> => {
@@ -99,7 +96,7 @@ const RegisterPage: React.FC = () => {
       </div>
 
       <div
-        className="relative w-[40%] h-full bg-gradient-to-br from-[#ffa500] to-[#ff8c00] flex items-end justify-center p-10 max-xl:w-full max-xl:h-[30%]"
+        className="relative w-[50%] h-full bg-gradient-to-br from-[#ffa500] to-[#ff8c00] flex items-end justify-center p-10 max-xl:w-full max-xl:h-[30%]"
         data-name="image 11"
       >
         <img
@@ -109,7 +106,7 @@ const RegisterPage: React.FC = () => {
         />
       </div>
 
-      <div className="absolute left-[40%] top-0 w-0 h-full flex items-center justify-center z-10 -translate-x-1/2 max-xl:hidden">
+      <div className="absolute left-[50%] top-0 w-0 h-full flex items-center justify-center z-10 -translate-x-1/2 max-xl:hidden">
         <img
           alt=""
           className="w-screen h-0.5 rotate-90 origin-center"
@@ -117,7 +114,7 @@ const RegisterPage: React.FC = () => {
         />
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center py-10 pr-[17px] pl-0 bg-white overflow-y-auto max-xl:w-full max-xl:p-5 relative">
+      <div className="flex-1 flex flex-col items-center justify-center py-8 px-4 bg-white overflow-y-auto max-xl:w-full max-xl:p-5 relative">
         <h1 className="font-tienne text-[42px] font-normal text-black text-center m-0 mb-[15px] w-[654px] max-w-full max-xl:text-[36px] max-md:text-[32px]">
           Create Account
         </h1>
@@ -140,7 +137,7 @@ const RegisterPage: React.FC = () => {
         )}
 
         <form
-          className="w-[620px] max-w-full flex flex-col gap-4 max-xl:w-full"
+          className="w-[460px] max-w-[92%] flex flex-col gap-5"
           onSubmit={handleSubmit(onSubmit)}
         >
           <div className="flex flex-col gap-1.5">
@@ -149,7 +146,7 @@ const RegisterPage: React.FC = () => {
             </label>
             <input
               type="text"
-              className={`w-full h-[50px] px-5 border border-[#2b0000] rounded-[15px] bg-white font-tienne text-base text-black outline-none box-border focus:border-[#f20000] focus:shadow-[0_0_0_2px_rgba(242,0,0,0.1)] ${errors.name ? "border-[#ff0404]" : ""}`}
+              className={`w-full h-[46px] px-4 border border-[#2b0000] rounded-[12px] bg-white font-tienne text-base text-black outline-none box-border focus:border-[#f20000] focus:shadow-[0_0_0_2px_rgba(242,0,0,0.1)] ${errors.name ? "border-[#ff0404]" : ""}`}
               {...register("name")}
             />
             {errors.name && (
@@ -166,7 +163,7 @@ const RegisterPage: React.FC = () => {
               </label>
               <input
                 type="email"
-                className={`w-full h-[50px] px-5 border border-[#2b0000] rounded-[15px] bg-white font-tienne text-base text-black outline-none box-border focus:border-[#f20000] focus:shadow-[0_0_0_2px_rgba(242,0,0,0.1)] ${errors.email ? "border-[#ff0404]" : ""}`}
+                className={`w-full h-[46px] px-4 border border-[#2b0000] rounded-[12px] bg-white font-tienne text-base text-black outline-none box-border focus:border-[#f20000] focus:shadow-[0_0_0_2px_rgba(242,0,0,0.1)] ${errors.email ? "border-[#ff0404]" : ""}`}
                 {...register("email")}
               />
               {errors.email && (
@@ -182,7 +179,7 @@ const RegisterPage: React.FC = () => {
               </label>
               <input
                 type="tel"
-                className={`w-full h-[50px] px-5 border border-[#2b0000] rounded-[15px] bg-white font-tienne text-base text-black outline-none box-border focus:border-[#f20000] focus:shadow-[0_0_0_2px_rgba(242,0,0,0.1)] ${errors.phoneNumber ? "border-[#ff0404]" : ""}`}
+                className={`w-full h-[46px] px-4 border border-[#2b0000] rounded-[12px] bg-white font-tienne text-base text-black outline-none box-border focus:border-[#f20000] focus:shadow-[0_0_0_2px_rgba(242,0,0,0.1)] ${errors.phoneNumber ? "border-[#ff0404]" : ""}`}
                 {...register("phoneNumber")}
               />
               {errors.phoneNumber && (
@@ -200,7 +197,7 @@ const RegisterPage: React.FC = () => {
               </label>
               <input
                 type="password"
-                className={`w-full h-[50px] px-5 border border-[#2b0000] rounded-[15px] bg-white font-tienne text-base text-black outline-none box-border focus:border-[#f20000] focus:shadow-[0_0_0_2px_rgba(242,0,0,0.1)] ${errors.password ? "border-[#ff0404]" : ""}`}
+                className={`w-full h-[46px] px-4 border border-[#2b0000] rounded-[12px] bg-white font-tienne text-base text-black outline-none box-border focus:border-[#f20000] focus:shadow-[0_0_0_2px_rgba(242,0,0,0.1)] ${errors.password ? "border-[#ff0404]" : ""}`}
                 {...register("password")}
               />
               {errors.password && (
@@ -216,7 +213,7 @@ const RegisterPage: React.FC = () => {
               </label>
               <input
                 type="password"
-                className={`w-full h-[50px] px-5 border border-[#2b0000] rounded-[15px] bg-white font-tienne text-base text-black outline-none box-border focus:border-[#f20000] focus:shadow-[0_0_0_2px_rgba(242,0,0,0.1)] ${errors.confirmPassword ? "border-[#ff0404]" : ""}`}
+                className={`w-full h-[46px] px-4 border border-[#2b0000] rounded-[12px] bg-white font-tienne text-base text-black outline-none box-border focus:border-[#f20000] focus:shadow-[0_0_0_2px_rgba(242,0,0,0.1)] ${errors.confirmPassword ? "border-[#ff0404]" : ""}`}
                 {...register("confirmPassword")}
               />
               {errors.confirmPassword && (
@@ -227,33 +224,10 @@ const RegisterPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 my-2">
-            <input
-              type="checkbox"
-              id="agree-terms"
-              className={`w-[24px] h-[24px] border border-[#2b0000] rounded-[5px] bg-white cursor-pointer appearance-none relative flex-shrink-0 checked:bg-[#f20000] checked:border-[#f20000] checked:after:content-['✓'] checked:after:absolute checked:after:top-1/2 checked:after:left-1/2 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 checked:after:text-white checked:after:text-sm checked:after:font-bold ${errors.agreeToTerms ? "border-[#ff0404]" : ""}`}
-              {...register("agreeToTerms")}
-            />
-            <label
-              htmlFor="agree-terms"
-              className="font-tienne text-base font-normal text-black cursor-pointer m-0"
-            >
-              I agree to the{" "}
-              <a href="#" className="text-[#ff0404] underline hover:opacity-80">
-                Terms and Conditions
-              </a>
-            </label>
-            {errors.agreeToTerms && (
-              <span className="font-tienne text-xs text-[#ff0404] block">
-                {errors.agreeToTerms.message}
-              </span>
-            )}
-          </div>
-
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full h-[50px] bg-[#f20000] border border-[#2b0000] rounded-[15px] cursor-pointer flex items-center justify-center transition-colors p-0 mt-1 ${isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-[#d10000]"}`}
+            className={`w-full h-[48px] bg-[#f20000] border border-[#2b0000] rounded-[12px] cursor-pointer flex items-center justify-center transition-colors p-0 mt-1 ${isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-[#d10000]"}`}
           >
             <span className="font-tienne text-xl font-normal text-[#fffafa] m-0">
               {isLoading ? "Creating account..." : "Create Account"}
