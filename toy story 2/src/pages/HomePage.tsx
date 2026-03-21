@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GundamKingdomCardsSection } from "../components/homepage/GundamKingdomCardsSection";
 import { PromotionalOffersSection } from "../components/homepage/PromotionalOffersSection";
-import { HeroBannerSection } from "../components/homepage/HeroBannerSection";import { GundamKingdomHeaderSection } from "../components/homepage/GundamKingdomHeaderSection";
+import { HeroBannerSection } from "../components/homepage/HeroBannerSection"; import { GundamKingdomHeaderSection } from "../components/homepage/GundamKingdomHeaderSection";
 import { BrandsSection } from "../components/homepage/BrandsSection";
 import { getActiveProducts } from "../services/productService";
 import { getActiveBrands } from "../services/brandService";
@@ -33,7 +33,7 @@ export const Homepage = (): React.JSX.Element => {
         setIsLoading(true);
         setError(null);
         const allProducts = await getActiveProducts();
-        
+
         const promotional = allProducts.length > 0 ? allProducts.slice(0, 12) : [];
         setPromotionalProducts(promotional);
 
@@ -45,9 +45,9 @@ export const Homepage = (): React.JSX.Element => {
         const gundam = gundamCategory
           ? allProducts.filter((p) => p.categoryId === gundamCategory.categoryId).slice(0, 12)
           : allProducts.filter((p) => p.name?.toUpperCase().includes("GUNDAM")).slice(0, 12);
-        
+
         setGundamProducts(gundam.length > 0 ? gundam : allProducts.slice(0, 12));
-        
+
         const brandsData = await getActiveBrands();
         setBrands(brandsData);
       } catch (err) {
@@ -61,10 +61,10 @@ export const Homepage = (): React.JSX.Element => {
   }, []);
 
   return (
-    <div className="bg-[#a70001] min-h-screen overflow-x-hidden">
+    <div className="bg-[#F8FAFC] min-h-screen font-sans text-slate-900">
       <AnimatePresence>
         {error && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
@@ -76,54 +76,44 @@ export const Homepage = (): React.JSX.Element => {
         )}
       </AnimatePresence>
 
-      <main className="flex flex-col w-full">
-        {/* Hero Section */}
-        <section className="py-12 relative">
-          <div className="max-w-7xl mx-auto px-4">
+      <main>
+        {/* 1. HERO - Clean background */}
+        <section className="pt-8 pb-12 bg-white">
+          <div className="max-w-7xl mx-auto">
             <HeroBannerSection page={heroPage} onPageChange={setHeroPage} />
           </div>
         </section>
 
-        {/* Promotions */}
-        <motion.section 
-          {...fadeInUp}
-          className="py-16 md:py-24 relative overflow-hidden"
-        >
-          {/* Subtle decoration */}
-          <div className="absolute top-0 left-0 w-full h-20 bg-gradient-to-b from-white/5 to-transparent" />
-          <div className="max-w-7xl mx-auto px-4 relative z-10">
+        {/* 2. PROMOTIONS - Light gray/blue tint to separate from Hero */}
+        <motion.section {...fadeInUp} className="py-20 bg-[#a70001] border-y border-slate-100">
+          <div className="max-w-7xl mx-auto px-4">
             <PromotionalOffersSection
               products={promotionalProducts}
               isLoading={isLoading}
               page={promotionsPage}
               onPageChange={setPromotionsPage}
-              maxPages={3}
             />
           </div>
         </motion.section>
 
-
-        {/* Gundam Kingdom */}
-        <motion.section 
-          {...fadeInUp}
-          className="py-16 md:py-24 relative"
-        >
+        {/* 3. GUNDAM KINGDOM - White background, emphasized header */}
+        <motion.section {...fadeInUp} className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4">
-            <GundamKingdomHeaderSection />
+            <div className="text-center mb-12">
+              <span className="text-red-600 font-bold tracking-widest uppercase text-sm">Premium Collection</span>
+              <GundamKingdomHeaderSection />
+            </div>
             <GundamKingdomCardsSection
               products={gundamProducts}
               isLoading={isLoading}
               page={gundamPage}
               onPageChange={setGundamPage}
-              maxPages={3}
             />
           </div>
         </motion.section>
-        {/* Brands */}
-        <motion.section 
-          {...fadeInUp}
-          className="py-16 md:py-24"
-        >
+
+        {/* 4. BRANDS - Simple and clean */}
+        <motion.section {...fadeInUp} className="py-20 bg-[#a70001]">
           <div className="max-w-7xl mx-auto px-4">
             <BrandsSection brands={brands} isLoading={isLoading} />
           </div>

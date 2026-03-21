@@ -79,7 +79,7 @@ const RegisterPage: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen w-full bg-gradient-to-br from-white via-[#fde8e8] to-[#b3131b] flex items-center justify-center p-4 sm:p-6 lg:p-8"
+      className="min-h-screen w-full bg-gradient-to-br from-white via-[#ffc703] to-[#ff4200] flex items-center justify-center p-4 sm:p-6 lg:p-8"
       data-name="RegisterPage"
     >
       <div className="relative w-full max-w-[820px] h-[calc(88vh-50px)] min-h-[630px] bg-white rounded-[28px] shadow-2xl overflow-hidden flex max-xl:flex-col max-xl:h-auto max-xl:min-h-0">
