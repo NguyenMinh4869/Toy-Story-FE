@@ -17,7 +17,7 @@ const OrderGrowthChart = () => {
     if (error || !data) {
         return (
             <div className="flex justify-center items-center h-64 text-red-500">
-                Không thể tải dữ liệu. Xin thử lại
+                Unable to load data. Please try again
             </div>
         );
     }
@@ -30,11 +30,11 @@ const OrderGrowthChart = () => {
 
     return (
         <ChartWidget
-            title="Tăng trưởng đơn hàng"
+            title="Order Growth"
             data={chartData}
             type="line"
             horizontal={false}
-            description="Số lượng đơn hàng mới theo ngày trong 30 ngày qua"
+            description="Number of new orders per day over the last 30 days"
         />
     );
 };

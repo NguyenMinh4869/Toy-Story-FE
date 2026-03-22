@@ -16,18 +16,18 @@ const TopPickChart = () => {
     if (error || !data) {
         return (
             <div className="flex justify-center items-center h-64 text-red-500">
-                Không thể tải dữ liệu. Xin thử lại
+                Unable to load data. Please try again
             </div>
         );
     }
 
     return (
         <ChartWidget
-            title="Sản phẩm được chọn nhiều nhất"
+            title="Most Selected Products"
             data={data.topPickProducts}
             type="pie"
             horizontal={false}
-            description="Tỷ lệ sản phẩm được khách hàng chọn"
+            description="Share of products selected by customers"
         />
     );
 };

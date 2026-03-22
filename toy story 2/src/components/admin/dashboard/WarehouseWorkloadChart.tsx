@@ -17,18 +17,18 @@ const WarehouseWorkloadChart = () => {
     if (error || !data) {
         return (
             <div className="flex justify-center items-center h-64 text-red-500">
-                Không thể tải dữ liệu. Xin thử lại
+                Unable to load data. Please try again
             </div>
         );
     }
 
     return (
         <ChartWidget
-            title="Khối lượng công việc theo kho"
+            title="Warehouse Workload"
             data={data.warehouseWorkload}
             type="bar"
             horizontal={true}
-            description="Số đơn hàng đang xử lý theo từng kho"
+            description="Number of in-progress orders by warehouse"
         />
     );
 };

@@ -17,18 +17,18 @@ const TopSellingSetsChart = () => {
     if (error || !data) {
         return (
             <div className="flex justify-center items-center h-64 text-red-500">
-                Không thể tải dữ liệu. Xin thử lại
+                Unable to load data. Please try again
             </div>
         );
     }
 
     return (
         <ChartWidget
-            title="Bộ sưu tập bán chạy"
+            title="Top Selling Sets"
             data={data.topSellingSets}
             type="bar"
             horizontal={true}
-            description="Top 5 bộ sưu tập bán chạy nhất"
+            description="Top 5 best-selling sets"
         />
     );
 };

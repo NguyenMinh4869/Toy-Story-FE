@@ -17,18 +17,18 @@ const TopSellingProductsChart = () => {
     if (error || !data) {
         return (
             <div className="flex justify-center items-center h-64 text-red-500">
-                Không thể tải dữ liệu. Xin thử lại
+                Unable to load data. Please try again
             </div>
         );
     }
 
     return (
         <ChartWidget
-            title="Sản phẩm bán chạy"
+            title="Top Selling Products"
             data={data.topSellingProducts}
             type="bar"
             horizontal={true}
-            description="Top 5 sản phẩm bán chạy nhất"
+            description="Top 5 best-selling products"
         />
     );
 };

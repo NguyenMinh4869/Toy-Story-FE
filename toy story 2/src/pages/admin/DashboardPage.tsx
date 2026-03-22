@@ -30,27 +30,27 @@ const DashboardPage: React.FC = () => {
 
   const stats = [
     {
-      title: 'Doanh thu',
+      title: 'Revenue',
       value: summary?.totalRevenue ? `${(summary.totalRevenue / 1000000).toFixed(1)}M` : '0',
       icon: <DollarSign className="text-red-500" />,
     },
     {
-      title: 'Đơn hàng',
+      title: 'Orders',
       value: summary?.totalOrders ?? 0,
       icon: <ShoppingBag className="text-red-500" />,
     },
     {
-      title: 'Sản phẩm',
+      title: 'Products',
       value: summary?.totalProducts ?? 0,
       icon: <Package className="text-red-500" />,
     },
     {
-      title: 'Bộ sản phẩm',
+      title: 'Product Sets',
       value: summary?.totalSets ?? 0,
       icon: <Boxes className="text-red-500" />,
     },
     {
-      title: 'Nhân viên',
+      title: 'Staff',
       value: summary?.totalStaff ?? 0,
       icon: <Users className="text-red-500" />,
     },
