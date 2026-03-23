@@ -34,7 +34,7 @@ const StaffDashboardPage: React.FC = () => {
 
       const metadata = getStoredUserMetadata();
       if (!metadata?.accountId) {
-        setError('No account ID found. Please log in again.');
+        setError('Không tìm thấy tài khoản. Vui lòng đăng nhập lại.');
         return;
       }
 
@@ -60,7 +60,7 @@ const StaffDashboardPage: React.FC = () => {
 
     } catch (error) {
       console.error('Failed to initialize staff context:', error);
-      setError('Failed to load dashboard data. Please refresh the page.');
+      setError('Không thể tải dữ liệu dashboard. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
@@ -68,33 +68,33 @@ const StaffDashboardPage: React.FC = () => {
 
   const stats = [
     {
-      title: 'Total Stock',
-      value: loading ? 'Loading...' : `${totalStock} items`,
+      title: 'Tổng tồn kho',
+      value: loading ? 'Đang tải...' : `${totalStock} sản phẩm`,
       icon: <Package className="text-emerald-500" />
     },
     {
-      title: 'Low Stock Products',
-      value: loading ? 'Loading...' : `${lowStockCount}`,
+      title: 'Sản phẩm sắp hết',
+      value: loading ? 'Đang tải...' : `${lowStockCount}`,
       icon: <AlertTriangle className="text-orange-500" />
     },
     {
-      title: 'Out of Stock',
-      value: loading ? 'Loading...' : `${outOfStockCount}`,
+      title: 'Sản phẩm hết hàng',
+      value: loading ? 'Đang tải...' : `${outOfStockCount}`,
       icon: <AlertTriangle className="text-red-500" />
     },
     {
-      title: 'Active Brands',
-      value: loading ? 'Loading...' : `${totalBrands}`,
+      title: 'Thương hiệu đang hoạt động',
+      value: loading ? 'Đang tải...' : `${totalBrands}`,
       icon: <Tag className="text-blue-500" />
     },
     {
-      title: 'Available Sets',
-      value: loading ? 'Loading...' : `${totalSets}`,
+      title: 'Bộ sản phẩm hiện có',
+      value: loading ? 'Đang tải...' : `${totalSets}`,
       icon: <Layers className="text-purple-500" />
     },
     {
-      title: 'Active Promotions',
-      value: loading ? 'Loading...' : `${activePromotions}`,
+      title: 'Khuyến mãi đang hoạt động',
+      value: loading ? 'Đang tải...' : `${activePromotions}`,
       icon: <Percent className="text-pink-500" />
     },
   ];

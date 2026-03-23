@@ -16,18 +16,18 @@ const LowStockChart = () => {
     if (error || !data) {
         return (
             <div className="flex justify-center items-center h-64 text-red-500">
-                Unable to load data. Please try again
+                Khong the tai du lieu. Vui long thu lai
             </div>
         );
     }
 
     return (
         <ChartWidget
-            title="Low Stock Alerts"
+            title="Canh bao ton kho thap"
             data={data.lowStockAlerts}
             type="pie"
             horizontal={false}
-            description="Share of low-stock products"
+            description="Ty le san pham sap het hang"
         />
     );
 };

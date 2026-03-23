@@ -182,11 +182,9 @@ const AddressForm: React.FC<AddressFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)}>
       <div>
-        <h3 className="text-[#00247d] text-lg font-bold mb-2">
-          {isEditing ? "Chỉnh Sửa Địa Chỉ" : "Thêm Địa Chỉ Giao Hàng"}
-        </h3>
+     
         {isEditing && initialAddress && (
           <p className="text-sm text-gray-600 mb-4">
             <strong>Địa chỉ hiện tại:</strong> {initialAddress}
@@ -336,7 +334,7 @@ const AddressForm: React.FC<AddressFormProps> = ({
         <button
           type="submit"
           disabled={isSaving}
-          className={`px-8 py-3 bg-[#ab0007] text-white rounded-lg font-medium hover:bg-[#8a0006] transition-colors ${
+          className={`px-8 py-3 bg-[#ab0007] text-white rounded-lg justify-center items-center font-medium hover:bg-[#8a0006] transition-colors ${
             isSaving ? "opacity-50 cursor-not-allowed" : ""
           }`}
         >

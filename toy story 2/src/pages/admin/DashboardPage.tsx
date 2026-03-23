@@ -19,7 +19,7 @@ const DashboardPage: React.FC = () => {
         setSummary(data)
       } catch (e) {
         console.error(e)
-        setError('Failed to load dashboard data')
+        setError('Khong the tai du lieu dashboard')
       } finally {
         setLoading(false)
       }
@@ -30,27 +30,27 @@ const DashboardPage: React.FC = () => {
 
   const stats = [
     {
-      title: 'Revenue',
+      title: 'Doanh thu',
       value: summary?.totalRevenue ? `${(summary.totalRevenue / 1000000).toFixed(1)}M` : '0',
       icon: <DollarSign className="text-red-500" />,
     },
     {
-      title: 'Orders',
+      title: 'Don hang',
       value: summary?.totalOrders ?? 0,
       icon: <ShoppingBag className="text-red-500" />,
     },
     {
-      title: 'Products',
+      title: 'San pham',
       value: summary?.totalProducts ?? 0,
       icon: <Package className="text-red-500" />,
     },
     {
-      title: 'Product Sets',
+      title: 'Bo san pham',
       value: summary?.totalSets ?? 0,
       icon: <Boxes className="text-red-500" />,
     },
     {
-      title: 'Staff',
+      title: 'Nhan vien',
       value: summary?.totalStaff ?? 0,
       icon: <Users className="text-red-500" />,
     },

@@ -17,18 +17,18 @@ const TopSellingProductsChart = () => {
     if (error || !data) {
         return (
             <div className="flex justify-center items-center h-64 text-red-500">
-                Unable to load data. Please try again
+                Khong the tai du lieu. Vui long thu lai
             </div>
         );
     }
 
     return (
         <ChartWidget
-            title="Top Selling Products"
+            title="San pham ban chay"
             data={data.topSellingProducts}
             type="bar"
             horizontal={true}
-            description="Top 5 best-selling products"
+            description="Top 5 san pham ban chay nhat"
         />
     );
 };

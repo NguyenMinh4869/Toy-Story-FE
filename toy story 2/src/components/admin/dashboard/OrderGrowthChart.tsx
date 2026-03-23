@@ -17,7 +17,7 @@ const OrderGrowthChart = () => {
     if (error || !data) {
         return (
             <div className="flex justify-center items-center h-64 text-red-500">
-                Unable to load data. Please try again
+                Khong the tai du lieu. Vui long thu lai
             </div>
         );
     }
@@ -30,11 +30,11 @@ const OrderGrowthChart = () => {
 
     return (
         <ChartWidget
-            title="Order Growth"
+            title="Tang truong don hang"
             data={chartData}
             type="line"
             horizontal={false}
-            description="Number of new orders per day over the last 30 days"
+            description="So luong don hang moi moi ngay trong 30 ngay gan nhat"
         />
     );
 };

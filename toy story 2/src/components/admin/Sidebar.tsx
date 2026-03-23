@@ -23,9 +23,9 @@ const Sidebar: React.FC = () => {
             key={link.to}
             to={link.to}
             className={({ isActive }) =>
-              `flex items-center px-4 py-2 text-sm font-semibold rounded-md transition-colors ${
+              `flex items-center px-4 py-2 text-sm font-black rounded-md transition-colors ${
                 isActive
-                  ? 'bg-red-100 text-red-700 font-bold'
+                  ? 'bg-red-100 text-red-700 font-black'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
               }`
             }
@@ -38,7 +38,7 @@ const Sidebar: React.FC = () => {
       <div className="px-6 pb-6">
         <Link 
           to={ROUTES.HOME} 
-          className="w-full bg-red-600 text-white text-center font-semibold py-2 px-4 rounded-md hover:bg-red-700 transition-colors no-underline"
+          className="w-full bg-red-600 text-white text-center font-black py-2 px-4 rounded-md hover:bg-red-700 transition-colors no-underline"
         >
           Home page
         </Link>

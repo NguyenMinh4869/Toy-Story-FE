@@ -27,7 +27,7 @@ const ProductListTable: React.FC<ProductListTableProps> = ({ products, onEdit, o
               <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                 <div className="flex items-center">
                   <img 
-                    className="w-10 h-10 rounded-md object-cover mr-4" 
+                    className="w-10 h-10 rounded-3xl object-cover mr-4" 
                     src={product.imageUrl || '/favicon.ico'} 
                     alt={product.name || 'Product'} 
                   />

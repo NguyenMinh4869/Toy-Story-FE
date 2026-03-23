@@ -4,16 +4,16 @@ import { useAdminDashboard } from "@/hooks/useDashboard";
 import { Loader2 } from "lucide-react";
 
 const ORDER_STATUS_LABEL_MAP: Record<string, string> = {
-    'đang chờ thanh toán': 'Pending Payment',
-    'đã thanh toán': 'Paid',
-    'đang xử lý': 'Processing',
-    'đang giao hàng': 'Shipping',
-    'đã giao hàng': 'Delivered',
-    'đã nhận hàng': 'Completed',
-    'đã hủy': 'Cancelled',
+    'đang chờ thanh toán': 'Cho thanh toan',
+    'đã thanh toán': 'Da thanh toan',
+    'đang xử lý': 'Dang xu ly',
+    'đang giao hàng': 'Dang giao hang',
+    'đã giao hàng': 'Da giao hang',
+    'đã nhận hàng': 'Da nhan hang',
+    'đã hủy': 'Da huy',
 };
 
-const toEnglishOrderStatus = (label: string) => {
+const toVietnameseOrderStatus = (label: string) => {
     const normalized = label.trim().toLowerCase();
     return ORDER_STATUS_LABEL_MAP[normalized] ?? label;
 };
@@ -32,21 +32,21 @@ const OrderStatusChart = () => {
     if (error || !data) {
         return (
             <div className="flex justify-center items-center h-64 text-red-500">
-                Unable to load data. Please try again
+                Khong the tai du lieu. Vui long thu lai
             </div>
         );
     }
 
     return (
         <ChartWidget
-            title="Order Status Distribution"
+            title="Phan bo trang thai don hang"
             data={data.orderStatusDistribution.map((item) => ({
                 ...item,
-                label: toEnglishOrderStatus(item.label),
+                label: toVietnameseOrderStatus(item.label),
             }))}
             type="pie"
             horizontal={false}
-            description="Share of orders by status"
+            description="Ty le don hang theo tung trang thai"
         />
     );
 };

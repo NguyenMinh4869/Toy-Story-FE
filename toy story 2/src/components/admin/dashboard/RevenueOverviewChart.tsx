@@ -17,7 +17,7 @@ const RevenueOverviewChart = () => {
     if (error || !data) {
         return (
             <div className="flex justify-center items-center h-64 text-red-500">
-                Unable to load data. Please try again
+                Không thể tải dữ liệu. Vui lòng thử lại
             </div>
         );
     }
@@ -30,11 +30,11 @@ const RevenueOverviewChart = () => {
 
     return (
         <ChartWidget
-            title="Revenue Overview"
+            title="Tổng quan doanh thu"
             data={chartData}
             type="line"
             horizontal={false}
-            description="Daily revenue over the last 30 days"
+            description="Doanh thu theo ngày trong 30 ngày gần nhất"
         />
     );
 };

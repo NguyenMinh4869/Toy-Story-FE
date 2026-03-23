@@ -187,10 +187,10 @@ const ProductManagementPage: React.FC = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">Product Management</h1>
+        <h1 className="text-2xl font-black text-gray-800">Product Management</h1>
         <button 
           onClick={openCreateModal}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700"
+          className="bg-blue-600 text-white px-4 py-2 rounded-2xl flex items-center gap-2 hover:bg-blue-700"
         >
           <Plus size={20} /> Add Product
         </button>
@@ -223,167 +223,177 @@ const ProductManagementPage: React.FC = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={currentProduct ? 'Edit Product' : 'Add Product'}
-        size="lg"
+        size="xxl"
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Name</label>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Name</label>
+                  <input
+                    type="text"
+                    name="Name"
+                    value={formData.Name}
+                    onChange={handleInputChange}
+                    required
+                    className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Price</label>
+                  <input
+                    type="number"
+                    name="Price"
+                    value={formData.Price}
+                    onChange={handleInputChange}
+                    required
+                    min="0"
+                    className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Description</label>
+                <textarea
+                  name="Description"
+                  value={formData.Description}
+                  onChange={handleInputChange}
+                  required
+                  rows={3}
+                  className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Category</label>
+                  <select
+                    name="CategoryId"
+                    value={formData.CategoryId}
+                    onChange={handleInputChange}
+                    required
+                    className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                  >
+                    <option value={0}>Select Category</option>
+                    {categories.map(c => (
+                      <option key={c.categoryId} value={c.categoryId}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Age Range</label>
+                  <select
+                    name="AgeRange"
+                    value={formData.AgeRange}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                  >
+                    <option value={0}>0-6 Months</option>
+                    <option value={1}>6-12 Months</option>
+                    <option value={2}>1-3 Years</option>
+                    <option value={3}>3-6 Years</option>
+                    <option value={4}>Above 6 Years</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Brand</label>
+                  <select
+                    name="BrandId"
+                    value={formData.BrandId}
+                    onChange={handleInputChange}
+                    required
+                    className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                  >
+                    <option value={0}>Select Brand</option>
+                    {brands.map(b => (
+                      <option key={b.brandId} value={b.brandId}>{b.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Origin</label>
+                  <input
+                    type="text"
+                    name="Origin"
+                    value={formData.Origin}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Material</label>
+                  <input
+                    type="text"
+                    name="Material"
+                    value={formData.Material}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Gender</label>
+                  <select
+                    name="Gender"
+                    value={formData.Gender}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                  >
+                    <option value={0}>Boy</option>
+                    <option value={1}>Girl</option>
+                    <option value={2}>Unisex</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex h-full flex-col rounded-2xl border border-gray-200 bg-gray-50 p-4">
+              <label className="block text-sm font-medium text-gray-700">Image</label>
               <input
-                type="text"
-                name="Name"
-                value={formData.Name}
-                onChange={handleInputChange}
-                required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="mt-2 block w-full text-sm text-gray-500
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-full file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-blue-50 file:text-blue-700
+                  hover:file:bg-blue-100"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Price</label>
-              <input
-                type="number"
-                name="Price"
-                value={formData.Price}
-                onChange={handleInputChange}
-                required
-                min="0"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Description</label>
-            <textarea
-              name="Description"
-              value={formData.Description}
-              onChange={handleInputChange}
-              required
-              rows={3}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Category</label>
-              <select
-                name="CategoryId"
-                value={formData.CategoryId}
-                onChange={handleInputChange}
-                required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
-              >
-                <option value={0}>Select Category</option>
-                {categories.map(c => (
-                  <option key={c.categoryId} value={c.categoryId}>{c.name}</option>
-                ))}
-              </select>
+              <div className="mt-4 flex-1">
+                {currentProduct?.imageUrl && !imageFile ? (
+                  <img
+                    src={currentProduct.imageUrl}
+                    alt="Current"
+                    className="h-full w-full min-h-[320px] rounded-2xl object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full min-h-[320px] items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-white px-4 text-center text-sm text-gray-500">
+                    Chon mot hinh anh de hien thi o day
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-             <div>
-              <label className="block text-sm font-medium text-gray-700">Brand</label>
-              <select
-                name="BrandId"
-                value={formData.BrandId}
-                onChange={handleInputChange}
-                required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
-              >
-                <option value={0}>Select Brand</option>
-                {brands.map(b => (
-                  <option key={b.brandId} value={b.brandId}>{b.name}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Origin</label>
-              <input
-                type="text"
-                name="Origin"
-                value={formData.Origin}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
-              />
-            </div>
-          </div>
-          
-           <div className="grid grid-cols-2 gap-4">
-             <div>
-              <label className="block text-sm font-medium text-gray-700">Material</label>
-              <input
-                type="text"
-                name="Material"
-                value={formData.Material}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Gender</label>
-              <select
-                name="Gender"
-                value={formData.Gender}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
-              >
-                <option value={0}>Boy</option>
-                <option value={1}>Girl</option>
-                <option value={2}>Unisex</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-             <label className="block text-sm font-medium text-gray-700">Age Range</label>
-             <select
-                name="AgeRange"
-                value={formData.AgeRange}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
-              >
-                <option value={0}>0-6 Months</option>
-                <option value={1}>6-12 Months</option>
-                <option value={2}>1-3 Years</option>
-                <option value={3}>3-6 Years</option>
-                <option value={4}>Above 6 Years</option>
-              </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Image</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="mt-1 block w-full text-sm text-gray-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-full file:border-0
-                file:text-sm file:font-semibold
-                file:bg-blue-50 file:text-blue-700
-                hover:file:bg-blue-100"
-            />
-            {currentProduct?.imageUrl && !imageFile && (
-               <div className="mt-2">
-                 <img src={currentProduct.imageUrl} alt="Current" className="h-20 w-20 object-cover rounded" />
-               </div>
-            )}
-          </div>
-
-          <div className="flex justify-end gap-3 mt-6">
+          <div className="flex justify-end gap-3 pt-2">
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-2xl hover:bg-gray-200"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-2xl hover:bg-blue-700"
             >
               {currentProduct ? 'Update Product' : 'Create Product'}
             </button>
