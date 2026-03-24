@@ -19,7 +19,7 @@ const DashboardPage: React.FC = () => {
         setSummary(data)
       } catch (e) {
         console.error(e)
-        setError('Failed to load dashboard data')
+        setError('Khong the tai du lieu dashboard')
       } finally {
         setLoading(false)
       }
@@ -45,7 +45,7 @@ const DashboardPage: React.FC = () => {
       icon: <Package className="text-red-500" />,
     },
     {
-      title: 'Bộ sản phẩm',
+      title: 'Bộ sưu tập',
       value: summary?.totalSets ?? 0,
       icon: <Boxes className="text-red-500" />,
     },

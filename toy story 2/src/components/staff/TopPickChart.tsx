@@ -16,7 +16,7 @@ const TopPickChart = () => {
     if (error || !data) {
         return (
             <div className="flex justify-center items-center h-64 text-red-500">
-                Không thể tải dữ liệu. Xin thử lại
+                Không thể tải dữ liệu. Vui lòng thử lại
             </div>
         );
     }
@@ -27,7 +27,7 @@ const TopPickChart = () => {
             data={data.topPickProducts}
             type="pie"
             horizontal={false}
-            description="Tỷ lệ sản phẩm được khách hàng chọn"
+            description="Tỷ lệ sản phẩm được khách hàng lựa chọn"
         />
     );
 };

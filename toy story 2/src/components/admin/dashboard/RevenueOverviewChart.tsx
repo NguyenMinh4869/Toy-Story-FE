@@ -17,7 +17,7 @@ const RevenueOverviewChart = () => {
     if (error || !data) {
         return (
             <div className="flex justify-center items-center h-64 text-red-500">
-                Không thể tải dữ liệu. Xin thử lại
+                Không thể tải dữ liệu. Vui lòng thử lại
             </div>
         );
     }
@@ -34,7 +34,7 @@ const RevenueOverviewChart = () => {
             data={chartData}
             type="line"
             horizontal={false}
-            description="Doanh thu theo ngày trong 30 ngày qua"
+            description="Doanh thu theo ngày trong 30 ngày gần nhất"
         />
     );
 };

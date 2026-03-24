@@ -22,7 +22,7 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
       {
         to: effectiveMode === 'admin' ? ROUTES.ADMIN_DASHBOARD : ROUTES.STAFF_DASHBOARD,
         icon: <LayoutDashboard size={20} />,
-        label: 'Dashboard'
+        label: 'Tổng quan'
       },
     ];
 
@@ -31,7 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
       baseLinks.push({
         to: ROUTES.ADMIN_PRODUCTS,
         icon: <ShoppingBag size={20} />,
-        label: 'Products'
+        label: 'Sản phẩm'
       });
     }
 
@@ -40,22 +40,22 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
       {
         to: effectiveMode === 'admin' ? ROUTES.ADMIN_BRANDS : ROUTES.STAFF_BRANDS,
         icon: <Tag size={20} />,
-        label: 'Brands'
+        label: 'Thương hiệu'
       },
       {
         to: effectiveMode === 'admin' ? ROUTES.ADMIN_SETS : ROUTES.STAFF_SETS,
         icon: <Layers size={20} />,
-        label: 'Sets'
+        label: 'Bộ sản phẩm'
       },
       {
         to: effectiveMode === 'admin' ? ROUTES.ADMIN_WAREHOUSE : ROUTES.STAFF_WAREHOUSE,
         icon: <Warehouse size={20} />,
-        label: 'Warehouse'
+        label: 'Kho'
       },
       {
         to: effectiveMode === 'admin' ? ROUTES.ADMIN_ORDERS : ROUTES.STAFF_ORDERS,
         icon: <List size={20} />,
-        label: 'Order'
+        label: 'Đơn hàng'
       }
     );
 
@@ -64,7 +64,7 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
       baseLinks.push({
         to: ROUTES.ADMIN_STAFF,
         icon: <Users size={20} />,
-        label: 'Staff'
+        label: 'Nhân viên'
       });
     }
 
@@ -72,7 +72,7 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
       baseLinks.push({
         to: ROUTES.ADMIN_INVOICES,
         icon: <Ticket size={20} />,
-        label: 'Invoices'
+        label: 'Hóa đơn'
       });
     }
 
@@ -81,14 +81,14 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
       baseLinks.push({
         to: ROUTES.ADMIN_VOUCHERS,
         icon: <Ticket size={20} />,
-        label: 'Vouchers'
+        label: 'Voucher'
       });
     }
 
     baseLinks.push({
       to: effectiveMode === 'admin' ? ROUTES.ADMIN_PROMOTIONS : ROUTES.STAFF_PROMOTIONS,
       icon: <Percent size={20} />,
-      label: 'Promotions'
+      label: 'Khuyến mãi'
     });
 
 
@@ -105,15 +105,15 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
   };
 
   return (
-    <div className={`w-64 bg-white flex flex-col flex-shrink-0 border-r border-gray-200 ${effectiveMode === 'admin' ? "font-['Red_Hat_Display']" : ''}`}>
+    <div className="w-64 bg-white flex flex-col flex-shrink-0 border-r border-gray-200">
       <nav className="flex-1 px-4 py-6 space-y-2">
         {navLinks.map((link) => (
           <NavLink
             key={link.to}
             to={link.to}
             className={({ isActive }) =>
-              `flex items-center px-4 py-2 text-sm font-semibold rounded-md transition-colors ${isActive
-                ? `${themeColors.activeBg} ${themeColors.activeText} font-bold`
+              `flex items-center px-4 py-2 text-sm !font-black rounded-md transition-colors ${isActive
+                ? `${themeColors.activeBg} ${themeColors.activeText} !font-black`
                 : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
               }`
             }
@@ -126,9 +126,9 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
       <div className="px-6 pb-6">
         <Link
           to={ROUTES.HOME}
-          className={`w-full ${themeColors.buttonBg} text-white text-center font-semibold py-2 px-4 rounded-md ${themeColors.buttonHover} transition-colors no-underline block`}
+          className={`w-full ${themeColors.buttonBg} text-white text-center !font-black py-2 px-4 rounded-md ${themeColors.buttonHover} transition-colors no-underline block`}
         >
-          Home page
+          Về trang chủ
         </Link>
       </div>
     </div>

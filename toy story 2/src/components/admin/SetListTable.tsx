@@ -14,12 +14,12 @@ const SetListTable: React.FC<SetListTableProps> = ({ sets, onEdit, onDelete }) =
       <table className="w-full text-sm text-left text-gray-500">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50">
           <tr>
-            <th scope="col" className="px-6 py-3">Set Info</th>
-            <th scope="col" className="px-6 py-3">Discount</th>
-            <th scope="col" className="px-6 py-3">Price Info</th>
-            <th scope="col" className="px-6 py-3">Items</th>
-            <th scope="col" className="px-6 py-3">Status</th>
-            <th scope="col" className="px-6 py-3">Action</th>
+            <th scope="col" className="px-6 py-3">Thông tin</th>
+            <th scope="col" className="px-6 py-3">Giảm giá</th>
+            <th scope="col" className="px-6 py-3">Giá thành</th>
+            <th scope="col" className="px-6 py-3">Sản phẩm</th>
+            <th scope="col" className="px-6 py-3">Trạng thái</th>
+            <th scope="col" className="px-6 py-3">Hàng động</th>
           </tr>
         </thead>
         <tbody>
@@ -44,11 +44,11 @@ const SetListTable: React.FC<SetListTableProps> = ({ sets, onEdit, onDelete }) =
               <td className="px-6 py-4">
                 <div className="text-gray-900 font-medium">{set.price?.toLocaleString()} VND</div>
                 {set.savings && set.savings > 0 && (
-                   <div className="text-xs text-green-600">Save {set.savings.toLocaleString()} VND</div>
+                   <div className="text-xs text-green-600">Tiết kiệm {set.savings.toLocaleString()} VND</div>
                 )}
               </td>
               <td className="px-6 py-4">
-                {set.totalItems} items
+                {set.totalItems} sản phẩm
               </td>
               <td className="px-6 py-4">
                 <span
@@ -58,7 +58,7 @@ const SetListTable: React.FC<SetListTableProps> = ({ sets, onEdit, onDelete }) =
                       : 'bg-gray-100 text-gray-800'
                   }`}
                 >
-                  {set.status === 0 ? 'Active' : set.status === 1 ? 'OutOfStock' : 'Inactive'}
+                  {set.status === 0 ? 'Đang hoạt động' : set.status === 1 ? 'Hết hàng' : 'Vô hiệu hóa'}
                 </span>
               </td>
               <td className="px-6 py-4">
@@ -67,13 +67,13 @@ const SetListTable: React.FC<SetListTableProps> = ({ sets, onEdit, onDelete }) =
                     onClick={() => onEdit(set)}
                     className="text-blue-600 hover:text-blue-900 text-xs font-medium flex items-center gap-1"
                   >
-                    <Edit size={14} /> EDIT
+                    <Edit size={14} /> Chỉnh sửa
                   </button>
                   <button
                     onClick={() => onDelete(set)}
                     className="text-red-600 hover:text-red-900 text-xs font-medium flex items-center gap-1"
                   >
-                    <Trash2 size={14} /> DELETE
+                    <Trash2 size={14} /> Xóa
                   </button>
                 </div>
               </td>

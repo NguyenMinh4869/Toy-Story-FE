@@ -17,7 +17,7 @@ const OrderGrowthChart = () => {
     if (error || !data) {
         return (
             <div className="flex justify-center items-center h-64 text-red-500">
-                Không thể tải dữ liệu. Xin thử lại
+                Khong the tai du lieu. Vui long thu lai
             </div>
         );
     }
@@ -34,7 +34,7 @@ const OrderGrowthChart = () => {
             data={chartData}
             type="line"
             horizontal={false}
-            description="Số lượng đơn hàng mới theo ngày trong 30 ngày qua"
+            description="Số lượng đơn hàng trong 30 ngày gần nhất"
         />
     );
 };

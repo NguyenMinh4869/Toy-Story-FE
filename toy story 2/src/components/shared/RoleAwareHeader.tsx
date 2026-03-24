@@ -21,7 +21,7 @@ const Header: React.FC<HeaderProps> = ({ mode }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const userRole = getUserRole();
   const effectiveMode = mode || (userRole === 'Admin' ? 'admin' : 'staff');
-  const displayName = effectiveMode === 'admin' ? 'Admin' : 'Staff';
+  const displayName = effectiveMode === 'admin' ? 'Quan tri vien' : 'Nhan vien';
   const isAdminMode = effectiveMode === 'admin';
 
   // Get user name from stored user data
@@ -60,10 +60,10 @@ const Header: React.FC<HeaderProps> = ({ mode }) => {
   const isProducts = location.pathname.startsWith(productsRoute);
   const isBrands = location.pathname.startsWith(brandsRoute);
   const placeholder = isProducts
-    ? 'Search products...'
+    ? 'Tim kiem san pham...'
     : isBrands
-    ? 'Search brands...'
-    : 'Search...';
+    ? 'Tim kiem thuong hieu...'
+    : 'Tim kiem...';
 
   const handleSearch = () => {
     const q = query.trim();
@@ -81,7 +81,7 @@ const Header: React.FC<HeaderProps> = ({ mode }) => {
 
   return (
     <header className={`h-20 bg-white border-b border-gray-200 flex items-center px-6 flex-shrink-0 ${isAdminMode ? 'justify-end' : 'justify-between'}`}>
-      {!isAdminMode && <h1 className="text-2xl font-semibold text-gray-800">Overview</h1>}
+      {!isAdminMode && <h1 className="text-2xl font-black text-gray-800">Tong quan</h1>}
       <div className="flex items-center gap-6">
         {!isAdminMode && (
           <div className="relative w-80">
@@ -113,7 +113,7 @@ const Header: React.FC<HeaderProps> = ({ mode }) => {
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="flex items-center gap-3 hover:bg-gray-50 rounded-lg px-3 py-2 transition-colors"
             >
-              <span className="font-semibold text-gray-700 text-right">{userName}</span>
+              <span className="font-black text-gray-700 text-right">{userName}</span>
               <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
                 <User size={24} className="text-white" />
               </div>
@@ -123,15 +123,15 @@ const Header: React.FC<HeaderProps> = ({ mode }) => {
             {isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                 <div className="px-4 py-3 border-b border-gray-100">
-                  <p className="text-sm font-semibold text-gray-900">{userName}</p>
-                  <p className="text-xs text-gray-500 mt-1">{effectiveMode === 'admin' ? 'Administrator' : 'Staff Member'}</p>
+                  <p className="text-sm font-black text-gray-900">{userName}</p>
+                  <p className="text-xs text-gray-500 mt-1">{effectiveMode === 'admin' ? 'Quan tri vien' : 'Nhan vien'}</p>
                 </div>
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                 >
                   <LogOut size={16} />
-                  <span>Logout</span>
+                  <span>LogOut</span>
                 </button>
               </div>
             )}

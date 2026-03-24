@@ -3,11 +3,11 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import BrandListTable from '../../components/admin/BrandListTable';
 import Modal from '../../components/ui/Modal';
-import { 
-  createBrand, 
-  updateBrand, 
-  changeBrandStatus, 
-  filterBrands 
+import {
+  createBrand,
+  updateBrand,
+  changeBrandStatus,
+  filterBrands
 } from '../../services/brandService';
 import Pagination from '../../components/ui/Pagination';
 import type { ViewBrandDto, CreateBrandDto, UpdateBrandDto } from '../../types/BrandDTO';
@@ -31,10 +31,10 @@ const BrandManagementPage: React.FC = () => {
   }, [brands, page, pageSize]);
 
   const totalPages = Math.ceil(brands.length / pageSize);
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentBrand, setCurrentBrand] = useState<ViewBrandDto | null>(null);
-  
+
   // Form State
   const [formData, setFormData] = useState<Partial<CreateBrandDto>>({
     name: ''
@@ -122,15 +122,15 @@ const BrandManagementPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
+    <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Brand Management</h1>
-        <button 
+        <h1 className="text-2xl font-bold text-gray-800">Quản lý thương hiệu</h1>
+        <button
           onClick={openCreateModal}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors"
+          className="bg-red-400 text-white px-4 py-2 rounded-3xl flex items-center gap-2 hover:bg-red-600 font-black"
         >
           <Plus size={20} />
-          Add Brand
+          Thêm thương hiệu
         </button>
       </div>
 
@@ -145,9 +145,9 @@ const BrandManagementPage: React.FC = () => {
       ) : (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100">
           <>
-            <BrandListTable 
-              brands={paginatedBrands} 
-              onEdit={openEditModal} 
+            <BrandListTable
+              brands={paginatedBrands}
+              onEdit={openEditModal}
               onChangeStatus={handleStatusChange}
             />
             <Pagination
@@ -166,11 +166,11 @@ const BrandManagementPage: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={currentBrand ? 'Edit Brand' : 'Add New Brand'}
+        title={currentBrand ? 'Chỉnh sửa thương hiệu' : 'Thêm thương hiệu'}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Brand Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tên thương hiệu</label>
             <input
               type="text"
               name="name"
@@ -182,7 +182,7 @@ const BrandManagementPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Hình ảnh</label>
             <input
               type="file"
               accept="image/*"
@@ -203,14 +203,14 @@ const BrandManagementPage: React.FC = () => {
               onClick={() => setIsModalOpen(false)}
               className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
             >
-              Cancel
+              Hủy
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="bg-red-400 text-white px-4 py-2 rounded-3xl flex items-center gap-2 hover:bg-red-600 font-black"
             >
-              {loading ? 'Saving...' : 'Save Brand'}
+              {loading ? 'Đang lưu ...' : 'Lưu thay đổi'}
             </button>
           </div>
         </form>

@@ -36,7 +36,7 @@ const OrderManagementPage: React.FC = () => {
         <div className="min-h-[500px]">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
-                <h2 className="text-[#00247d] text-2xl font-bold font-tilt-warp">
+                <h2 className="text-2xl font-bold font-tilt-warp">
                     Quản lý Đơn Hàng
                 </h2>
                 <span className="text-sm font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">

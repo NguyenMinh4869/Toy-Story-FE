@@ -17,7 +17,7 @@ const TopSellingSetsChart = () => {
     if (error || !data) {
         return (
             <div className="flex justify-center items-center h-64 text-red-500">
-                Không thể tải dữ liệu. Xin thử lại
+                Khong the tai du lieu. Vui long thu lai
             </div>
         );
     }
@@ -28,7 +28,7 @@ const TopSellingSetsChart = () => {
             data={data.topSellingSets}
             type="bar"
             horizontal={true}
-            description="Top 5 bộ sưu tập bán chạy nhất"
+            description="Top 5 bộ sưu tập bán chạy"
         />
     );
 };

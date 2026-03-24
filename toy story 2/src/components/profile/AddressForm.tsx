@@ -15,7 +15,6 @@ interface AddressFormProps {
 
 const AddressForm: React.FC<AddressFormProps> = ({
   onSave,
-  onCancel,
   initialAddress,
   isEditing = false,
 }) => {
@@ -182,11 +181,9 @@ const AddressForm: React.FC<AddressFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)}>
       <div>
-        <h3 className="text-[#00247d] text-lg font-bold mb-2">
-          {isEditing ? "Chỉnh Sửa Địa Chỉ" : "Thêm Địa Chỉ Giao Hàng"}
-        </h3>
+     
         {isEditing && initialAddress && (
           <p className="text-sm text-gray-600 mb-4">
             <strong>Địa chỉ hiện tại:</strong> {initialAddress}
@@ -332,26 +329,19 @@ const AddressForm: React.FC<AddressFormProps> = ({
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-4 pt-4">
+      <div className="flex justify-center pt-4">
         <button
           type="submit"
           disabled={isSaving}
-          className={`px-8 py-3 bg-[#ab0007] text-white rounded-lg font-medium hover:bg-[#8a0006] transition-colors ${
+          className={`min-w-[220px] px-8 py-3 bg-[#ab0007] text-white rounded-lg font-medium hover:bg-[#8a0006] transition-colors ${
             isSaving ? "opacity-50 cursor-not-allowed" : ""
           }`}
         >
           {isSaving
-            ? "Đang lưu..."
+            ? "Đang lưu..." 
             : isEditing
               ? "Cập nhật địa chỉ"
               : "Thêm địa chỉ"}
-        </button>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-8 py-3 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-        >
-          Hủy
         </button>
       </div>
     </form>

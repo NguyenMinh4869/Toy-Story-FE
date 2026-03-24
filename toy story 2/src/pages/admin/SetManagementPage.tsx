@@ -3,8 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import SetListTable from '../../components/admin/SetListTable';
 import Modal from '../../components/ui/Modal';
-import { 
-  getSets, 
+import {
+  getSets,
   getSetById,
   createSet,
   updateSet,
@@ -26,11 +26,11 @@ const SetManagementPage: React.FC = () => {
   const [sets, setSets] = useState<ViewSetDetailDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentSet, setCurrentSet] = useState<ViewSetDetailDto | null>(null);
   const [currentSetDetail, setCurrentSetDetail] = useState<ViewSetDetailDto | null>(null);
-  
+
   // Form State
   const [formData, setFormData] = useState<Partial<CreateSetDto>>({
     Name: '',
@@ -50,14 +50,14 @@ const SetManagementPage: React.FC = () => {
 
   const filteredSets = useMemo(() => {
     if (!q) return sets;
-    return sets.filter(set => 
-        set.name?.toLowerCase().includes(q.toLowerCase())
+    return sets.filter(set =>
+      set.name?.toLowerCase().includes(q.toLowerCase())
     );
   }, [sets, q]);
 
   const paginatedSets = useMemo(() => {
-      const start = (page - 1) * PAGE_SIZE;
-      return filteredSets.slice(start, start + PAGE_SIZE);
+    const start = (page - 1) * PAGE_SIZE;
+    return filteredSets.slice(start, start + PAGE_SIZE);
   }, [filteredSets, page]);
 
   const totalPages = Math.ceil(filteredSets.length / PAGE_SIZE);
@@ -253,15 +253,15 @@ const SetManagementPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
+    <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Set Management</h1>
-        <button 
+        <h1 className="text-2xl font-bold text-gray-800">Quản lý bộ sưu tập</h1>
+        <button
           onClick={openCreateModal}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors"
+          className="bg-red-400 text-white px-4 py-2 rounded-3xl flex items-center gap-2 hover:bg-red-600 font-black"
         >
           <Plus size={20} />
-          Add Set
+          Thêm bộ sưu tập
         </button>
       </div>
 
@@ -276,9 +276,9 @@ const SetManagementPage: React.FC = () => {
       ) : (
         <>
           <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-            <SetListTable 
-              sets={paginatedSets} 
-              onEdit={openEditModal} 
+            <SetListTable
+              sets={paginatedSets}
+              onEdit={openEditModal}
               onDelete={async (set) => {
                 if (!set.setId) return;
                 if (!confirm(`Delete set "${set.name || set.setId}"?`)) return;
@@ -293,10 +293,10 @@ const SetManagementPage: React.FC = () => {
                 } finally {
                   setLoading(false);
                 }
-              }} 
+              }}
             />
           </div>
-          <Pagination 
+          <Pagination
             currentPage={page}
             totalPages={totalPages}
             onPageChange={(nextPage) => {
@@ -311,11 +311,11 @@ const SetManagementPage: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={currentSet ? 'Edit Set' : 'Add New Set'}
+        title={currentSet ? 'Chỉnh sửa bộ sưu tập' : 'Thêm bộ sưu tập'}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Set Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tên bộ sưu tập</label>
             <input
               type="text"
               name="Name"
@@ -327,7 +327,7 @@ const SetManagementPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
             <textarea
               name="Description"
               value={formData.Description}
@@ -339,7 +339,7 @@ const SetManagementPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Discount Percent (%)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Phần trăm giảm giá (%)</label>
             <input
               type="number"
               name="DiscountPercent"
@@ -353,7 +353,7 @@ const SetManagementPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">HÌnh ảnh</label>
             <input
               type="file"
               accept="image/*"
@@ -370,7 +370,7 @@ const SetManagementPage: React.FC = () => {
 
           <div className="border-t pt-4">
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium text-gray-700">Set Items</label>
+              <label className="block text-sm font-medium text-gray-700">Thành phần bộ sưu tập</label>
               {currentSet && !currentSetDetail && (
                 <span className="text-xs text-gray-500">Loading items...</span>
               )}
@@ -378,7 +378,7 @@ const SetManagementPage: React.FC = () => {
 
             <div className="grid grid-cols-12 gap-2 items-end">
               <div className="col-span-7">
-                <label className="block text-xs text-gray-600 mb-1">Product</label>
+                <label className="block text-xs text-gray-600 mb-1">Sản phẩm</label>
                 <select
                   value={pendingAddProductId}
                   onChange={(e) => {
@@ -387,7 +387,7 @@ const SetManagementPage: React.FC = () => {
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value={0}>Select product</option>
+                  <option value={0}>Chọn sản phẩm</option>
                   {products
                     .filter(p => {
                       const pid = p.productId || 0;
@@ -404,7 +404,7 @@ const SetManagementPage: React.FC = () => {
 
               <div className="col-span-3">
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs text-gray-600">Qty</label>
+                  <label className="block text-xs text-gray-600">Số lượng</label>
                   {pendingAddProductId ? (
                     <span className="text-[11px] text-gray-500">
                       Max: {totalStockByProductId[pendingAddProductId] ?? 0}
@@ -460,7 +460,7 @@ const SetManagementPage: React.FC = () => {
                   }}
                   className="w-full px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Add
+                  Thêm
                 </button>
               </div>
             </div>
@@ -477,14 +477,14 @@ const SetManagementPage: React.FC = () => {
                     <div key={item.productId} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
                       <div className="min-w-0">
                         <div className="text-sm font-medium text-gray-800 truncate">{product?.name || `Product #${item.productId}`}</div>
-                        <div className="text-xs text-gray-500">Qty: {item.quantity}</div>
+                        <div className="text-xs text-gray-500">Số lượng: {item.quantity}</div>
                       </div>
                       <button
                         type="button"
                         onClick={() => setSelectedItems(prev => prev.filter(i => i.productId !== item.productId))}
                         className="text-xs font-medium text-red-600 hover:text-red-800"
                       >
-                        Remove
+                        Xóa
                       </button>
                     </div>
                   );
@@ -500,14 +500,14 @@ const SetManagementPage: React.FC = () => {
               onClick={() => setIsModalOpen(false)}
               className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
             >
-              Cancel
+              Hủy
             </button>
             <button
               type="submit"
               disabled={loading || selectedItems.length === 0}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-red-400 text-white px-4 py-2 rounded-3xl flex items-center gap-2 hover:bg-red-600 font-black"
             >
-              {loading ? 'Saving...' : 'Save Set'}
+              {loading ? 'Đang lưu ...' : 'Lưu bộ sưu tập'}
             </button>
           </div>
         </form>

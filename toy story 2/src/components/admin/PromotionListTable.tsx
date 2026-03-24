@@ -22,9 +22,6 @@ const PromotionListTable: React.FC<PromotionListTableProps> = ({
               Name
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Description
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Date Range
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -49,9 +46,6 @@ const PromotionListTable: React.FC<PromotionListTableProps> = ({
                   )}
                   <span className="text-sm font-medium text-gray-900">{promotion.name}</span>
                 </div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {promotion.description}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 <div className="flex flex-col">
