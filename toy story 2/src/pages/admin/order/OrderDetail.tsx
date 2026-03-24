@@ -49,7 +49,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onClose, onRefresh }) 
         <div className="flex items-start justify-between border-b border-slate-200/80 bg-white/95 px-4 py-3.5">
           <div className="space-y-1">
             <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-              <Hash size={14} /> Don hang #{order.orderId}
+              <Hash size={14} /> Đơn hàng #{order.orderId}
             </div>
             <h2 className="text-lg font-black text-slate-900">Chi tiết đơn hàng</h2>
           </div>
