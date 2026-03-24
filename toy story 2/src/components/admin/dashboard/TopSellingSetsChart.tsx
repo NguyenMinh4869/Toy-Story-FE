@@ -24,11 +24,11 @@ const TopSellingSetsChart = () => {
 
     return (
         <ChartWidget
-            title="Bo san pham ban chay"
+            title="Bộ sưu tập bán chạy"
             data={data.topSellingSets}
             type="bar"
             horizontal={true}
-            description="Top 5 bo san pham ban chay nhat"
+            description="Top 5 bộ sưu tập bán chạy"
         />
     );
 };

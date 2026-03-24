@@ -24,11 +24,11 @@ const TopSellingProductsChart = () => {
 
     return (
         <ChartWidget
-            title="San pham ban chay"
+            title="Sản phẩm bán chạy"
             data={data.topSellingProducts}
             type="bar"
             horizontal={true}
-            description="Top 5 san pham ban chay nhat"
+            description="Top 5 sản phẩm bán chạy"
         />
     );
 };

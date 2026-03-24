@@ -14,11 +14,11 @@ const ProductListTable: React.FC<ProductListTableProps> = ({ products, onEdit, o
       <table className="w-full text-sm text-left text-gray-500">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50">
           <tr>
-            <th scope="col" className="px-6 py-3">Product Info</th>
-            <th scope="col" className="px-6 py-3">Brand / Category</th>
-            <th scope="col" className="px-6 py-3">Price</th>
-            <th scope="col" className="px-6 py-3">Status</th>
-            <th scope="col" className="px-6 py-3">Action</th>
+            <th scope="col" className="px-6 py-3">Thông tin</th>
+            <th scope="col" className="px-6 py-3">Thương hiệu/Phân loại</th>
+            <th scope="col" className="px-6 py-3">Giá thành</th>
+            <th scope="col" className="px-6 py-3">Trạng thái</th>
+            <th scope="col" className="px-6 py-3">Hành động</th>
           </tr>
         </thead>
         <tbody>
@@ -63,7 +63,7 @@ const ProductListTable: React.FC<ProductListTableProps> = ({ products, onEdit, o
                     onClick={() => onEdit(product)}
                     className="text-blue-600 hover:text-blue-900 text-xs font-medium flex items-center gap-1"
                   >
-                    <Edit size={14} /> EDIT
+                    <Edit size={14} /> Chỉnh sửa
                   </button>
                   <button
                     onClick={() => product.productId && onStatusChange(product.productId)}
@@ -75,9 +75,9 @@ const ProductListTable: React.FC<ProductListTableProps> = ({ products, onEdit, o
                     } disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
                     {(product.status?.toLowerCase() === 'active' || product.status?.toLowerCase() === 'đang bán') ? (
-                      <><PowerOff size={14} /> DISABLE</>
+                      <><PowerOff size={14} /> Vô hiệu hóa</>
                     ) : (
-                      <><Power size={14} /> ENABLE</>
+                      <><Power size={14} /> Kích hoạt</>
                     )}
                   </button>
                 </div>

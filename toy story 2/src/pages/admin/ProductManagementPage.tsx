@@ -4,10 +4,10 @@ import Pagination from '../../components/ui/Pagination';
 import { Plus } from 'lucide-react';
 import ProductListTable from '../../components/admin/ProductListTable';
 import Modal from '../../components/ui/Modal';
-import { 
-  createProduct, 
-  updateProduct, 
-  changeProductStatus, 
+import {
+  createProduct,
+  updateProduct,
+  changeProductStatus,
   filterProducts,
   getProductById
 } from '../../services/productService';
@@ -32,10 +32,10 @@ const ProductManagementPage: React.FC = () => {
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const page = Math.max(1, Number(searchParams.get('page') || '1'));
   const pageSize = Math.max(1, Number(searchParams.get('pageSize') || String(PAGE_SIZE)));
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<ViewProductDto | null>(null);
-  
+
   // Form State
   const [formData, setFormData] = useState<Partial<CreateProductDto>>({
     Name: '',
@@ -79,8 +79,8 @@ const ProductManagementPage: React.FC = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'Price' || name === 'CategoryId' || name === 'BrandId' || name === 'Gender' || name === 'AgeRange' 
-        ? Number(value) 
+      [name]: name === 'Price' || name === 'CategoryId' || name === 'BrandId' || name === 'Gender' || name === 'AgeRange'
+        ? Number(value)
         : value
     }));
   };
@@ -117,11 +117,11 @@ const ProductManagementPage: React.FC = () => {
     const page = Math.max(1, Number(searchParams.get('page') || '1'));
 
     const filtered = allProducts.filter(p => {
-        if (!q) return true;
-        const lowerCaseQuery = q.toLowerCase();
-        return p.name?.toLowerCase().includes(lowerCaseQuery) ||
-               p.brandName?.toLowerCase().includes(lowerCaseQuery) ||
-               p.categoryName?.toLowerCase().includes(lowerCaseQuery);
+      if (!q) return true;
+      const lowerCaseQuery = q.toLowerCase();
+      return p.name?.toLowerCase().includes(lowerCaseQuery) ||
+        p.brandName?.toLowerCase().includes(lowerCaseQuery) ||
+        p.categoryName?.toLowerCase().includes(lowerCaseQuery);
     });
 
     const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -185,14 +185,14 @@ const ProductManagementPage: React.FC = () => {
 
 
   return (
-    <div className="p-6">
+    <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-black text-gray-800">Product Management</h1>
-        <button 
+        <h1 className="text-2xl font-black text-gray-800">Quản lý sản phẩm</h1>
+        <button
           onClick={openCreateModal}
-          className="bg-blue-600 text-white px-4 py-2 rounded-2xl flex items-center gap-2 hover:bg-blue-700"
+          className="bg-red-400 text-white px-4 py-2 rounded-3xl flex items-center gap-2 hover:bg-red-600 font-black"
         >
-          <Plus size={20} /> Add Product
+          <Plus size={20} /> Thêm sản phẩm
         </button>
       </div>
 
@@ -201,10 +201,10 @@ const ProductManagementPage: React.FC = () => {
 
       {!loading && !error && (
         <>
-          <ProductListTable 
-            products={paginatedProducts} 
-            onEdit={openEditModal} 
-            onStatusChange={handleStatusChange} 
+          <ProductListTable
+            products={paginatedProducts}
+            onEdit={openEditModal}
+            onStatusChange={handleStatusChange}
           />
           <Pagination
             currentPage={page}
@@ -222,7 +222,7 @@ const ProductManagementPage: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={currentProduct ? 'Edit Product' : 'Add Product'}
+        title={currentProduct ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm'}
         size="xxl"
       >
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -230,7 +230,7 @@ const ProductManagementPage: React.FC = () => {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Name</label>
+                  <label className="block text-sm font-medium text-gray-700">Tên</label>
                   <input
                     type="text"
                     name="Name"
@@ -241,7 +241,7 @@ const ProductManagementPage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Price</label>
+                  <label className="block text-sm font-medium text-gray-700">Giá tiền</label>
                   <input
                     type="number"
                     name="Price"
@@ -255,7 +255,7 @@ const ProductManagementPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Description</label>
+                <label className="block text-sm font-medium text-gray-700">Mô tả</label>
                 <textarea
                   name="Description"
                   value={formData.Description}
@@ -268,7 +268,7 @@ const ProductManagementPage: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Category</label>
+                  <label className="block text-sm font-medium text-gray-700">Phân loại</label>
                   <select
                     name="CategoryId"
                     value={formData.CategoryId}
@@ -283,25 +283,26 @@ const ProductManagementPage: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Age Range</label>
+                  <label className="block text-sm font-medium text-gray-700">Độ tuổi</label>
                   <select
                     name="AgeRange"
                     value={formData.AgeRange}
                     onChange={handleInputChange}
                     className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
                   >
-                    <option value={0}>0-6 Months</option>
-                    <option value={1}>6-12 Months</option>
-                    <option value={2}>1-3 Years</option>
-                    <option value={3}>3-6 Years</option>
-                    <option value={4}>Above 6 Years</option>
+                    <option value={0}>0-6 tháng</option>
+                    <option value={1}>6-12 tháng</option>
+                    <option value={2}>1-3 tuổi</option>
+                    <option value={3}>3-6 tuổi</option>
+                    <option value={4}>Trên 6 tuổi</option>
                   </select>
                 </div>
+
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Brand</label>
+                  <label className="block text-sm font-medium text-gray-700">Thương hiệu</label>
                   <select
                     name="BrandId"
                     value={formData.BrandId}
@@ -316,7 +317,7 @@ const ProductManagementPage: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Origin</label>
+                  <label className="block text-sm font-medium text-gray-700">Xuất xứ</label>
                   <input
                     type="text"
                     name="Origin"
@@ -329,7 +330,7 @@ const ProductManagementPage: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Material</label>
+                  <label className="block text-sm font-medium text-gray-700">Chất lượng</label>
                   <input
                     type="text"
                     name="Material"
@@ -339,15 +340,15 @@ const ProductManagementPage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Gender</label>
+                  <label className="block text-sm font-medium text-gray-700">Giới tính</label>
                   <select
                     name="Gender"
                     value={formData.Gender}
                     onChange={handleInputChange}
                     className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
                   >
-                    <option value={0}>Boy</option>
-                    <option value={1}>Girl</option>
+                    <option value={0}>Nam</option>
+                    <option value={1}>Nữ</option>
                     <option value={2}>Unisex</option>
                   </select>
                 </div>
@@ -355,7 +356,7 @@ const ProductManagementPage: React.FC = () => {
             </div>
 
             <div className="flex h-full flex-col rounded-2xl border border-gray-200 bg-gray-50 p-4">
-              <label className="block text-sm font-medium text-gray-700">Image</label>
+              <label className="block text-sm font-medium text-gray-700">Hình ảnh</label>
               <input
                 type="file"
                 accept="image/*"
@@ -389,13 +390,13 @@ const ProductManagementPage: React.FC = () => {
               onClick={() => setIsModalOpen(false)}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-2xl hover:bg-gray-200"
             >
-              Cancel
+              Hủy
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-2xl hover:bg-blue-700"
+              className="bg-red-400 text-white px-4 py-2 rounded-3xl flex items-center gap-2 hover:bg-red-600 font-black"
             >
-              {currentProduct ? 'Update Product' : 'Create Product'}
+              {currentProduct ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm'}
             </button>
           </div>
         </form>

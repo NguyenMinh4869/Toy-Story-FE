@@ -24,11 +24,11 @@ const WarehouseWorkloadChart = () => {
 
     return (
         <ChartWidget
-            title="Khoi luong cong viec kho"
+            title="Khối lượng công việc kho"
             data={data.warehouseWorkload}
             type="bar"
             horizontal={true}
-            description="So don hang dang xu ly theo tung kho"
+            description="Số lượng đơn hàng theo từng kho"
         />
     );
 };

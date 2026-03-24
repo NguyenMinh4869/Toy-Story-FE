@@ -39,14 +39,14 @@ const OrderStatusChart = () => {
 
     return (
         <ChartWidget
-            title="Phan bo trang thai don hang"
+            title="Phân bố trạng thái ngân hàng"
             data={data.orderStatusDistribution.map((item) => ({
                 ...item,
                 label: toVietnameseOrderStatus(item.label),
             }))}
             type="pie"
             horizontal={false}
-            description="Ty le don hang theo tung trang thai"
+            description="Tỷ lệ ngân hàng theo trạng thái"
         />
     );
 };

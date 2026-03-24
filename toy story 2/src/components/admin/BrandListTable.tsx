@@ -14,9 +14,9 @@ const BrandListTable: React.FC<BrandListTableProps> = ({ brands, onEdit, onChang
       <table className="w-full text-sm text-left text-gray-500">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50">
           <tr>
-            <th scope="col" className="px-6 py-3">Brand Info</th>
-            <th scope="col" className="px-6 py-3">Status</th>
-            <th scope="col" className="px-6 py-3">Action</th>
+            <th scope="col" className="px-6 py-3">Thông tin</th>
+            <th scope="col" className="px-6 py-3">Trạng thái</th>
+            <th scope="col" className="px-6 py-3">Hàng động</th>
           </tr>
         </thead>
         <tbody>
@@ -52,7 +52,7 @@ const BrandListTable: React.FC<BrandListTableProps> = ({ brands, onEdit, onChang
                     onClick={() => onEdit(brand)}
                     className="text-blue-600 hover:text-blue-900 text-xs font-medium flex items-center gap-1"
                   >
-                    <Edit size={14} /> EDIT
+                    <Edit size={14} /> Chỉnh sửa
                   </button>
                   <button
                     onClick={() => brand.brandId && onChangeStatus(brand.brandId)}
@@ -63,9 +63,9 @@ const BrandListTable: React.FC<BrandListTableProps> = ({ brands, onEdit, onChang
                     }`}
                   >
                     {(brand.status?.toLowerCase() === 'active' || brand.status?.toLowerCase() === 'đang hoạt động') ? (
-                      <><PowerOff size={14} /> DISABLE</>
+                      <><PowerOff size={14} /> Vô hiệu hóa</>
                     ) : (
-                      <><Power size={14} /> ENABLE</>
+                      <><Power size={14} /> Kích hoạt</>
                     )}
                   </button>
                 </div>

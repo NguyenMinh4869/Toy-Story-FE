@@ -35,22 +35,22 @@ const DashboardPage: React.FC = () => {
       icon: <DollarSign className="text-red-500" />,
     },
     {
-      title: 'Don hang',
+      title: 'Đơn hàng',
       value: summary?.totalOrders ?? 0,
       icon: <ShoppingBag className="text-red-500" />,
     },
     {
-      title: 'San pham',
+      title: 'Sản phẩm',
       value: summary?.totalProducts ?? 0,
       icon: <Package className="text-red-500" />,
     },
     {
-      title: 'Bo san pham',
+      title: 'Bộ sưu tập',
       value: summary?.totalSets ?? 0,
       icon: <Boxes className="text-red-500" />,
     },
     {
-      title: 'Nhan vien',
+      title: 'Nhân viên',
       value: summary?.totalStaff ?? 0,
       icon: <Users className="text-red-500" />,
     },

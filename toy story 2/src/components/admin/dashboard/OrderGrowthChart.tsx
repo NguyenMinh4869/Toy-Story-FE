@@ -30,11 +30,11 @@ const OrderGrowthChart = () => {
 
     return (
         <ChartWidget
-            title="Tang truong don hang"
+            title="Tăng trưởng đơn hàng"
             data={chartData}
             type="line"
             horizontal={false}
-            description="So luong don hang moi moi ngay trong 30 ngay gan nhat"
+            description="Số lượng đơn hàng trong 30 ngày gần nhất"
         />
     );
 };
