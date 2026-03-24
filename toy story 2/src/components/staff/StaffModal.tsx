@@ -292,209 +292,215 @@ const StaffModal: React.FC<StaffModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title={currentStaff ? "Edit Staff" : "Add New Staff"}
+      title={currentStaff ? "Chỉnh sửa nhân viên" : "Thêm nhân viên mới"}
+      size="xxl"
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Full Name */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Full Name <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-        </div>
-
-        {/* Email */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Email <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-            disabled={!!currentStaff}
-          />
-        </div>
-
-        {/* Password fields for new staff */}
-        {!currentStaff && (
-          <>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Password <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Confirm Password <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-          </>
-        )}
-
-        {/* Phone Number */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Phone Number <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="tel"
-            name="phoneNumber"
-            value={formData.phoneNumber}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-        </div>
-
-        {/* Province Selection */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Province/City
-          </label>
-          <select
-            value={selectedProvince}
-            onChange={(e) => setSelectedProvince(Number(e.target.value) || "")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select Province</option>
-            {provinces.map((p) => (
-              <option key={p.code} value={p.code}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* District Selection */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            District
-          </label>
-          <select
-            value={selectedDistrict}
-            onChange={(e) => setSelectedDistrict(Number(e.target.value) || "")}
-            disabled={!selectedProvince}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-          >
-            <option value="">Select District</option>
-            {districts.map((d) => (
-              <option key={d.code} value={d.code}>
-                {d.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Ward Selection */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Ward/Commune
-          </label>
-          <select
-            value={selectedWard}
-            onChange={(e) => setSelectedWard(Number(e.target.value) || "")}
-            disabled={!selectedDistrict}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-          >
-            <option value="">Select Ward</option>
-            {wards.map((w) => (
-              <option key={w.code} value={w.code}>
-                {w.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Street Address */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Street Address
-          </label>
-          <input
-            type="text"
-            name="address"
-            value={formData.address}
-            onChange={handleInputChange}
-            placeholder="Số nhà, tên đường"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        {/* Address Preview */}
-        {previewAddress && (
-          <div className="bg-gray-50 p-3 rounded-lg">
-            <p className="text-sm text-gray-600">
-              <span className="font-medium">Full Address:</span>{" "}
-              {previewAddress}
-            </p>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid gap-4 lg:grid-cols-2">
+          {/* Full Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Họ và tên <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              className="w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+              required
+            />
           </div>
-        )}
 
-        {/* Warehouse Assignment */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Warehouse <span className="text-red-500">*</span>
-          </label>
-          <select
-            name="warehouseId"
-            value={formData.warehouseId}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          >
-            <option value={0}>Select Warehouse</option>
-            {warehouses.map((w) => (
-              <option key={w.warehouseId} value={w.warehouseId}>
-                {w.name} - {w.location}
-              </option>
-            ))}
-          </select>
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              className="w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+              required
+              disabled={!!currentStaff}
+            />
+          </div>
+
+          {/* Password fields for new staff */}
+          {!currentStaff && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Mật khẩu <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className="w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Xác nhận mật khẩu <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  className="w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                  required
+                />
+              </div>
+            </>
+          )}
+
+          {/* Phone Number */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Số điện thoại <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="tel"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleInputChange}
+              className="w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+              required
+            />
+          </div>
+
+          {/* Warehouse Assignment */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Kho làm việc <span className="text-red-500">*</span>
+            </label>
+            <select
+              name="warehouseId"
+              value={formData.warehouseId}
+              onChange={handleInputChange}
+              className="w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+              required
+            >
+              <option value={0}>Chọn Kho</option>
+              {warehouses.map((w) => (
+                <option key={w.warehouseId} value={w.warehouseId}>
+                  {w.name} - {w.location}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Location Selectors Nested Grid */}
+          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Province Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Tỉnh/Thành phố
+              </label>
+              <select
+                value={selectedProvince}
+                onChange={(e) => setSelectedProvince(Number(e.target.value) || "")}
+                className="w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+              >
+                <option value="">Chọn Tỉnh/Thành phố</option>
+                {provinces.map((p) => (
+                  <option key={p.code} value={p.code}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* District Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Quận/Huyện
+              </label>
+              <select
+                value={selectedDistrict}
+                onChange={(e) => setSelectedDistrict(Number(e.target.value) || "")}
+                disabled={!selectedProvince}
+                className="w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              >
+                <option value="">Chọn Quận/Huyện</option>
+                {districts.map((d) => (
+                  <option key={d.code} value={d.code}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Ward Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Phường/Xã
+              </label>
+              <select
+                value={selectedWard}
+                onChange={(e) => setSelectedWard(Number(e.target.value) || "")}
+                disabled={!selectedDistrict}
+                className="w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              >
+                <option value="">Chọn Phường/Xã</option>
+                {wards.map((w) => (
+                  <option key={w.code} value={w.code}>
+                    {w.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Street Address */}
+          <div className="lg:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Địa chỉ cụ thể
+            </label>
+            <input
+              type="text"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+              placeholder="Số nhà, tên đường"
+              className="w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+            />
+          </div>
+
+          {/* Address Preview */}
+          {previewAddress && (
+            <div className="lg:col-span-2 bg-gray-50 p-3 rounded-2xl mt-[-8px]">
+              <p className="text-sm text-gray-600 break-words">
+                <span className="font-medium">Địa chỉ đầy đủ:</span>{" "}
+                {previewAddress}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Form Actions */}
-        <div className="flex justify-end gap-3 pt-4 border-t">
+        <div className="flex justify-end gap-3 pt-2">
           <button
             type="button"
             onClick={handleClose}
-            className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-2xl hover:bg-gray-200 transition-colors"
             disabled={loading}
           >
-            Cancel
+            Hủy
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 min-w-[100px]"
+            className="bg-red-400 text-white px-4 py-2 rounded-3xl flex items-center gap-2 hover:bg-red-600 font-black disabled:opacity-50"
           >
-            {loading ? "Saving..." : "Save Staff"}
+            {loading ? "Đang lưu..." : "Lưu nhân viên"}
           </button>
         </div>
       </form>

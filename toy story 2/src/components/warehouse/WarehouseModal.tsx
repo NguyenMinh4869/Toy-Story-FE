@@ -235,125 +235,128 @@ const WarehouseModal: React.FC<WarehouseModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title={currentWarehouse ? "Edit Warehouse" : "Add New Warehouse"}
+      title={currentWarehouse ? "Chỉnh sửa kho" : "Thêm kho mới"}
+      size="xxl"
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Warehouse Name */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Warehouse Name <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            name="Name"
-            value={formData.Name}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-            placeholder="Enter warehouse name"
-          />
-        </div>
-
-        {/* Province Selection */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Province/City
-          </label>
-          <select
-            value={selectedProvince}
-            onChange={(e) => setSelectedProvince(Number(e.target.value) || "")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select Province</option>
-            {provinces.map((p) => (
-              <option key={p.code} value={p.code}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* District Selection */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            District
-          </label>
-          <select
-            value={selectedDistrict}
-            onChange={(e) => setSelectedDistrict(Number(e.target.value) || "")}
-            disabled={!selectedProvince}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-          >
-            <option value="">Select District</option>
-            {districts.map((d) => (
-              <option key={d.code} value={d.code}>
-                {d.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Ward Selection */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Ward/Commune
-          </label>
-          <select
-            value={selectedWard}
-            onChange={(e) => setSelectedWard(Number(e.target.value) || "")}
-            disabled={!selectedDistrict}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-          >
-            <option value="">Select Ward</option>
-            {wards.map((w) => (
-              <option key={w.code} value={w.code}>
-                {w.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Street Address */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Street Address
-          </label>
-          <input
-            type="text"
-            name="Location"
-            value={formData.Location}
-            onChange={handleInputChange}
-            placeholder="Số nhà, tên đường"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        {/* Address Preview */}
-        {previewAddress && (
-          <div className="bg-gray-50 p-3 rounded-lg">
-            <p className="text-sm text-gray-600">
-              <span className="font-medium">Full Address:</span>{" "}
-              {previewAddress}
-            </p>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Warehouse Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Tên kho <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="Name"
+              value={formData.Name}
+              onChange={handleInputChange}
+              className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+              required
+              placeholder="Nhập tên kho"
+            />
           </div>
-        )}
+
+          {/* Province Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Tỉnh/Thành phố
+            </label>
+            <select
+              value={selectedProvince}
+              onChange={(e) => setSelectedProvince(Number(e.target.value) || "")}
+              className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+            >
+              <option value="">Chọn Tỉnh/Thành phố</option>
+              {provinces.map((p) => (
+                <option key={p.code} value={p.code}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* District Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Quận/Huyện
+            </label>
+            <select
+              value={selectedDistrict}
+              onChange={(e) => setSelectedDistrict(Number(e.target.value) || "")}
+              disabled={!selectedProvince}
+              className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            >
+              <option value="">Chọn Quận/Huyện</option>
+              {districts.map((d) => (
+                <option key={d.code} value={d.code}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Ward Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Phường/Xã
+            </label>
+            <select
+              value={selectedWard}
+              onChange={(e) => setSelectedWard(Number(e.target.value) || "")}
+              disabled={!selectedDistrict}
+              className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            >
+              <option value="">Chọn Phường/Xã</option>
+              {wards.map((w) => (
+                <option key={w.code} value={w.code}>
+                  {w.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Street Address */}
+          <div className="lg:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Địa chỉ cụ thể
+            </label>
+            <input
+              type="text"
+              name="Location"
+              value={formData.Location}
+              onChange={handleInputChange}
+              placeholder="Số nhà, tên đường"
+              className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+            />
+          </div>
+
+          {/* Address Preview */}
+          {previewAddress && (
+            <div className="lg:col-span-2 bg-gray-50 p-3 rounded-2xl">
+              <p className="text-sm text-gray-600">
+                <span className="font-medium">Địa chỉ đầy đủ:</span>{" "}
+                {previewAddress}
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* Form Actions */}
-        <div className="flex justify-end gap-3 pt-4 border-t">
+        <div className="flex justify-end gap-3 pt-2">
           <button
             type="button"
             onClick={handleClose}
-            className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-2xl hover:bg-gray-200"
             disabled={loading}
           >
-            Cancel
+            Hủy
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 min-w-[100px]"
+            className="bg-red-400 text-white px-4 py-2 rounded-3xl flex items-center gap-2 hover:bg-red-600 font-black disabled:opacity-50"
           >
-            {loading ? "Saving..." : "Save Warehouse"}
+            {loading ? "Đang lưu..." : "Lưu kho"}
           </button>
         </div>
       </form>

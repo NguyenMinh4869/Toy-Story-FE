@@ -117,10 +117,10 @@ const RegisterPage: React.FC = () => {
 
         <div className="flex-1 flex flex-col items-center justify-center px-4 bg-white overflow-y-auto max-xl:w-full max-xl:p-6 relative">
           <h1 className="text-[32px] font-black text-[#c1121f] text-left w-[460px] max-w-[92%] max-xl:text-[28px] max-md:text-[24px]">
-            Create Account
+            Tạo tài khoản
           </h1>
           <p className="text-sm font-bold text-[#d46a6a] text-left w-[460px] max-w-[92%]">
-            Join us and start your magical journey!
+            Tham gia cùng chúng tôi và bắt đầu hành trình kỳ diệu của bạn!
           </p>
 
           <div className="w-[460px] max-w-[92%] h-px bg-gradient-to-r from-transparent via-black/20 to-transparent mt-5 mb-10" />
@@ -145,7 +145,7 @@ const RegisterPage: React.FC = () => {
           >
             <div className="flex flex-col gap-1.5">
               <label className="text-base font-bold text-black m-0">
-                Full Name
+                Họ và tên
               </label>
               <input
                 type="text"
@@ -178,7 +178,7 @@ const RegisterPage: React.FC = () => {
 
               <div className="flex flex-col gap-1">
                 <label className=" text-base font-bold text-black">
-                  Phone Number
+                  Số điện thoại
                 </label>
                 <input
                   type="tel"
@@ -196,7 +196,7 @@ const RegisterPage: React.FC = () => {
             <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
               <div className="flex flex-col gap-1">
                 <label className="text-base font-bold text-black ">
-                  Password
+                  Mật khẩu
                 </label>
                 <input
                   type="password"
@@ -212,7 +212,7 @@ const RegisterPage: React.FC = () => {
 
               <div className="flex flex-col gap-1">
                 <label className=" text-base font-bold text-black m-0">
-                  Confirm Password
+                  Xác nhận mật khẩu
                 </label>
                 <input
                   type="password"
@@ -233,17 +233,17 @@ const RegisterPage: React.FC = () => {
               className={`w-full h-[48px] bg-[#f20000] rounded-3xl cursor-pointer flex items-center justify-center transition-colors p-0 ${isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-[#d10000]"}`}
             >
               <span className=" text-base font-black text-[#fffafa] ">
-                {isLoading ? "Creating account..." : "Create Account"}
+                {isLoading ? "Đang tạo tài khoản..." : "Tạo tài khoản"}
               </span>
             </button>
 
             <p className="text-sm font-bold text-black text-center">
-              Already have an account?{" "}
+              Đã có tài khoản?{" "}
               <Link
                 to={ROUTES.LOGIN}
                 className="text-[#ff0404] no-underline transition-opacity hover:opacity-80"
               >
-                Login
+                Đăng nhập
               </Link>
             </p>
           </form>

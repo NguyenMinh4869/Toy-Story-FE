@@ -114,15 +114,15 @@ const StaffManagementPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
+    <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Staff Management</h1>
+        <h1 className="text-2xl font-black text-gray-800">Quản lý nhân viên</h1>
         <button
           onClick={openCreateModal}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors"
+          className="bg-red-400 text-white px-4 py-2 rounded-3xl flex items-center gap-2 hover:bg-red-600 font-black"
         >
           <Plus size={20} />
-          Add Staff
+          Thêm nhân viên
         </button>
       </div>
 

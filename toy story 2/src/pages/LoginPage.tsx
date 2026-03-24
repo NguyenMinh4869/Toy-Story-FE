@@ -98,8 +98,8 @@ const LoginPage: React.FC = () => {
         </div>
 
         <div className="flex-1 flex flex-col items-center justify-center py-10 px-4 bg-white overflow-y-auto max-xl:w-full max-xl:p-6 relative">
-          <h1 className=" text-[32px] font-black text-[#c1121f] text-left m-0 mb-0 w-[460px] max-w-[92%] max-xl:text-[28px] max-md:text-[24px]" data-node-id="51:13">Welcome Back!</h1>
-          <p className="text-sm font-bold text-[#d46a6a] text-left m-0 mb-0 w-[460px] max-w-[92%]" data-node-id="51:14">Ready for more fun? Log in to your account.</p>
+          <h1 className=" text-[32px] font-black text-[#c1121f] text-left m-0 mb-0 w-[460px] max-w-[92%] max-xl:text-[28px] max-md:text-[24px]" data-node-id="51:13">Chào mừng trở lại!</h1>
+          <p className="text-sm font-bold text-[#d46a6a] text-left m-0 mb-0 w-[460px] max-w-[92%]" data-node-id="51:14">Sẵn sàng cho nhiều niềm vui hơn? Đăng nhập vào tài khoản của bạn.</p>
 
           <div className="w-[460px] max-w-[92%] h-px bg-gradient-to-r from-transparent via-black/20 to-transparent mt-5 mb-10" />
 
@@ -114,7 +114,7 @@ const LoginPage: React.FC = () => {
               <label className="text-base font-bold text-black m-0" data-node-id="52:2">Email</label>
               <input
                 type="email"
-                placeholder="Type your email address"
+                placeholder="Nhập địa chỉ email của bạn"
                 className={`w-full h-[40px] px-3.5 rounded-2xl bg-white text-sm text-black placeholder:text-gray-400 outline-none box-border focus:border-[#f20000] shadow-md`}
                 data-node-id="51:15"
                 {...register('email')}
@@ -126,11 +126,11 @@ const LoginPage: React.FC = () => {
 
             <div className="flex flex-col gap-2.5">
               <div className="flex justify-between items-center">
-                <label className=" text-base font-bold text-black m-0" data-node-id="52:3">Password</label>
+                <label className=" text-base font-bold text-black m-0" data-node-id="52:3">Mật khẩu</label>
               </div>
               <input
                 type="password"
-                placeholder="Type your password"
+                placeholder="Nhập mật khẩu của bạn"
                 className={`w-full h-[40px] px-3.5 rounded-2xl bg-white text-sm text-black placeholder:text-gray-400 outline-none box-border focus:border-[#f20000] shadow-md`}
                 data-node-id="52:5"
                 {...register('password')}
@@ -139,7 +139,7 @@ const LoginPage: React.FC = () => {
                 <span className=" text-xs text-[#ff0404] -mt-1">{errors.password.message}</span>
               )}
               <div className="flex justify-end">
-                <a href="#" className="text-xs font-normal text-[#ff0404] no-underline transition-opacity hover:opacity-80" data-node-id="52:15">forgot password?</a>
+                <a href="#" className="text-xs font-normal text-[#ff0404] no-underline transition-opacity hover:opacity-80" data-node-id="52:15">Quên mật khẩu?</a>
               </div>
             </div>
 
@@ -150,12 +150,12 @@ const LoginPage: React.FC = () => {
               data-node-id="52:11"
             >
               <span className="text-lg font-bold text-[#fffafa] m-0" data-node-id="52:13">
-                {isLoading ? 'Logging in...' : 'Login'}
+                {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
               </span>
             </button>
 
             <p className="text-sm font-bold text-black text-center m-[15px_0_0_0]" data-node-id="52:17">
-              Don't have an account? <Link to={ROUTES.REGISTER} className="text-[#ff0404] no-underline transition-opacity hover:opacity-80">Create an account</Link>
+              Chưa có tài khoản? <Link to={ROUTES.REGISTER} className="text-[#ff0404] no-underline transition-opacity hover:opacity-80">Tạo tài khoản</Link>
             </p>
           </form>
         </div>

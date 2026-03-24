@@ -63,6 +63,17 @@ const VoucherManagementPage: React.FC = () => {
     ValidTo: '',
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  const getDiscountValueLabel = () => {
+    switch (Number(formData.DiscountType)) {
+      case 0: return "Giá trị giảm (%)";
+      case 1: return "Giá trị giảm (VNĐ)";
+      case 2: return "Mức giảm phí ship tối đa (VNĐ)";
+      case 3: return "Số lượng tặng (Mua X tặng Y)";
+      default: return "Giá trị giảm";
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -99,7 +110,12 @@ const VoucherManagementPage: React.FC = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setImageFile(e.target.files[0]);
+      const file = e.target.files[0];
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    } else {
+      setImageFile(null);
+      setImagePreview(null);
     }
   };
 
@@ -116,6 +132,7 @@ const VoucherManagementPage: React.FC = () => {
       ValidTo: '',
     });
     setImageFile(null);
+    setImagePreview(null);
     setIsEditing(false);
     setCurrentVoucherId(null);
   };
@@ -140,6 +157,8 @@ const VoucherManagementPage: React.FC = () => {
         ValidFrom: details.validFrom ? details.validFrom.split('T')[0] : '',
         ValidTo: details.validTo ? details.validTo.split('T')[0] : '',
       });
+      // Try to set image preview if there is an existing image (assume url field might exist)
+      setImagePreview((details as any).imageUrl || null);
       setCurrentVoucherId(voucher.voucherId);
       setIsEditing(true);
       setIsModalOpen(true);
@@ -182,14 +201,14 @@ const VoucherManagementPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Voucher Management</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-black text-gray-900">Quản lý Voucher</h1>
         <button
           onClick={handleOpenCreate}
-          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+          className="bg-red-400 text-white px-4 py-2 rounded-3xl flex items-center gap-2 hover:bg-red-600 font-black"
         >
           <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
-          Add Voucher
+          Thêm Voucher
         </button>
       </div>
 
@@ -229,145 +248,171 @@ const VoucherManagementPage: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={isEditing ? 'Edit Voucher' : 'Create Voucher'}
+        title={isEditing ? 'Chỉnh sửa Voucher' : 'Thêm Voucher mới'}
+        size="xxl"
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Code</label>
-            <input
-              type="text"
-              name="Code"
-              value={formData.Code}
-              onChange={handleInputChange}
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
-            />
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Mã Voucher</label>
+                <input
+                  type="text"
+                  name="Code"
+                  value={formData.Code}
+                  onChange={handleInputChange}
+                  required
+                  className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                />
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Name</label>
-            <input
-              type="text"
-              name="Name"
-              value={formData.Name}
-              onChange={handleInputChange}
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
-            />
-          </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Tên Voucher</label>
+                <input
+                  type="text"
+                  name="Name"
+                  value={formData.Name}
+                  onChange={handleInputChange}
+                  required
+                  className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                />
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Description</label>
-            <textarea
-              name="Description"
-              value={formData.Description}
-              onChange={handleInputChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
-            />
-          </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Mô tả</label>
+                <textarea
+                  name="Description"
+                  value={formData.Description}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                  rows={2}
+                />
+              </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Discount Type</label>
-              <select
-                name="DiscountType"
-                value={formData.DiscountType}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
-              >
-                <option value={0}>Percentage</option>
-                <option value={1}>Fixed Amount</option>
-                <option value={2}>Free Shipping</option>
-                <option value={3}>Buy X Get Y</option>
-              </select>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Loại giảm giá</label>
+                  <select
+                    name="DiscountType"
+                    value={formData.DiscountType}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                  >
+                    <option value={0}>Phần trăm</option>
+                    <option value={1}>Số tiền cố định</option>
+                    <option value={2}>Miễn phí vận chuyển</option>
+                    <option value={3}>Mua X tặng Y</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    {getDiscountValueLabel()}
+                  </label>
+                  <input
+                    type="number"
+                    name="DiscountValue"
+                    value={formData.DiscountValue}
+                    onChange={handleInputChange}
+                    required
+                    min="0"
+                    className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Số lượt sử dụng tối đa</label>
+                  <input
+                    type="number"
+                    name="MaxUsage"
+                    value={formData.MaxUsage}
+                    onChange={handleInputChange}
+                    min="0"
+                    className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Số lượt dùng tối đa / khách
+                  </label>
+                  <input
+                    type="number"
+                    name="MaxUsagePerCustomer"
+                    value={formData.MaxUsagePerCustomer}
+                    onChange={handleInputChange}
+                    min="0"
+                    className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Ngày bắt đầu</label>
+                  <input
+                    type="date"
+                    name="ValidFrom"
+                    value={formData.ValidFrom}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Ngày kết thúc</label>
+                  <input
+                    type="date"
+                    name="ValidTo"
+                    value={formData.ValidTo}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                  />
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Discount Value</label>
+
+            {/* Image Upload section */}
+            <div className="flex h-full flex-col rounded-2xl border border-gray-200 bg-gray-50 p-4">
+              <label className="block text-sm font-medium text-gray-700">Hình ảnh</label>
               <input
-                type="number"
-                name="DiscountValue"
-                value={formData.DiscountValue}
-                onChange={handleInputChange}
-                required
-                min="0"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="mt-2 block w-full text-sm text-gray-500
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-full file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-blue-50 file:text-blue-700
+                  hover:file:bg-blue-100"
               />
+              <div className="mt-4 flex-1">
+                 <div className="flex h-full min-h-[320px] max-h-[400px] items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-white overflow-hidden text-center text-sm text-gray-500">
+                    {imagePreview ? (
+                      <img src={imagePreview} alt="Preview" className="w-full h-full object-contain" />
+                    ) : (
+                      "Chọn một hình ảnh để hiển thị ở đây"
+                    )}
+                 </div>
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Max Usage</label>
-              <input
-                type="number"
-                name="MaxUsage"
-                value={formData.MaxUsage}
-                onChange={handleInputChange}
-                min="0"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Max Usage Per Customer
-              </label>
-              <input
-                type="number"
-                name="MaxUsagePerCustomer"
-                value={formData.MaxUsagePerCustomer}
-                onChange={handleInputChange}
-                min="0"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Valid From</label>
-              <input
-                type="date"
-                name="ValidFrom"
-                value={formData.ValidFrom}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Valid To</label>
-              <input
-                type="date"
-                name="ValidTo"
-                value={formData.ValidTo}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Image</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
-            />
-          </div>
-
-          <div className="flex justify-end space-x-3 pt-4">
+          <div className="flex justify-end gap-3 pt-2">
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-2xl hover:bg-gray-200"
             >
-              Cancel
+              Hủy
             </button>
             <button
               type="submit"
-              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+              className="bg-red-400 text-white px-4 py-2 rounded-3xl flex items-center gap-2 hover:bg-red-600 font-black"
             >
-              {isEditing ? 'Update' : 'Create'}
+              {isEditing ? 'Cập nhật' : 'Thêm mới'}
             </button>
           </div>
         </form>

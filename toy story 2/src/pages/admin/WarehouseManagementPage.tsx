@@ -120,17 +120,17 @@ const WarehouseManagementPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
+    <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">
-          Warehouse Management
+        <h1 className="text-2xl font-black text-gray-800">
+          Quản lý kho
         </h1>
         <button
           onClick={openCreateModal}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors"
+          className="bg-red-400 text-white px-4 py-2 rounded-3xl flex items-center gap-2 hover:bg-red-600 font-black"
         >
           <Plus size={20} />
-          Add Warehouse
+          Thêm kho mới
         </button>
       </div>
 

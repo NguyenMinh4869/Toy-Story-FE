@@ -1,7 +1,7 @@
 import { Ward, District, Province } from "@/types/LocationDTO";
 
 class LocationService {
-  private baseUrl = "https://localhost:7217/api/locations";
+  private baseUrl = "https://toy-story-xwni.onrender.com/api/locations";
   private wardCache = new Map<number, Ward>();
   private districtCache = new Map<number, District>();
   private provinceCache = new Map<number, Province>();
