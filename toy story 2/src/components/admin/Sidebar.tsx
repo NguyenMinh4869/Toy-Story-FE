@@ -1,10 +1,14 @@
 import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { LayoutDashboard, ShoppingBag, Users, Tag, Percent, Layers, Ticket, Warehouse } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Users, Tag, Percent, Layers, Ticket, Warehouse, BookOpen, List } from 'lucide-react';
 import { ROUTES } from '../../routes/routePaths';
+import { useLocation } from 'react-router-dom';
 
 const Sidebar: React.FC = () => {
-  const navLinks = [
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith('/admin');
+
+  const navLinks = isAdmin ? [
     { to: ROUTES.ADMIN_DASHBOARD, icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
     { to: ROUTES.ADMIN_PRODUCTS, icon: <ShoppingBag size={20} />, label: 'Products' },
     { to: ROUTES.ADMIN_BRANDS, icon: <Tag size={20} />, label: 'Brands' },
@@ -13,6 +17,18 @@ const Sidebar: React.FC = () => {
     { to: ROUTES.ADMIN_STAFF, icon: <Users size={20} />, label: 'Staff' },
     { to: ROUTES.ADMIN_VOUCHERS, icon: <Ticket size={20} />, label: 'Vouchers' },
     { to: ROUTES.ADMIN_PROMOTIONS, icon: <Percent size={20} />, label: 'Promotions' },
+    { to: ROUTES.ADMIN_ARTICLES, icon: <BookOpen size={20} />, label: 'Articles' },
+    { to: ROUTES.ADMIN_ARTICLE_CATEGORIES, icon: <List size={20} />, label: 'Categories' },
+  ] : [
+    { to: ROUTES.STAFF_DASHBOARD, icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
+    { to: ROUTES.STAFF_PRODUCTS, icon: <ShoppingBag size={20} />, label: 'Products' },
+    { to: ROUTES.STAFF_BRANDS, icon: <Tag size={20} />, label: 'Brands' },
+    { to: ROUTES.STAFF_SETS, icon: <Layers size={20} />, label: 'Sets' },
+    { to: ROUTES.STAFF_WAREHOUSE, icon: <Warehouse size={20} />, label: 'Warehouse' },
+    { to: ROUTES.STAFF_VOUCHERS, icon: <Ticket size={20} />, label: 'Vouchers' },
+    { to: ROUTES.STAFF_PROMOTIONS, icon: <Percent size={20} />, label: 'Promotions' },
+    { to: ROUTES.STAFF_ARTICLES, icon: <BookOpen size={20} />, label: 'Articles' },
+    { to: ROUTES.STAFF_ARTICLE_CATEGORIES, icon: <List size={20} />, label: 'Categories' },
   ];
 
   return (

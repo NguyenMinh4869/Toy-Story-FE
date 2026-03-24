@@ -19,6 +19,8 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import ProtectedRoute from "./ProtectedRoute";
 
 // Admin Pages
+import ArticleManagementPage from "../pages/admin/ArticleManagementPage";
+import ArticleCategoryManagementPage from "../pages/admin/ArticleCategoryManagementPage";
 import DashboardPage from "../pages/admin/DashboardPage";
 import ProductManagementPage from "../pages/admin/ProductManagementPage";
 import StaffManagementPage from "../pages/admin/StaffManagementPage";
@@ -131,6 +133,22 @@ const AppRoutes: React.FC = () => {
         />
 
         <Route
+          path={ROUTES.ADMIN_ARTICLES}
+          element={
+            <DashboardLayout mode="admin">
+              <ArticleManagementPage />
+            </DashboardLayout>
+          }
+        />
+        <Route
+          path={ROUTES.ADMIN_ARTICLE_CATEGORIES}
+          element={
+            <DashboardLayout mode="admin">
+              <ArticleCategoryManagementPage />
+            </DashboardLayout>
+          }
+        />
+        <Route
           path={ROUTES.ADMIN_INVOICES}
           element={
             <DashboardLayout mode="admin">
@@ -183,6 +201,22 @@ const AppRoutes: React.FC = () => {
           }
         />
 
+        <Route
+          path={ROUTES.STAFF_ARTICLES}
+          element={
+            <DashboardLayout mode="staff">
+              <ArticleManagementPage />
+            </DashboardLayout>
+          }
+        />
+        <Route
+          path={ROUTES.STAFF_ARTICLE_CATEGORIES}
+          element={
+            <DashboardLayout mode="staff">
+              <ArticleCategoryManagementPage />
+            </DashboardLayout>
+          }
+        />
         <Route
           path={ROUTES.STAFF_ORDERS}
           element={

@@ -25,16 +25,16 @@ export const ArticleCard = ({ article }: ArticleCardProps): React.JSX.Element =>
             {article.title}
           </h3>
           <p className="font-red-hat text-black text-[12px] mb-[3px]">
-            {article.date}  {article.author}
+            {new Date(article.createdAt).toLocaleDateString('vi-VN')} | {article.authorName}  {article.categoryName && `| ${article.categoryName}`}
           </p>
           <p className="font-sansation text-black text-[12px] leading-normal line-clamp-3 mb-[8px]">
-            {article.excerpt}
+            {article.shortDescription}
           </p>
         </div>
         
         <Link
-          to={`/cam-nang/${article.id}`}
-          className="font-rowdies text-[#b20000] text-[13px] not-italic hover:underline self-start"
+          to={`/cam-nang/${article.articleId}`}
+          className="font-rowdies text-[#b20000] text-[13px] not-italic hover:underline self-start uppercase font-black"
         >
           Xem Thêm
         </Link>

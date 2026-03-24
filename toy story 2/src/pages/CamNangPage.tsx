@@ -5,7 +5,7 @@ import { ArticleCard } from "../components/camnang/ArticleCard";
 import { Pagination } from "../components/camnang/Pagination";
 import { Search } from "lucide-react";
 import { getArticles, getArticleCategories } from "../services/articleService";
-import type { ViewArticleDto } from "../types/ArticleDTO";
+import type { ViewArticleDto, ViewArticleCategoryDto } from "../types/ArticleDTO";
 
 // Image assets from Figma
 const imgLine23 =
@@ -16,10 +16,11 @@ export const CamNangPage = (): React.JSX.Element => {
   const categoryFromUrl = searchParams.get("category");
 
   const [articles, setArticles] = useState<ViewArticleDto[]>([]);
+  const [categories, setCategories] = useState<ViewArticleCategoryDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory] = useState<string | null>(categoryFromUrl);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(categoryFromUrl);
   const [currentPage, setCurrentPage] = useState(1);
   const articlesPerPage = 5;
   const articlesSectionRef = useRef<HTMLDivElement>(null);
@@ -28,12 +29,12 @@ export const CamNangPage = (): React.JSX.Element => {
     const fetchContent = async () => {
       setIsLoading(true);
       try {
-        const [fetchedArticles] = await Promise.all([
+        const [fetchedArticles, fetchedCategories] = await Promise.all([
           getArticles(),
           getArticleCategories(),
         ]);
         setArticles(fetchedArticles);
-        // Fallback categories if none exist yet
+        setCategories(fetchedCategories);
       } catch (error) {
         console.error("Failed to fetch articles:", error);
       } finally {
@@ -48,9 +49,9 @@ export const CamNangPage = (): React.JSX.Element => {
     return articles.filter((article) => {
       const matchesSearch =
         article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+        article.shortDescription.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory =
-        !selectedCategory || article.category === selectedCategory;
+        !selectedCategory || article.categoryName === selectedCategory;
       return matchesSearch && matchesCategory;
     });
   }, [articles, searchQuery, selectedCategory]);
@@ -103,6 +104,39 @@ export const CamNangPage = (): React.JSX.Element => {
                   className="flex-1 border-none outline-none font-sansation text-[12px] text-[rgba(0,0,0,0.44)] placeholder:text-[rgba(0,0,0,0.44)] ml-2 bg-transparent"
                 />
               </div>
+
+              {/* Category Filter */}
+              <div className="mt-8">
+                <p className="font-sansation font-bold text-[#ab0007] text-[12px] mb-[15px] uppercase">
+                  Danh mục bài viết
+                </p>
+                <div className="space-y-0">
+                   <button
+                    onClick={() => setSelectedCategory(null)}
+                    className={`w-full text-left font-sansation text-[12px] ${!selectedCategory ? "text-[#ab0007] font-bold" : "text-black"} py-[10px] px-0 border-none bg-transparent cursor-pointer hover:text-[#ab0007] transition-colors block`}
+                  >
+                    Tất cả bài viết
+                  </button>
+                  <div className="h-px w-full" style={{ backgroundImage: `url(${imgLine23})` }} />
+                  
+                  {categories.map((category, index) => (
+                    <div key={category.articleCategoryId}>
+                      <button
+                        onClick={() => setSelectedCategory(category.name)}
+                        className={`w-full text-left font-sansation text-[12px] ${category.name === selectedCategory ? "text-[#ab0007] font-bold" : "text-black"} py-[12px] px-0 border-none bg-transparent cursor-pointer hover:text-[#ab0007] transition-colors block`}
+                      >
+                        {category.name}
+                      </button>
+                      {index < categories.length - 1 && (
+                        <div
+                          className="h-px w-full"
+                          style={{ backgroundImage: `url(${imgLine23})` }}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Right Content Area */}
@@ -129,7 +163,7 @@ export const CamNangPage = (): React.JSX.Element => {
                   </div>
                 ) : currentArticles.length > 0 ? (
                   currentArticles.map((article) => (
-                    <ArticleCard key={article.id} article={article} />
+                    <ArticleCard key={article.articleId} article={article} />
                   ))
                 ) : (
                   <div className="text-center py-10">
