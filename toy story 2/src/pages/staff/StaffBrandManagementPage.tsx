@@ -55,8 +55,8 @@ const StaffBrandManagementPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Brand Management</h2>
-          <p className="text-sm text-gray-600 mt-1"> View Only - No editing allowed</p>
+          <h2 className="text-2xl font-bold text-gray-800">Quản lý thương hiệu</h2>
+          <p className="text-sm text-gray-600 mt-1">Chế độ quan sát - Không thể chỉnh sửa</p>
         </div>
       </div>
 
@@ -71,9 +71,9 @@ const StaffBrandManagementPage: React.FC = () => {
           <table className="w-full text-sm text-left text-gray-500">
             <thead className="text-xs text-gray-700 uppercase bg-gray-50">
               <tr>
-                <th scope="col" className="px-6 py-3">Brand Info</th>
-                <th scope="col" className="px-6 py-3">Status</th>
-                <th scope="col" className="px-6 py-3">Action</th>
+                <th scope="col" className="px-6 py-3">Thông tin</th>
+                <th scope="col" className="px-6 py-3">Trạng thái</th>
+                <th scope="col" className="px-6 py-3">Hành động</th>
               </tr>
             </thead>
             <tbody>
@@ -126,7 +126,7 @@ const StaffBrandManagementPage: React.FC = () => {
       <Modal
         isOpen={isViewModalOpen}
         onClose={closeModal}
-        title="Brand Details"
+        title="Thông tin thương hiệu"
       >
         {selectedBrand && (
           <div className="space-y-4">
@@ -139,15 +139,15 @@ const StaffBrandManagementPage: React.FC = () => {
             </div>
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Brand ID</label>
+                <label className="block text-sm font-medium text-gray-700">ID</label>
                 <p className="mt-1 text-gray-900">{selectedBrand.brandId}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Brand Name</label>
+                <label className="block text-sm font-medium text-gray-700">Tên thương hiệu</label>
                 <p className="mt-1 text-gray-900 text-lg font-semibold">{selectedBrand.name}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Status</label>
+                <label className="block text-sm font-medium text-gray-700">Trạng thái</label>
                 <span className={`inline-block mt-1 px-3 py-1 text-sm font-semibold rounded-full ${
                   selectedBrand.status === 'Available'
                     ? 'bg-green-100 text-green-800'
@@ -162,7 +162,7 @@ const StaffBrandManagementPage: React.FC = () => {
                 onClick={closeModal}
                 className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
               >
-                Close
+                Đóng
               </button>
             </div>
           </div>

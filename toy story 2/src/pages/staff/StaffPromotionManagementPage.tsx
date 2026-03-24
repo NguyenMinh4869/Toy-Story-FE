@@ -60,8 +60,8 @@ const StaffPromotionManagementPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Promotion Management</h2>
-          <p className="text-sm text-gray-600 mt-1"> View Only - No editing allowed</p>
+          <h2 className="text-2xl font-bold text-gray-800">Quản lý khuyến mãi</h2>
+          <p className="text-sm text-gray-600 mt-1">Chế độ quan sát - Không thể chỉnh sửa</p>
         </div>
       </div>
 
@@ -76,11 +76,11 @@ const StaffPromotionManagementPage: React.FC = () => {
           <table className="w-full text-sm text-left text-gray-500">
             <thead className="text-xs text-gray-700 uppercase bg-gray-50">
               <tr>
-                <th scope="col" className="px-6 py-3">Promotion Info</th>
-                <th scope="col" className="px-6 py-3">Discount</th>
-                <th scope="col" className="px-6 py-3">Duration</th>
-                <th scope="col" className="px-6 py-3">Status</th>
-                <th scope="col" className="px-6 py-3">Action</th>
+                <th scope="col" className="px-6 py-3">Thông tin</th>
+                <th scope="col" className="px-6 py-3">Giảm giá</th>
+                <th scope="col" className="px-6 py-3">Thời hạn</th>
+                <th scope="col" className="px-6 py-3">Trạng thái</th>
+                <th scope="col" className="px-6 py-3">Hành động</th>
               </tr>
             </thead>
             <tbody>
@@ -130,7 +130,7 @@ const StaffPromotionManagementPage: React.FC = () => {
                         ? 'bg-green-100 text-green-800'
                         : 'bg-gray-100 text-gray-800'
                         }`}>
-                        {promotion.isActive ? 'Active' : 'Inactive'}
+                        {promotion.isActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}
                       </span>
                     </td>
                     <td className="px-6 py-4">

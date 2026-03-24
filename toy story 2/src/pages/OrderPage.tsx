@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import ProfileLayout from '../layouts/ProfileLayout'
-import { ShoppingBag, Package, ChevronRight, Clock } from 'lucide-react'
+import { ShoppingBag, Package, Clock } from 'lucide-react'
 import { formatPrice } from '../utils/formatPrice'
 import { Link } from 'react-router-dom'
 import { getOrderById, getAccountOrders, updateOrderStatus } from '@/services/orderService'
@@ -76,13 +76,11 @@ const OrderPage: React.FC = () => {
                                         console.error('Failed to fetch order detail:', error)
                                     }
                                 }}
-                                className="group bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-xl hover:border-red-100 transition-all cursor-pointer"
+                                className="group bg-white border border-gray-200 rounded-2xl shadow-md p-6 hover:shadow-xl hover:border-red-100 transition-all cursor-pointer"
                             >
                                 {/* Top section: icon + info */}
                                 <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-red-600 shrink-0">
-                                        <Package size={24} />
-                                    </div>
+
                                     <div className="flex-1">
                                         <h4 className="font-bold text-gray-900 text-lg mb-1">
                                             Đơn hàng #{order.orderId}
@@ -92,52 +90,50 @@ const OrderPage: React.FC = () => {
                                                 <Clock size={14} />
                                                 {new Date(order.orderDate).toLocaleDateString('vi-VN')}
                                             </span>
-                                            <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                                            <span>{order.accountName || 'N/A'}</span>
+                                            <StatusBadge status={order.status} />
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="mt-4 flex items-center justify-between">
-                                    <div className="text-right">
-                                        <div className="text-lg font-black text-red-600 mb-1">
+                                <div className="mt-6 flex items-center justify-between">
+                                    {/* Price Section: Better typography and color balance */}
+                                    <div className="flex flex-col">
+                                       
+                                        <div className="text-xl font-extrabold tracking-tight text-red-600">
                                             {formatPrice(order.totalAmount)}
                                         </div>
-
-                                        <StatusBadge status={order.status} />
-
-                                        {order.status === 'Đang giao hàng' && (
-                                            <button
-                                                onClick={async () => {
-                                                    try {
-                                                        await updateOrderStatus(order.orderId)
-                                                        setOrders(prev =>
-                                                            prev.map(o =>
-                                                                o.orderId === order.orderId
-                                                                    ? { ...o, status: 'Đã nhận hàng' }
-                                                                    : o
-                                                            )
-                                                        )
-                                                    } catch (error) {
-                                                        console.error('Failed to update order status:', error)
-                                                    }
-                                                }}
-                                                className="mt-2 inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700 transition-colors"
-                                            >
-                                                Đã nhận hàng
-                                            </button>
-                                        )}
                                     </div>
-                                    <ChevronRight
-                                        size={20}
-                                        className="text-gray-300 group-hover:text-red-600 transition-colors"
-                                    />
-                                </div>
 
+                                    {/* Button Section: Adding weight, shadow, and click-depth */}
+                                    {order.status === 'Đang giao hàng' && (
+                                        <button
+                                            onClick={async () => {
+                                                try {
+                                                    await updateOrderStatus(order.orderId);
+                                                    setOrders(prev =>
+                                                        prev.map(o => o.orderId === order.orderId
+                                                            ? { ...o, status: 'Đã nhận hàng' }
+                                                            : o
+                                                        )
+                                                    );
+                                                } catch (error) {
+                                                    console.error(error);
+                                                }
+                                            }}
+                                            className="relative flex items-center justify-center h-8 px-8 
+                 bg-green-600 text-white rounded-full text-sm font-bold 
+                 shadow-[0_4px_14px_0_rgba(22,163,74,0.39)] 
+                 hover:shadow-[0_6px_20px_rgba(22,163,74,0.23)] 
+                 hover:bg-green-700 active:scale-95 
+                 transition-all duration-200 ease-in-out"
+                                        >
+                                            Nhận hàng
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         ))}
                     </div>
-
                 )}
                 {selectedOrder && (
                     <OrderDetailModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />

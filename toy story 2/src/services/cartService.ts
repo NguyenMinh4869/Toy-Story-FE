@@ -63,10 +63,14 @@ export const clearCartServer = async (): Promise<void> => {
  * Get server-side cart
  * GET /api/accounts/carts
  */
-export const getCartServer = async (): Promise<CartDto> => {
-    const response = await apiGet<CartDto>('/accounts/carts')
-    return response.data
-}
+export const getCartServer = async (): Promise<CartDto | null> => {
+    try {
+        const response = await apiGet<CartDto>('/accounts/carts', undefined, true);
+        return response.data;
+    } catch (error: any) {
+        return null;
+    }
+};
 
 /**
  * Replace server-side cart with the current local cart contents.

@@ -16,18 +16,18 @@ const LowStockChart = () => {
     if (error || !data) {
         return (
             <div className="flex justify-center items-center h-64 text-red-500">
-                Khong the tai du lieu. Vui long thu lai
+                Không thể tải dữ liệu. Vui lòng thử lại
             </div>
         );
     }
 
     return (
         <ChartWidget
-            title="Canh bao ton kho thap"
+            title="Cảnh báo hàng tồn kho thấp"
             data={data.lowStockAlerts}
             type="pie"
             horizontal={false}
-            description="Ty le san pham sap het hang"
+            description="Tỷ lệ sản phẩm sắp hết hàng"
         />
     );
 };

@@ -17,7 +17,7 @@ const WeeklyOrderVolumeChart = () => {
     if (error || !data) {
         return (
             <div className="flex justify-center items-center h-64 text-red-500">
-                Khong the tai du lieu. Vui long thu lai
+                Không thể tải dữ liệu. Vui lòng thử lại
             </div>
         );
     }
@@ -30,11 +30,11 @@ const WeeklyOrderVolumeChart = () => {
 
     return (
         <ChartWidget
-            title="So luong don hang theo ngay"
+            title="Số lượng đơn hàng theo ngày"
             data={chartData}
             type="bar" // Changed from pie to bar since it's weekly volume
             horizontal={false}
-            description="Tong so don hang trong tuan nay"
+            description="Tổng số lượng đơn hàng tuần này"
         />
     );
 };

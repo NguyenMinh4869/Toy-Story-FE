@@ -36,6 +36,20 @@ export default {
         'unbounded': ['Unbounded', 'sans-serif'],
         'sf-pro': ['"SF Pro Display"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
       },
+      keyframes: {
+        "slide-in": {
+          "0%": { transform: "translateX(100%)" },
+          "100%": { transform: "translateX(0)" },
+        },
+        "swipe-out": {
+          "0%": { transform: "translateX(var(--radix-toast-swipe-end-x))" },
+          "100%": { transform: "translateX(100%)" },
+        },
+      },
+      animation: {
+        "slide-in": "slide-in 0.2s ease-out",
+        "swipe-out": "swipe-out 0.1s ease-out",
+      },
     },
   },
   plugins: [],

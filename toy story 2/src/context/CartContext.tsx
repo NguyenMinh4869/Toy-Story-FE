@@ -70,9 +70,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const loadServerCart = async (): Promise<void> => {
     try {
       const cart = await getCartServer()
-      setCartItems(cart.items.map(mapDtoToCartItem))
+      setCartItems(cart?.items?.map(mapDtoToCartItem) ?? [])
     } catch {
-      // silent fail
     }
   }
 

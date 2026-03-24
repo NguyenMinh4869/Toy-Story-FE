@@ -3620,7 +3620,7 @@ export interface components {
       accountId?: number;
       accountName?: string | null;
       manuallyAssign: boolean;
-
+      isDelivered: boolean;
     };
     PaymentWebhookDto: {
       /** Format: int64 */

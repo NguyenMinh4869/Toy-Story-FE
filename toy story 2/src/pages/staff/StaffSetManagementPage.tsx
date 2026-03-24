@@ -50,8 +50,8 @@ const StaffSetManagementPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Set Management</h2>
-          <p className="text-sm text-gray-600 mt-1"> View Only - No editing allowed</p>
+          <h2 className="text-2xl font-bold text-gray-800">Quản lý bộ sưu tập</h2>
+          <p className="text-sm text-gray-600 mt-1">Chế độ quan sát - Không thể chỉnh sửa</p>
         </div>
       </div>
 

@@ -68,13 +68,13 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
       });
     }
 
-    if (effectiveMode === 'admin') {
-      baseLinks.push({
-        to: ROUTES.ADMIN_INVOICES,
-        icon: <Ticket size={20} />,
-        label: 'Hóa đơn'
-      });
-    }
+    // if (effectiveMode === 'admin') {
+    //   baseLinks.push({
+    //     to: ROUTES.ADMIN_INVOICES,
+    //     icon: <Ticket size={20} />,
+    //     label: 'Hóa đơn'
+    //   });
+    // }
 
     // Vouchers are ADMIN-ONLY, Promotions for both roles
     if (effectiveMode === 'admin') {

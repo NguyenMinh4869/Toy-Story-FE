@@ -31,21 +31,21 @@ const TodayOrderChart = () => {
     if (error || !data) {
         return (
             <div className="flex justify-center items-center h-64 text-red-500">
-                Khong the tai du lieu. Vui long thu lai
+                Không thể tải dữ liệu. Vui lòng thử lại
             </div>
         );
     }
 
     return (
         <ChartWidget
-            title="Phan bo trang thai don hang"
+            title="Phân bố trạng thái đơn hàng"
             data={data.todayOrderStatus.map((item) => ({
                 ...item,
                 label: toVietnameseOrderStatus(item.label),
             }))}
             type="pie"
             horizontal={false}
-            description="Ty le don hang theo tung trang thai"
+            description="Tỷ lệ đơn hàng theo từng trạng thái"
         />
     );
 };

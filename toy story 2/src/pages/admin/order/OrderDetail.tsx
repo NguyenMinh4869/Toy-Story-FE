@@ -3,7 +3,7 @@ import { CalendarDays, Hash, Phone, Store, User, X } from 'lucide-react'
 import { formatPrice } from '@/utils/formatPrice'
 import { OrderDetailDto } from '@/types/OrderDTO'
 import { getWarehouses } from '@/services/warehouseService'
-import { assignWarehouse } from '@/services/orderService'
+import { assignWarehouse, updateOrderStatus } from '@/services/orderService'
 import { WarehouseSummaryDto } from '@/types/WarehouseDTO'
 interface OrderDetailProps {
   order: OrderDetailDto | null
@@ -85,13 +85,12 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onClose, onRefresh }) 
               <div>
                 <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Trạng thái</div>
                 <span
-                  className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                    String(order.status).toLowerCase().includes('giao')
-                      ? 'bg-emerald-100 text-emerald-700'
-                      : String(order.status).toLowerCase().includes('hủy')
+                  className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold ${String(order.status).toLowerCase().includes('giao')
+                    ? 'bg-emerald-100 text-emerald-700'
+                    : String(order.status).toLowerCase().includes('hủy')
                       ? 'bg-rose-100 text-rose-700'
                       : 'bg-amber-100 text-amber-700'
-                  }`}
+                    }`}
                 >
                   {order.status}
                 </span>
@@ -227,9 +226,27 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onClose, onRefresh }) 
             <p className="text-xs text-slate-500">Tổng cộng</p>
             <p className="text-xl font-black text-rose-600">{formatPrice(order.totalAmount)}</p>
           </div>
+          {order.isDelivered && (
+            <button
+              onClick={async () => {
+                try {
+                  await updateOrderStatus(order.orderId);
+                  if (onRefresh) {
+                    onRefresh();
+                  }
+                  onClose();
+                } catch (error) {
+                  console.error('Failed to update order status:', error);
+                }
+              }}
+              className="mt-2 inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-3xl text-sm font-bold hover:bg-green-700 transition-colors"
+            >
+              Xác nhận giao hàng
+            </button>
+          )}
         </div>
       </div>
-    </div>
+    </div >
   )
 }
 

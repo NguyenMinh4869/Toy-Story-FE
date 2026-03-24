@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import ProfileLayout from '../layouts/ProfileLayout'
-import { ShoppingBag, Package, Search, ChevronRight, Clock, CheckCircle, XCircle } from 'lucide-react'
+import { ShoppingBag, Package, Search, Clock, CheckCircle, XCircle } from 'lucide-react'
 import { getAccountInvoices } from '../services/invoiceService'
 import { formatPrice } from '../utils/formatPrice'
 import { Link } from 'react-router-dom'
@@ -100,7 +100,7 @@ const InvoicePage: React.FC = () => {
             {filteredInvoices.map((invoice) => (
               <div
                 key={invoice.invoiceId}
-                className="group bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-xl hover:border-red-100 transition-all cursor-pointer"
+                className="group bg-white border border-gray-200 rounded-2xl p-6 shadow-md hover:shadow-xl hover:border-red-100 transition-all cursor-pointer"
               >
                 {/* Top section: icon + info */}
                 <div className="flex items-start gap-4">
@@ -117,33 +117,27 @@ const InvoicePage: React.FC = () => {
                         {new Date(invoice.issuedAt).toLocaleDateString('vi-VN')}
                       </span>
                       <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                      <span>{invoice.orderCode || 'N/A'}</span>
+                      <span>Mã hóa đơn: {invoice.orderCode || 'N/A'}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Bottom section: amount + status + chevron */}
                 <div className="mt-4 flex items-center justify-between">
-                  <div className="text-right">
-                    <div className="text-lg font-black text-red-600 mb-1">
-                      {formatPrice(invoice.amountDue)}
-                    </div>
-                    <div
-                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${getStatusStyle(invoice.status)}`}
-                    >
-                      {getStatusIcon(invoice.status)}
-                      {invoice.status}
-                    </div>
+
+                  <div
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${getStatusStyle(invoice.status)}`}
+                  >
+                    {getStatusIcon(invoice.status)}
+                    {invoice.status}
                   </div>
-                  <ChevronRight
-                    size={20}
-                    className="text-gray-300 group-hover:text-red-600 transition-colors"
-                  />
+                  <div className="text-lg font-black text-red-600 mb-1">
+                    {formatPrice(invoice.amountDue)}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
-
         )}
       </div>
     </ProfileLayout>

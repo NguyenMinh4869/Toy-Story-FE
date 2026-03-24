@@ -5,7 +5,7 @@
 import React, { useEffect, useState } from 'react';
 import { Edit, AlertCircle, Trash2, Plus, Search } from 'lucide-react';
 import Modal from '../../components/ui/Modal';
-import { 
+import {
   getWarehouseProductsWithDetails,
   updateWarehouseProduct,
   addWarehouseProduct,
@@ -27,7 +27,7 @@ const StaffWarehouseManagementPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [warehouseId, setWarehouseId] = useState<number | null>(null);
-  
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -55,7 +55,7 @@ const StaffWarehouseManagementPage: React.FC = () => {
       const debounceTimer = setTimeout(() => {
         applyFilters();
       }, 300); // Debounce for 300ms to avoid too many API calls
-      
+
       return () => clearTimeout(debounceTimer);
     }
   }, [searchTerm, genderFilter, ageRangeFilter, categoryFilter, brandFilter, isAddModalOpen]);
@@ -93,7 +93,7 @@ const StaffWarehouseManagementPage: React.FC = () => {
         setProducts([]);
         return;
       }
-      
+
       const warehouseProducts = await getWarehouseProductsWithDetails(warehouseId);
       setProducts(warehouseProducts);
     } catch (err) {
@@ -132,7 +132,7 @@ const StaffWarehouseManagementPage: React.FC = () => {
         getCategories(),
         filterBrands({ status: 'Active' })
       ]);
-      
+
       // Filter out products already in warehouse
       const existingProductIds = products.map(p => p.productId);
       const available = allProducts.filter(p => !existingProductIds.includes(p.productId));
@@ -155,7 +155,7 @@ const StaffWarehouseManagementPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!currentProduct?.productWarehouseId) {
       setError('Invalid product warehouse ID');
       return;
@@ -179,7 +179,7 @@ const StaffWarehouseManagementPage: React.FC = () => {
 
   const handleAddSubmit = async (e: React.FormEvent | React.MouseEvent) => {
     e.preventDefault();
-    
+
     if (!selectedProductId || newQuantity <= 0) {
       setError('Please select a product and enter a valid quantity');
       return;
@@ -259,7 +259,7 @@ const StaffWarehouseManagementPage: React.FC = () => {
       if (ageRangeFilter) params.ageRange = ageRangeFilter;
       if (categoryFilter) params.categoryId = parseInt(categoryFilter);
       if (brandFilter) params.brandId = parseInt(brandFilter);
-      
+
       const allProducts = await filterProducts(params);
       const existingProductIds = products.map(p => p.productId);
       const available = allProducts.filter(p => !existingProductIds.includes(p.productId));
@@ -290,9 +290,9 @@ const StaffWarehouseManagementPage: React.FC = () => {
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-xl md:text-2xl font-bold text-gray-800">Product Management</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-gray-800">Quản lý sản phẩm tại kho</h2>
           {warehouseId && (
-            <p className="text-xs md:text-sm text-gray-600 mt-1">Managing Warehouse ID: {warehouseId}</p>
+            <p className="text-xs md:text-sm text-gray-600 mt-1">Kho số ID: {warehouseId}</p>
           )}
         </div>
         <button
@@ -300,7 +300,7 @@ const StaffWarehouseManagementPage: React.FC = () => {
           className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors text-sm"
         >
           <Plus size={18} />
-          Add Product
+          Thêm sản phẩm
         </button>
       </div>
 
@@ -316,19 +316,19 @@ const StaffWarehouseManagementPage: React.FC = () => {
           <table className="w-full text-sm text-left text-gray-500">
             <thead className="text-xs text-gray-700 uppercase bg-gray-50">
               <tr>
-                <th scope="col" className="px-3 md:px-6 py-3 min-w-[200px]">Product Info</th>
-                <th scope="col" className="px-3 md:px-6 py-3 min-w-[120px]">Brand / Category</th>
-                <th scope="col" className="px-3 md:px-6 py-3 min-w-[100px]">Price</th>
-                <th scope="col" className="px-3 md:px-6 py-3 w-24">Quantity</th>
-                <th scope="col" className="px-3 md:px-6 py-3 w-28">Status</th>
-                <th scope="col" className="px-3 md:px-6 py-3 w-32">Action</th>
+                <th scope="col" className="px-3 md:px-6 py-3 min-w-[200px]">Thông tin</th>
+                <th scope="col" className="px-3 md:px-6 py-3 min-w-[120px]">Thương hiệu/Nhãn hiệu</th>
+                <th scope="col" className="px-3 md:px-6 py-3 min-w-[100px]">Giá tiền</th>
+                <th scope="col" className="px-3 md:px-6 py-3 w-24">Số lượng</th>
+                <th scope="col" className="px-3 md:px-6 py-3 w-28">Trạng thái</th>
+                <th scope="col" className="px-3 md:px-6 py-3 w-32">Hành động</th>
               </tr>
             </thead>
             <tbody>
               {!products || products.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
-                    No products found in warehouse
+                    Không có sản phẩm trong kho
                   </td>
                 </tr>
               ) : (
@@ -338,10 +338,10 @@ const StaffWarehouseManagementPage: React.FC = () => {
                     <tr key={product.productWarehouseId} className="bg-white border-b hover:bg-gray-50">
                       <td className="px-3 md:px-6 py-4 font-medium text-gray-900">
                         <div className="flex items-center gap-2 md:gap-4">
-                          <img 
-                            className="w-8 h-8 md:w-10 md:h-10 rounded-md object-cover flex-shrink-0" 
-                            src={product.imageUrl || 'https://via.placeholder.com/40'} 
-                            alt={product.productName || 'Product'} 
+                          <img
+                            className="w-8 h-8 md:w-10 md:h-10 rounded-md object-cover flex-shrink-0"
+                            src={product.imageUrl || 'https://via.placeholder.com/40'}
+                            alt={product.productName || 'Product'}
                           />
                           <div className="min-w-0">
                             <div className="font-semibold truncate">{product.productName || 'N/A'}</div>
@@ -360,23 +360,27 @@ const StaffWarehouseManagementPage: React.FC = () => {
                         <span className="font-semibold">{product.quantity || 0}</span>
                       </td>
                       <td className="px-3 md:px-6 py-4">
-                        <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${status.color}`}>
-                          {status.label}
+                        <span
+                          className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${status.color
+                            }`}
+                        >
+                          {status.label ? "Hoạt động" : "Vô hiệu hóa"}
                         </span>
                       </td>
+
                       <td className="px-3 md:px-6 py-4">
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleEdit(product)}
                             className="text-emerald-600 hover:text-emerald-800 p-1"
-                            title="Edit Quantity"
+                            title="Chỉnh sửa số lượng"
                           >
                             <Edit size={18} />
                           </button>
                           <button
                             onClick={() => handleDelete(product)}
                             className="text-red-600 hover:text-red-800 p-1"
-                            title="Remove Product"
+                            title="Xóa sản phẩm"
                           >
                             <Trash2 size={18} />
                           </button>
@@ -450,7 +454,7 @@ const StaffWarehouseManagementPage: React.FC = () => {
       <Modal
         isOpen={isAddModalOpen}
         onClose={closeModal}
-        title="Add Product to Warehouse"
+        title="Thêm sản phẩm vào kho hàng"
       >
         <div className="space-y-4">
           {/* Search Bar */}
@@ -468,43 +472,43 @@ const StaffWarehouseManagementPage: React.FC = () => {
           {/* Filters */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Gender Target</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Giới tính</label>
               <select
                 value={genderFilter}
                 onChange={(e) => setGenderFilter(e.target.value)}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               >
-                <option value="">All Genders</option>
-                <option value="Boy">Boy</option>
-                <option value="Girl">Girl</option>
+                <option value="">Tất cả</option>
+                <option value="Boy">Nam</option>
+                <option value="Girl">Nữ</option>
                 <option value="Unisex">Unisex</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Age Range</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Độ tuổi</label>
               <select
                 value={ageRangeFilter}
                 onChange={(e) => setAgeRangeFilter(e.target.value)}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               >
                 <option value="">All Ages</option>
-                <option value="ZeroToSixMonths">0-6 Months</option>
-                <option value="SixToTwelveMonths">6-12 Months</option>
-                <option value="OneToThreeYears">1-3 Years</option>
-                <option value="ThreeToSixYears">3-6 Years</option>
-                <option value="AboveSixYears">Above 6 Years</option>
+                <option value="ZeroToSixMonths">0-6 tháng</option>
+                <option value="SixToTwelveMonths">6-12 tháng</option>
+                <option value="OneToThreeYears">1-3 tuổi</option>
+                <option value="ThreeToSixYears">3-6 tuổi</option>
+                <option value="AboveSixYears">Trên 6 tuổi</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Category</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Phân loại</label>
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               >
-                <option value="">All Categories</option>
+                <option value="">Tất cả</option>
                 {categories.map(cat => (
                   <option key={cat.categoryId} value={cat.categoryId}>{cat.name}</option>
                 ))}
@@ -512,13 +516,13 @@ const StaffWarehouseManagementPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Brand</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Thương hiệu</label>
               <select
                 value={brandFilter}
                 onChange={(e) => setBrandFilter(e.target.value)}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               >
-                <option value="">All Brands</option>
+                <option value="">Tất cả</option>
                 {brands.map(brand => (
                   <option key={brand.brandId} value={brand.brandId}>{brand.name}</option>
                 ))}
@@ -532,7 +536,7 @@ const StaffWarehouseManagementPage: React.FC = () => {
               onClick={clearFilters}
               className="px-4 py-2 border border-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-50"
             >
-              Clear Filters
+              Làm mới
             </button>
           </div>
 
@@ -547,11 +551,10 @@ const StaffWarehouseManagementPage: React.FC = () => {
                 <div
                   key={product.productId}
                   onClick={() => handleSelectProduct(product.productId)}
-                  className={`flex items-center gap-4 p-3 rounded-lg cursor-pointer transition-all ${
-                    selectedProductId === product.productId
-                      ? 'bg-emerald-50 border-2 border-emerald-500'
-                      : 'bg-white border border-gray-200 hover:bg-gray-50'
-                  }`}
+                  className={`flex items-center gap-4 p-3 rounded-lg cursor-pointer transition-all ${selectedProductId === product.productId
+                    ? 'bg-emerald-50 border-2 border-emerald-500'
+                    : 'bg-white border border-gray-200 hover:bg-gray-50'
+                    }`}
                 >
                   {/* Product Image */}
                   <img
@@ -595,7 +598,7 @@ const StaffWarehouseManagementPage: React.FC = () => {
           {selectedProductId > 0 && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Initial Quantity
+                Số lượng
               </label>
               <input
                 type="number"
@@ -615,14 +618,14 @@ const StaffWarehouseManagementPage: React.FC = () => {
               onClick={closeModal}
               className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
             >
-              Cancel
+              Hủy
             </button>
             <button
               onClick={handleAddSubmit}
               disabled={loading || selectedProductId === 0}
               className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Adding...' : 'Add Product'}
+              {loading ? 'Đang thêm ...' : 'Thêm sản phẩm'}
             </button>
           </div>
         </div>
@@ -638,10 +641,10 @@ const StaffWarehouseManagementPage: React.FC = () => {
           <div className="space-y-4">
             <div className="bg-red-50 p-4 rounded-lg">
               <p className="text-gray-900">
-                Are you sure you want to remove <strong>{currentProduct.productName}</strong> from this warehouse?
+                Bạn có chắc chắn muốn xóa <strong>{currentProduct.productName}</strong> khỏi kho này không?
               </p>
               <p className="text-sm text-red-600 mt-2">
-                This action cannot be undone. The product will be removed from inventory.
+                Hành động này không thể hoàn tác. Sản phẩm sẽ bị xóa khỏi tồn kho.
               </p>
             </div>
 
@@ -651,18 +654,19 @@ const StaffWarehouseManagementPage: React.FC = () => {
                 onClick={closeModal}
                 className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
               >
-                Cancel
+                Hủy
               </button>
               <button
                 onClick={handleDeleteConfirm}
                 disabled={loading}
                 className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
               >
-                {loading ? 'Removing...' : 'Remove Product'}
+                {loading ? 'Đang xóa...' : 'Xóa sản phẩm'}
               </button>
             </div>
           </div>
         )}
+
       </Modal>
     </div>
   );

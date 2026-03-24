@@ -69,15 +69,10 @@ const WarehouseListTable: React.FC<WarehouseListTableProps> = ({
       <table className="w-full text-sm text-left text-gray-500">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50">
           <tr>
-            <th scope="col" className="px-6 py-3">
-              Warehouse Name
-            </th>
-            <th scope="col" className="px-6 py-3">
-              Location
-            </th>
-            <th scope="col" className="px-6 py-3">
-              Action
-            </th>
+            <th scope="col" className="px-6 py-3 w-[100px]">Tên kho</th>
+            <th scope="col" className="px-6 py-3 w-[150px]">Địa chỉ</th>
+            <th scope="col" className="px-6 py-3 w-[150px]">Hành động</th>
+
           </tr>
         </thead>
         <tbody>
@@ -96,7 +91,7 @@ const WarehouseListTable: React.FC<WarehouseListTableProps> = ({
                     onClick={() => onEdit(warehouse)}
                     className="text-blue-600 hover:text-blue-900 text-xs font-medium flex items-center gap-1"
                   >
-                    <Edit size={14} /> EDIT
+                    <Edit size={14} /> Chỉnh sửa
                   </button>
                   <button
                     onClick={() =>
@@ -104,7 +99,7 @@ const WarehouseListTable: React.FC<WarehouseListTableProps> = ({
                     }
                     className="text-red-600 hover:text-red-900 text-xs font-medium flex items-center gap-1"
                   >
-                    <Trash2 size={14} /> DELETE
+                    <Trash2 size={14} /> Xóa
                   </button>
                 </div>
               </td>
@@ -113,7 +108,7 @@ const WarehouseListTable: React.FC<WarehouseListTableProps> = ({
           {warehouses.length === 0 && (
             <tr>
               <td colSpan={3} className="px-6 py-4 text-center text-gray-500">
-                No warehouses found
+                Không có kho
               </td>
             </tr>
           )}

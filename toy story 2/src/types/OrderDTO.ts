@@ -3,16 +3,17 @@
  */
 
 export interface ViewOrderDto {
-    orderId: number;
-    orderDate: string;
-    status: string;
-    cancelledAt?: string | null;
-    totalAmount: number;
-    accountId: number;
-    accountName: string;
-    warehouseId?: number | null;
-    manuallyAssign: boolean;
-    warehouseName?: string | null;
+  orderId: number;
+  orderDate: string;
+  status: string;
+  cancelledAt?: string | null;
+  totalAmount: number;
+  accountId: number;
+  accountName: string;
+  warehouseId?: number | null;
+  manuallyAssign: boolean;
+  isDelivered: boolean;
+  warehouseName?: string | null;
 }
 
 
@@ -53,6 +54,7 @@ export interface OrderDetailDto {
   provinceCode?: number | null;
   districtCode?: number | null;
   wardCode?: number | null;
+  isDelivered: boolean;
   items: OrderItemDto[];
   invoice?: ViewInvoiceDto | null;
 }
