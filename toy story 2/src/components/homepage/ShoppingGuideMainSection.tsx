@@ -11,7 +11,7 @@ export const ShoppingGuideMainSection = (): React.JSX.Element => {
     <section aria-label="Cẩm nang mua sắm">
       <SectionHeader
         title="Cẩm nang mua sắm"
-        top="2607px"
+
       />
 
       <ShoppingGuideSection />
