@@ -49,6 +49,7 @@ const VoucherManagementPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentVoucherId, setCurrentVoucherId] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState<CreateVoucherDto>({
@@ -182,6 +183,7 @@ const VoucherManagementPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       if (isEditing && currentVoucherId) {
         const updateData: UpdateVoucherDto = { ...formData };
@@ -196,6 +198,8 @@ const VoucherManagementPage: React.FC = () => {
     } catch (err) {
       console.error(err);
       setError('Failed to save voucher');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -410,9 +414,10 @@ const VoucherManagementPage: React.FC = () => {
             </button>
             <button
               type="submit"
-              className="bg-red-400 text-white px-4 py-2 rounded-3xl flex items-center gap-2 hover:bg-red-600 font-black"
+              disabled={isSubmitting}
+              className="bg-red-400 text-white px-4 py-2 rounded-3xl flex items-center gap-2 hover:bg-red-600 font-black disabled:opacity-50"
             >
-              {isEditing ? 'Cập nhật' : 'Thêm mới'}
+              {isSubmitting ? 'Đang lưu...' : (isEditing ? 'Cập nhật' : 'Thêm mới')}
             </button>
           </div>
         </form>

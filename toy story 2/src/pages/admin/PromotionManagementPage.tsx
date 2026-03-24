@@ -59,6 +59,7 @@ const PromotionManagementPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentPromotionId, setCurrentPromotionId] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState<CreatePromotionDto>({
@@ -204,6 +205,7 @@ const PromotionManagementPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       if (isEditing && currentPromotionId) {
         const updateData: UpdatePromotionDto = { ...formData };
@@ -217,6 +219,8 @@ const PromotionManagementPage: React.FC = () => {
     } catch (err) {
       console.error(err);
       setError('Failed to save promotion');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -465,9 +469,10 @@ const PromotionManagementPage: React.FC = () => {
             </button>
             <button
               type="submit"
-              className="bg-red-400 text-white px-4 py-2 rounded-3xl flex items-center gap-2 hover:bg-red-600 font-black"
+              disabled={isSubmitting}
+              className="bg-red-400 text-white px-4 py-2 rounded-3xl flex items-center gap-2 hover:bg-red-600 font-black disabled:opacity-50"
             >
-              {isEditing ? 'Cập nhật' : 'Thêm mới'}
+              {isSubmitting ? 'Đang lưu...' : (isEditing ? 'Cập nhật' : 'Thêm mới')}
             </button>
           </div>
         </form>

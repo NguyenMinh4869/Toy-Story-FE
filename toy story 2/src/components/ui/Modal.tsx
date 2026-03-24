@@ -40,7 +40,9 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
             <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
           </div>
         )}
-        <div className="p-6 overflow-y-auto flex-1">{children}</div>
+        <div className="p-6 overflow-y-auto flex-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          {children}
+        </div>
       </div>
     </div>
   )
