@@ -3,7 +3,7 @@ import { Plus, Search } from 'lucide-react';
 import Modal from '../../components/ui/Modal';
 import Pagination from '../../components/ui/Pagination';
 import ArticleListTable from '../../components/admin/ArticleListTable';
-import {
+import { 
   getArticles,
   getArticleCategories,
   createArticle,
@@ -24,6 +24,7 @@ import { ROUTES } from '../../routes/routePaths';
 import { useAuth } from '../../hooks/useAuth';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { Bold, Italic, Heading1, List as ListIcon, Image as ImageIcon, Link as LinkIcon, Type } from 'lucide-react';
 
 const PAGE_SIZE = 8;
 
@@ -48,6 +49,9 @@ const ArticleManagementPage: React.FC = () => {
     authorName: user?.name || 'Admin',
     articleCategoryId: 0
   });
+
+  const [mediaLibrary, setMediaLibrary] = useState<string[]>([]);
+  const [newMediaUrl, setNewMediaUrl] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -106,6 +110,31 @@ const ArticleManagementPage: React.FC = () => {
     });
   };
 
+  const insertMarkdown = (prefix: string, suffix: string = '', placeholder: string = '') => {
+    const textarea = document.querySelector('textarea[name="content"]') as HTMLTextAreaElement;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    const selection = text.substring(start, end);
+    const before = text.substring(0, start);
+    const after = text.substring(end);
+
+    const middle = selection || placeholder;
+    const newContent = before + prefix + middle + suffix + after;
+    setFormData(prev => ({ ...prev, content: newContent }));
+    
+    // Focus back and set selection
+    setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(
+            start + prefix.length,
+            start + prefix.length + middle.length
+        );
+    }, 0);
+  };
+
   const openCreateModal = () => {
     setCurrentArticle(null);
     setFormData({
@@ -117,6 +146,7 @@ const ArticleManagementPage: React.FC = () => {
       articleCategoryId: categories[0]?.articleCategoryId || 0
     });
     setActiveTab('edit');
+    setMediaLibrary([]);
     setIsModalOpen(true);
   };
 
@@ -215,19 +245,33 @@ const ArticleManagementPage: React.FC = () => {
         size="xxl"
       >
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">Tiêu đề</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-red-400"
-                />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">Tiêu đề</label>
+                    <input
+                    type="text"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-red-400"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">URL Hình ảnh bìa</label>
+                    <input
+                    type="text"
+                    name="imageUrl"
+                    value={formData.imageUrl}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-red-400"
+                    placeholder="https://..."
+                    />
+                </div>
               </div>
+              
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-1">Mô tả ngắn</label>
                 <textarea
@@ -239,6 +283,7 @@ const ArticleManagementPage: React.FC = () => {
                   className="w-full px-4 py-2 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-red-400"
                 />
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-1">Tác giả</label>
@@ -266,37 +311,40 @@ const ArticleManagementPage: React.FC = () => {
                   </select>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">URL Hình ảnh</label>
-                <input
-                  type="text"
-                  name="imageUrl"
-                  value={formData.imageUrl}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-red-400"
-                  placeholder="https://..."
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-4 h-full flex flex-col">
+
+              <div className="space-y-4 h-full flex flex-col">
                 <div className="flex justify-between items-center mb-1">
                     <label className="block text-sm font-bold text-gray-700">Nội dung bài viết</label>
-                    <div className="flex bg-gray-100 p-1 rounded-xl">
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab('edit')}
-                            className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${activeTab === 'edit' ? 'bg-white shadow text-red-600' : 'text-gray-500 hover:text-gray-700'}`}
-                        >
-                            Soạn thảo
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab('preview')}
-                            className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${activeTab === 'preview' ? 'bg-white shadow text-red-600' : 'text-gray-500 hover:text-gray-700'}`}
-                        >
-                            Xem trước
-                        </button>
+                </div>
+                
+                <div className="flex flex-col gap-2">
+                    <div className="flex justify-between items-center bg-gray-50 border border-gray-200 p-2 rounded-2xl">
+                        <div className="flex gap-1 overflow-x-auto pb-1 md:pb-0">
+                            <button title="In đậm" type="button" onClick={() => insertMarkdown('**', '**', 'văn bản')} className="p-2 hover:bg-white hover:shadow-sm rounded-xl transition-all text-gray-600"><Bold size={16} /></button>
+                            <button title="In nghiêng" type="button" onClick={() => insertMarkdown('_', '_', 'văn bản')} className="p-2 hover:bg-white hover:shadow-sm rounded-xl transition-all text-gray-600"><Italic size={16} /></button>
+                            <button title="Tiêu đề 1" type="button" onClick={() => insertMarkdown('# ', '', 'Tiêu đề')} className="p-2 hover:bg-white hover:shadow-sm rounded-xl transition-all text-gray-600"><Heading1 size={16} /></button>
+                            <button title="Tiêu đề 2" type="button" onClick={() => insertMarkdown('## ', '', 'Tiêu đề')} className="p-2 hover:bg-white hover:shadow-sm rounded-xl transition-all text-gray-600"><Type size={16} /></button>
+                            <button title="Danh sách" type="button" onClick={() => insertMarkdown('- ', '', 'Danh sách')} className="p-2 hover:bg-white hover:shadow-sm rounded-xl transition-all text-gray-600"><ListIcon size={16} /></button>
+                            <div className="w-px h-6 bg-gray-200 mx-1"></div>
+                            <button title="Chèn link" type="button" onClick={() => insertMarkdown('[', '](url)', 'nội dung')} className="p-2 hover:bg-white hover:shadow-sm rounded-xl transition-all text-gray-600"><LinkIcon size={16} /></button>
+                            <button title="Chèn ảnh" type="button" onClick={() => insertMarkdown('![mô tả](', ')', 'url-ảnh')} className="p-2 hover:bg-white hover:shadow-sm rounded-xl transition-all text-gray-600"><ImageIcon size={16} /></button>
+                        </div>
+                        <div className="flex bg-gray-200 p-1 rounded-xl">
+                            <button
+                                type="button"
+                                onClick={() => setActiveTab('edit')}
+                                className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${activeTab === 'edit' ? 'bg-white shadow text-red-600' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                Soạn thảo
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setActiveTab('preview')}
+                                className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${activeTab === 'preview' ? 'bg-white shadow text-red-600' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                Xem trước
+                            </button>
+                        </div>
                     </div>
                 </div>
                 
@@ -320,6 +368,69 @@ const ArticleManagementPage: React.FC = () => {
                         )}
                     </div>
                 )}
+              </div>
+            </div>
+
+            {/* Media Gallery Helper */}
+            <div className="bg-gray-50 p-4 rounded-3xl border border-gray-200 h-fit sticky top-0">
+                <h3 className="font-black text-gray-800 text-sm mb-4 uppercase flex items-center gap-2">
+                    <ImageIcon size={18} className="text-red-400" /> Thư viện ảnh bài viết
+                </h3>
+                <div className="space-y-4">
+                    <div className="flex gap-2">
+                        <input 
+                            type="text" 
+                            placeholder="Dán link ảnh tại đây..." 
+                            value={newMediaUrl}
+                            onChange={(e) => setNewMediaUrl(e.target.value)}
+                            className="flex-1 px-3 py-2 text-xs border border-gray-200 rounded-xl outline-none focus:ring-1 focus:ring-red-400"
+                        />
+                        <button 
+                            type="button"
+                            onClick={() => {
+                                if (newMediaUrl) {
+                                    setMediaLibrary([newMediaUrl, ...mediaLibrary]);
+                                    setNewMediaUrl('');
+                                }
+                            }}
+                            className="bg-red-400 text-white px-3 py-2 rounded-xl text-xs font-black hover:bg-red-600"
+                        >
+                            Thêm
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 max-h-[400px] overflow-y-auto pr-1">
+                        {mediaLibrary.length === 0 && (
+                            <div className="col-span-2 py-8 text-center border-2 border-dashed border-gray-200 rounded-2xl text-gray-400 text-[10px]">
+                                Chưa có ảnh nào được thêm
+                            </div>
+                        )}
+                        {mediaLibrary.map((url, idx) => (
+                            <div key={idx} className="group relative aspect-square bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                                <img src={url} alt="media" className="w-full h-full object-cover" />
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-2 gap-1">
+                                    <button 
+                                        type="button"
+                                        onClick={() => insertMarkdown('![ảnh minh họa](' + url + ')', '', '')}
+                                        className="w-full py-1 text-[10px] bg-red-400 text-white font-black rounded-lg hover:bg-red-600"
+                                    >
+                                        Chèn vào bài
+                                    </button>
+                                    <button 
+                                        type="button"
+                                        onClick={() => setMediaLibrary(mediaLibrary.filter((_, i) => i !== idx))}
+                                        className="w-full py-1 text-[10px] bg-white text-gray-600 font-black rounded-lg hover:bg-gray-100"
+                                    >
+                                        Xóa
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <p className="text-[10px] text-gray-400 italic">
+                        * Mẹo: Bạn có thể thêm nhiều link ảnh vào đây để "gắn" vào nội dung bài viết dễ dàng hơn.
+                    </p>
+                </div>
             </div>
           </div>
 

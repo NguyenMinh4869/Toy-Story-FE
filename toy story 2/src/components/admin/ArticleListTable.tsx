@@ -54,7 +54,7 @@ const ArticleListTable: React.FC<ArticleListTableProps> = ({ articles, onEdit, o
                 </td>
                 <td className="px-6 py-4 text-right whitespace-nowrap">
                   <div className="flex justify-end gap-2">
-                     <button
+                    <button
                       onClick={() => onView(article.articleId)}
                       className="p-2 text-green-600 hover:bg-green-50 rounded-full transition-colors"
                       title="Xem"
@@ -79,12 +79,12 @@ const ArticleListTable: React.FC<ArticleListTableProps> = ({ articles, onEdit, o
                 </td>
               </tr>
             ))}
-             {articles.length === 0 && (
-                <tr>
-                    <td colSpan={6} className="px-6 py-10 text-center text-gray-500 font-black">
-                        Chưa có bài viết nào. Hãy nhấn "Thêm bài viết" để bắt đầu.
-                    </td>
-                </tr>
+            {articles.length === 0 && (
+              <tr>
+                <td colSpan={6} className="px-6 py-10 text-center text-gray-500 font-black">
+                  Chưa có bài viết nào. Hãy nhấn "Thêm bài viết" để bắt đầu.
+                </td>
+              </tr>
             )}
           </tbody>
         </table>

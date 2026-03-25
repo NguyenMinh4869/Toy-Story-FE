@@ -23,6 +23,7 @@ export default {
         }
       },
       fontFamily: {
+        'sans': ['"SF Pro Display"', '"Inter"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
         'tilt-warp': ['Tilt Warp', 'sans-serif'],
         'sansation': ['Sansation', 'Noto Sans', 'sans-serif'],
         'tienne': ['Tienne', 'serif'],
@@ -34,7 +35,7 @@ export default {
         'viga': ['Viga', 'sans-serif'],
         'archivo': ['Archivo Black', 'sans-serif'],
         'unbounded': ['Unbounded', 'sans-serif'],
-        'sf-pro': ['"SF Pro Display"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+        'sf-pro': ['"SF Pro Display"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
       },
     },
   },
