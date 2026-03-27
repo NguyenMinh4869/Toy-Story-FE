@@ -10,7 +10,7 @@ interface RelatedArticleCardProps {
 export const RelatedArticleCard = ({ article }: RelatedArticleCardProps): React.JSX.Element => {
   return (
     <Link
-      to={`${ROUTES.CAM_NANG}/${article.id}`}
+      to={`${ROUTES.CAM_NANG}/${article.articleId}`}
       className="block bg-[#f2f2f2] h-[210px] rounded-[17px] overflow-hidden hover:opacity-90 transition-opacity"
     >
       <div className="h-[108px] w-full rounded-[14px] overflow-hidden mb-[11px]">
@@ -27,7 +27,7 @@ export const RelatedArticleCard = ({ article }: RelatedArticleCardProps): React.
           </h4>
         )}
         <p className="font-red-hat text-black text-[12px]">
-          {article.date}  {article.author}
+          {article.updatedAt}  {article.authorName}
         </p>
       </div>
     </Link>
