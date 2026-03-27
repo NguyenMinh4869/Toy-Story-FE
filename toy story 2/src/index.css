@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Tilt+Warp&family=Sansation&family=Noto+Sans:wght@400;700&family=Archivo+Black&family=Varela&family=Viga&family=Thasadith&family=Rowdies&family=Tilt+Neon&family=Red+Hat+Display:wght@400;700&family=Unbounded:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&family=Tilt+Warp&family=Sansation&family=Noto+Sans:wght@400;700&family=Archivo+Black&family=Varela&family=Viga&family=Thasadith&family=Rowdies&family=Tilt+Neon&family=Red+Hat+Display:wght@400;700&family=Unbounded:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -14,7 +14,8 @@
 }
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --font-sf: "SF Pro Display", "Outfit", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: var(--font-sf);
   line-height: 1.5;
   font-weight: 400;
   color-scheme: light;
@@ -78,4 +79,18 @@ ul {
 
 .animate-slide-in {
   animation: slide-in 0.3s ease-out;
+}
+
+.font-sf {
+  font-family: var(--font-sf);
+}
+
+.article-card-shadow {
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.article-card-shadow:hover {
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
 }

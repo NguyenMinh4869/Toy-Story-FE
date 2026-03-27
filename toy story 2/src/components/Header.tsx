@@ -81,6 +81,9 @@ const Header: React.FC = () => {
             <Link to={ROUTES.BRANDS} className="text-white hover:opacity-80">
               THƯƠNG HIỆU
             </Link>
+            <Link to={ROUTES.CAM_NANG} className="text-white hover:opacity-80">
+              CẨM NANG
+            </Link>
 
           </nav>
         </div>

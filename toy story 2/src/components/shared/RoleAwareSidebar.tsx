@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { LayoutDashboard, ShoppingBag, Users, Tag, Percent, Layers, Ticket, Warehouse, List } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Users, Tag, Percent, Layers, Ticket, Warehouse, List, BookOpen } from 'lucide-react';
 import { ROUTES } from '../../routes/routePaths';
 import { getUserRole } from '../../services/authService';
 
@@ -90,6 +90,19 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
       icon: <Percent size={20} />,
       label: 'Khuyến mãi'
     });
+
+    baseLinks.push(
+      {
+        to: effectiveMode === 'admin' ? ROUTES.ADMIN_ARTICLES : ROUTES.STAFF_ARTICLES,
+        icon: <BookOpen size={20} />,
+        label: 'Bài viết'
+      },
+      {
+        to: effectiveMode === 'admin' ? ROUTES.ADMIN_ARTICLE_CATEGORIES : ROUTES.STAFF_ARTICLE_CATEGORIES,
+        icon: <List size={20} />,
+        label: 'Danh mục bài viết'
+      }
+    );
 
 
     return baseLinks;
