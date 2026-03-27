@@ -50,6 +50,7 @@ import OrderPage from "@/pages/OrderPage";
 import InvoiceManagementPage from "@/pages/admin/InvoiceManagementPage";
 import OrderManagementPage from "@/pages/admin/OrderManagementPage";
 import StaffOrderManagementPage from "@/pages/staff/StaffOrderManagementPage";
+import EventHistoryPage from "@/pages/EventHistoryPage";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -156,6 +157,15 @@ const AppRoutes: React.FC = () => {
             </DashboardLayout>
           }
         />
+
+        <Route
+          path={ROUTES.ADMIN_EVENT}
+          element={
+            <DashboardLayout mode="admin">
+              <EventHistoryPage />
+            </DashboardLayout>
+          }
+        />
       </Route>
 
       {/* Staff Routes - Staff Only */}
@@ -222,6 +232,15 @@ const AppRoutes: React.FC = () => {
           element={
             <DashboardLayout mode="staff">
               <StaffOrderManagementPage />
+            </DashboardLayout>
+          }
+        />
+
+        <Route
+          path={ROUTES.STAFF_EVENT}
+          element={
+            <DashboardLayout mode="staff">
+              <EventHistoryPage />
             </DashboardLayout>
           }
         />

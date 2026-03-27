@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { LayoutDashboard, ShoppingBag, Users, Tag, Percent, Layers, Ticket, Warehouse, List, BookOpen } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Users, Tag, Percent, Layers, Ticket, Warehouse, List, BookOpen, Album } from 'lucide-react';
 import { ROUTES } from '../../routes/routePaths';
 import { getUserRole } from '../../services/authService';
 
@@ -68,14 +68,6 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
       });
     }
 
-    // if (effectiveMode === 'admin') {
-    //   baseLinks.push({
-    //     to: ROUTES.ADMIN_INVOICES,
-    //     icon: <Ticket size={20} />,
-    //     label: 'Hóa đơn'
-    //   });
-    // }
-
     // Vouchers are ADMIN-ONLY, Promotions for both roles
     if (effectiveMode === 'admin') {
       baseLinks.push({
@@ -103,6 +95,12 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
         label: 'Danh mục bài viết'
       }
     );
+
+    baseLinks.push({
+      to: effectiveMode === 'admin' ? ROUTES.ADMIN_EVENT : ROUTES.STAFF_EVENT,
+      icon: <Album size={20} />,
+      label: 'Lịch sử thay đổi'
+    });
 
 
     return baseLinks;

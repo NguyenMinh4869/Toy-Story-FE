@@ -22,3 +22,9 @@ export interface StockEventDto {
     payload?: any;   // Deserialized payload
     createdAt: Date;
 }
+
+export interface EventFilterDto {
+    warehouseId?: number;
+    startDate?: string;
+    endDate?: string;
+}

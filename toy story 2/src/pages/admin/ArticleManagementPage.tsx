@@ -202,7 +202,7 @@ const ArticleManagementPage: React.FC = () => {
   const paginatedArticles = filteredArticles.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
-    <div className="p-6 font-['Red_Hat_Display']">
+    <div >
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-black text-gray-800">Quản lý bài viết cẩm nang</h1>
         <button
