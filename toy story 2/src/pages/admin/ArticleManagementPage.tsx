@@ -40,6 +40,8 @@ const ArticleManagementPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<CreateArticleDto>({
     title: '',
@@ -82,14 +84,25 @@ const ArticleManagementPage: React.FC = () => {
     }));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    setImageFile(file);
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setImagePreview(url);
+    } else {
+      setImagePreview(formData.imageUrl ?? null);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setLoading(true);
       if (currentArticle) {
-        await updateArticle(currentArticle.articleId, formData as UpdateArticleDto);
+        await updateArticle(currentArticle.articleId, formData as UpdateArticleDto, imageFile || undefined);
       } else {
-        await createArticle(formData);
+        await createArticle(formData, imageFile || undefined);
       }
       setIsModalOpen(false);
       fetchData();
@@ -147,6 +160,8 @@ const ArticleManagementPage: React.FC = () => {
     });
     setActiveTab('edit');
     setMediaLibrary([]);
+    setImageFile(null);
+    setImagePreview(null);
     setIsModalOpen(true);
   };
 
@@ -163,6 +178,8 @@ const ArticleManagementPage: React.FC = () => {
         authorName: details.authorName,
         articleCategoryId: details.articleCategoryId
       });
+      setImageFile(null);
+      setImagePreview(details.imageUrl || null);
       setActiveTab('edit');
       setIsModalOpen(true);
     } catch (err) {
@@ -260,15 +277,29 @@ const ArticleManagementPage: React.FC = () => {
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-1">URL Hình ảnh bìa</label>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">Hình ảnh bìa</label>
                     <input
-                    type="text"
-                    name="imageUrl"
-                    value={formData.imageUrl}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-red-400"
-                    placeholder="https://..."
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="w-full px-4 py-2 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-red-400 bg-white"
                     />
+                    {imagePreview ? (
+                      <div className="mt-2">
+                        <img src={imagePreview} alt="Preview" className="h-24 w-full rounded-2xl object-cover border border-gray-100" />
+                      </div>
+                    ) : null}
+                    <div className="mt-2">
+                      <label className="block text-xs font-bold text-gray-500 mb-1">Hoặc dán URL (nếu không upload file)</label>
+                      <input
+                        type="text"
+                        name="imageUrl"
+                        value={formData.imageUrl || ''}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-red-400"
+                        placeholder="https://..."
+                      />
+                    </div>
                 </div>
               </div>
               

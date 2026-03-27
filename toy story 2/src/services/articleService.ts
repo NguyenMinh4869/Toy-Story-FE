@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiDelete, apiPut } from './apiClient';
+import { apiGet, apiPost, apiDelete, apiPut, apiPostForm, apiPutForm } from './apiClient';
 import type { 
   ViewArticleDto, 
   ViewArticleCategoryDto, 
@@ -20,11 +20,32 @@ export const getArticleById = async (id: number): Promise<ViewArticleDto> => {
   return response.data;
 };
 
-export const createArticle = async (data: CreateArticleDto): Promise<void> => {
+export const createArticle = async (data: CreateArticleDto, imageFile?: File): Promise<void> => {
+  // Prefer multipart when sending a file, otherwise fallback to JSON
+  if (imageFile) {
+    const form = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) form.append(key, String(value));
+    });
+    form.append('imageFile', imageFile);
+    await apiPostForm('/articles', form);
+    return;
+  }
+
   await apiPost('/articles', data);
 };
 
-export const updateArticle = async (id: number, data: UpdateArticleDto): Promise<void> => {
+export const updateArticle = async (id: number, data: UpdateArticleDto, imageFile?: File): Promise<void> => {
+  if (imageFile) {
+    const form = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) form.append(key, String(value));
+    });
+    form.append('imageFile', imageFile);
+    await apiPutForm(`/articles/${id}`, form);
+    return;
+  }
+
   await apiPut(`/articles/${id}`, data);
 };
 
