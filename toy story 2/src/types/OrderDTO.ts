@@ -6,6 +6,7 @@ export interface ViewOrderDto {
   orderId: number;
   orderDate: string;
   status: string;
+  statusCode: number;
   cancelledAt?: string | null;
   totalAmount: number;
   accountId: number;

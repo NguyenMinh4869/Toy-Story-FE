@@ -4,10 +4,14 @@ import { getOrderById, getWarehouseOrders } from '@/services/orderService'
 import { ViewOrderDto, OrderDetailDto } from '@/types/OrderDTO'
 import OrderList from '../admin/order/OrderList'
 import OrderDetail from '../admin/order/OrderDetail'
+import { getOrderEventsByOrderId } from '@/services/eventService'
+import { OrderEventDto } from '@/types/EventDto'
+import OrderEventsModal from '@/components/event/OrderEventsModal'
 const StaffOrderManagementPage: React.FC = () => {
     const [orders, setOrders] = useState<ViewOrderDto[]>([])
     const [loading, setLoading] = useState(true)
     const [selectedOrder, setSelectedOrder] = useState<OrderDetailDto | null>(null)
+    const [selectedOrderEvents, setSelectedOrderEvents] = useState<OrderEventDto[] | null>(null)
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -23,27 +27,23 @@ const StaffOrderManagementPage: React.FC = () => {
         fetchOrders()
     }, [])
 
-    const refreshOrders = async () => {
-        try {
-            const data = await getWarehouseOrders()
-            setOrders(data)
-
-            // if a detail modal is open, refresh that too
-            if (selectedOrder) {
-                const detail = await getOrderById(selectedOrder.orderId)
-                setSelectedOrder(detail)
-            }
-        } catch (error) {
-            console.error('Error refreshing orders:', error)
-        }
-    }
-
     const handleSelectOrder = async (orderId: number) => {
         try {
             const detail = await getOrderById(orderId)
             setSelectedOrder(detail)
         } catch (error) {
             console.error('Failed to fetch order detail:', error)
+        }
+    }
+
+    const handleViewHistory = async (orderId: number) => {
+        try {
+            const events = await getOrderEventsByOrderId(orderId);
+            if (events) {
+                setSelectedOrderEvents(events);
+            }
+        } catch (error) {
+            console.error('Failed to fetch events:', error);
         }
     }
 
@@ -78,15 +78,23 @@ const StaffOrderManagementPage: React.FC = () => {
                     </p>
                 </div>
             ) : (
-                <OrderList orders={orders} onSelect={handleSelectOrder} />
+                <OrderList orders={orders} onSelect={handleSelectOrder} onViewHistory={handleViewHistory} />
             )}
 
-            {/* Detail Modal */}
-            {selectedOrder && (
+            {selectedOrder && !selectedOrderEvents && (
                 <OrderDetail
                     order={selectedOrder}
                     onClose={() => setSelectedOrder(null)}
-                    onRefresh={refreshOrders}
+                />
+            )}
+
+            {selectedOrderEvents && (
+                <OrderEventsModal
+                    orderId={selectedOrderEvents[0]?.orderId}
+                    events={selectedOrderEvents}
+                    onClose={() => {
+                        setSelectedOrderEvents(null);
+                    }}
                 />
             )}
         </div>

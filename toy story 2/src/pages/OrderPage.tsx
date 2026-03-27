@@ -7,11 +7,17 @@ import { getOrderById, getAccountOrders, updateOrderStatus } from '@/services/or
 import StatusBadge from '@/components/badge/OrderStatusBadge'
 import { OrderDetailDto } from '@/types/OrderDTO'
 import OrderDetailModal from '@/components/OrderDetailModalProps'
+import { getOrderEventsByOrderId } from '@/services/eventService'
+import { OrderEventDto } from '@/types/EventDto'
+import OrderEventsModal from '@/components/event/OrderEventsModal'
 
 const OrderPage: React.FC = () => {
     const [orders, setOrders] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
+
     const [selectedOrder, setSelectedOrder] = useState<OrderDetailDto | null>(null)
+    const [selectedOrderEvents, setSelectedOrderEvents] = useState<OrderEventDto[] | null>(null)
+
     useEffect(() => {
         const fetchOrders = async () => {
             try {
@@ -79,35 +85,33 @@ const OrderPage: React.FC = () => {
                                 className="group bg-white border border-gray-200 rounded-2xl shadow-md p-6 hover:shadow-xl hover:border-red-100 transition-all cursor-pointer"
                             >
                                 {/* Top section: icon + info */}
-                                <div className="flex items-start gap-4">
-
-                                    <div className="flex-1">
-                                        <h4 className="font-bold text-gray-900 text-lg mb-1">
+                                <div className="flex flex-col gap-2">
+                                    {/* First row: Order ID + Date */}
+                                    <div className="flex items-center justify-between">
+                                        <h4 className="font-bold text-gray-900 text-lg">
                                             Đơn hàng #{order.orderId}
                                         </h4>
-                                        <div className="flex items-center gap-3 text-sm text-gray-500">
-                                            <span className="flex items-center gap-1">
-                                                <Clock size={14} />
-                                                {new Date(order.orderDate).toLocaleDateString('vi-VN')}
-                                            </span>
-                                            <StatusBadge status={order.status} />
-                                        </div>
+                                        <span className="flex items-center gap-1 text-sm text-gray-500">
+                                            <Clock size={14} />
+                                            {new Date(order.orderDate).toLocaleDateString('vi-VN')}
+                                        </span>
                                     </div>
-                                </div>
 
-                                <div className="mt-6 flex items-center justify-between">
-                                    {/* Price Section: Better typography and color balance */}
-                                    <div className="flex flex-col">
-                                       
+                                    {/* Second row: Status + Price */}
+                                    <div className="flex items-center justify-between">
+                                        <StatusBadge status={order.status} />
                                         <div className="text-xl font-extrabold tracking-tight text-red-600">
                                             {formatPrice(order.totalAmount)}
                                         </div>
                                     </div>
+                                </div>
 
-                                    {/* Button Section: Adding weight, shadow, and click-depth */}
+
+                                <div className="mt-4 flex justify-center gap-6">
                                     {order.status === 'Đang giao hàng' && (
                                         <button
-                                            onClick={async () => {
+                                            onClick={async (e) => {
+                                                e.stopPropagation();
                                                 try {
                                                     await updateOrderStatus(order.orderId);
                                                     setOrders(prev =>
@@ -120,14 +124,28 @@ const OrderPage: React.FC = () => {
                                                     console.error(error);
                                                 }
                                             }}
-                                            className="relative flex items-center justify-center h-8 px-8 
-                 bg-green-600 text-white rounded-full text-sm font-bold 
-                 shadow-[0_4px_14px_0_rgba(22,163,74,0.39)] 
-                 hover:shadow-[0_6px_20px_rgba(22,163,74,0.23)] 
-                 hover:bg-green-700 active:scale-95 
-                 transition-all duration-200 ease-in-out"
+                                            className="px-6 py-2 bg-green-600 text-white rounded-full text-sm font-bold hover:bg-green-700 transition-all"
                                         >
                                             Nhận hàng
+                                        </button>
+                                    )}
+
+                                    {order.status !== 'Đang chờ thanh toán' && order.status !== 'Đã hủy' && (
+                                        <button
+                                            onClick={async (e) => {
+                                                e.stopPropagation();
+                                                try {
+                                                    const events = await getOrderEventsByOrderId(order.orderId);
+                                                    if (events) {
+                                                        setSelectedOrderEvents(events);
+                                                    }
+                                                } catch (error) {
+                                                    console.error('Failed to fetch events:', error);
+                                                }
+                                            }}
+                                            className="px-6 py-2 bg-blue-600 text-white rounded-full text-sm font-bold hover:bg-blue-700 transition-all"
+                                        >
+                                            Xem lịch sử
                                         </button>
                                     )}
                                 </div>
@@ -135,8 +153,22 @@ const OrderPage: React.FC = () => {
                         ))}
                     </div>
                 )}
-                {selectedOrder && (
-                    <OrderDetailModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />
+
+                {selectedOrder && !selectedOrderEvents && (
+                    <OrderDetailModal
+                        order={selectedOrder}
+                        onClose={() => setSelectedOrder(null)}
+                    />
+                )}
+
+                {selectedOrderEvents && (
+                    <OrderEventsModal
+                        orderId={selectedOrderEvents[0]?.orderId}
+                        events={selectedOrderEvents}
+                        onClose={() => {
+                            setSelectedOrderEvents(null);
+                        }}
+                    />
                 )}
             </div>
 

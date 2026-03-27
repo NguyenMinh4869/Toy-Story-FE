@@ -2,12 +2,17 @@ import React, { useEffect, useState } from 'react'
 import { Package } from 'lucide-react'
 import { getOrderById, getOrders } from '@/services/orderService'
 import { ViewOrderDto, OrderDetailDto } from '@/types/OrderDTO'
-import OrderList from './order/OrderList'
 import OrderDetail from './order/OrderDetail'
+import OrderEventsModal from '@/components/event/OrderEventsModal'
+import { OrderEventDto } from '@/types/EventDto'
+import { getOrderEventsByOrderId } from '@/services/eventService'
+import OrderList from './order/OrderList'
+
 const OrderManagementPage: React.FC = () => {
     const [orders, setOrders] = useState<ViewOrderDto[]>([])
     const [loading, setLoading] = useState(true)
     const [selectedOrder, setSelectedOrder] = useState<OrderDetailDto | null>(null)
+    const [selectedOrderEvents, setSelectedOrderEvents] = useState<OrderEventDto[] | null>(null)
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -29,6 +34,17 @@ const OrderManagementPage: React.FC = () => {
             setSelectedOrder(detail)
         } catch (error) {
             console.error('Failed to fetch order detail:', error)
+        }
+    }
+
+    const handleViewHistory = async (orderId: number) => {
+        try {
+            const events = await getOrderEventsByOrderId(orderId);
+            if (events) {
+                setSelectedOrderEvents(events);
+            }
+        } catch (error) {
+            console.error('Failed to fetch events:', error);
         }
     }
 
@@ -63,14 +79,23 @@ const OrderManagementPage: React.FC = () => {
                     </p>
                 </div>
             ) : (
-                <OrderList orders={orders} onSelect={handleSelectOrder} />
+                <OrderList orders={orders} onSelect={handleSelectOrder} onViewHistory={handleViewHistory} />
             )}
 
-            {/* Detail Modal */}
-            {selectedOrder && (
+            {selectedOrder && !selectedOrderEvents && (
                 <OrderDetail
                     order={selectedOrder}
                     onClose={() => setSelectedOrder(null)}
+                />
+            )}
+
+            {selectedOrderEvents && (
+                <OrderEventsModal
+                    orderId={selectedOrderEvents[0]?.orderId}
+                    events={selectedOrderEvents}
+                    onClose={() => {
+                        setSelectedOrderEvents(null);
+                    }}
                 />
             )}
         </div>

@@ -5,10 +5,10 @@ import OrderCard from './OrderCard'
 interface OrderListProps {
   orders: ViewOrderDto[]
   onSelect: (orderId: number) => void
-  
+  onViewHistory: (orderId: number) => void
 }
 
-const OrderList: React.FC<OrderListProps> = ({ orders, onSelect }) => {
+const OrderList: React.FC<OrderListProps> = ({ orders, onSelect, onViewHistory }) => {
   return (
     <div className="grid grid-cols-3 gap-4">
       {orders.map(order => (
@@ -16,10 +16,11 @@ const OrderList: React.FC<OrderListProps> = ({ orders, onSelect }) => {
           key={order.orderId}
           order={order}
           onClick={() => onSelect(order.orderId)}
+          onViewHistory={onViewHistory}
         />
       ))}
     </div>
   )
 }
 
-export default OrderList
+export default OrderList;
