@@ -27,7 +27,6 @@ import StaffManagementPage from "../pages/admin/StaffManagementPage";
 import BrandManagementPage from "../pages/admin/BrandManagementPage";
 import PromotionManagementPage from "../pages/admin/PromotionManagementPage";
 import SetManagementPage from "../pages/admin/SetManagementPage";
-import VoucherManagementPage from "../pages/admin/VoucherManagementPage";
 import WarehouseManagementPage from "../pages/admin/WarehouseManagementPage";
 
 // Staff Pages
@@ -108,14 +107,7 @@ const AppRoutes: React.FC = () => {
             </DashboardLayout>
           }
         />
-        <Route
-          path={ROUTES.ADMIN_VOUCHERS}
-          element={
-            <DashboardLayout mode="admin">
-              <VoucherManagementPage />
-            </DashboardLayout>
-          }
-        />
+
         <Route
           path={ROUTES.ADMIN_WAREHOUSE}
           element={

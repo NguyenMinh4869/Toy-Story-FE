@@ -21,9 +21,6 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({
   const productImage = product.imageUrl ?? PRODUCT_PLACEHOLDER;
   const { addToCart } = useCart();
 
-  const discount = 30;
-  const originalPrice = productPrice / (1 - discount / 100);
-
   const handleAddToCart = (e: React.MouseEvent): void => {
     e.preventDefault()
     e.stopPropagation()
@@ -54,9 +51,6 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({
         <div className="flex items-center gap-4 mb-4">
           <span className="font-tilt-warp text-[20px] text-[#ff0000]">
             {formatPrice(productPrice)}
-          </span>
-          <span className="font-tilt-warp text-[20px] text-[#574848] line-through">
-            {formatPrice(originalPrice)}
           </span>
         </div>
 

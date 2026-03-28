@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { LayoutDashboard, ShoppingBag, Users, Tag, Percent, Layers, Ticket, Warehouse, List, BookOpen, Album } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Users, Tag, Percent, Layers, Warehouse, List, BookOpen, Album } from 'lucide-react';
 import { ROUTES } from '../../routes/routePaths';
 import { getUserRole } from '../../services/authService';
 
@@ -65,15 +65,6 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
         to: ROUTES.ADMIN_STAFF,
         icon: <Users size={20} />,
         label: 'Nhân viên'
-      });
-    }
-
-    // Vouchers are ADMIN-ONLY, Promotions for both roles
-    if (effectiveMode === 'admin') {
-      baseLinks.push({
-        to: ROUTES.ADMIN_VOUCHERS,
-        icon: <Ticket size={20} />,
-        label: 'Voucher'
       });
     }
 

@@ -1,6 +1,5 @@
 import { apiPost, apiDelete, apiPut } from "./apiClient";
 import {
-  CalculatePriceRequest,
   CalculatePriceResponse,
   CheckoutResponse,
   CreatePaymentResponse,
@@ -34,14 +33,15 @@ export const syncCartToServer = async (
  * Calculate order price (preview)
  * POST /api/checkout/calculate
  */
-export const calculatePrice = async (
-  request: CalculatePriceRequest,
-): Promise<CalculatePriceResponse> => {
-  // Note: If this fails with 404, we'll need to use Cart total as fallback
+export const calculateCheckout = async (): Promise<CalculatePriceResponse> => {
   const response = await apiPost<CalculatePriceResponse>(
-    "/checkout/calculate",
-    request,
-  );
+    "/checkout/calculate-checkout");
+  return response.data;
+};
+
+export const calculatePrice = async (): Promise<CalculatePriceResponse> => {
+  const response = await apiPost<CalculatePriceResponse>(
+    "/checkout/calculate-price");
   return response.data;
 };
 

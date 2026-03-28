@@ -19,7 +19,7 @@ export interface CalculatePriceResponse {
     subtotal: number
     discount: number
     total: number
-    message?: string
+    message: string
 }
 
 /**
@@ -72,4 +72,72 @@ export interface ValidateVoucherResponse {
     }[]
     totalDiscount: number
     finalAmount: number
+}
+
+
+// types/CheckoutDTO.ts
+export interface DiscountDetailDto {
+    id: number;
+    name: string;
+    code?: string;
+    amount: number;
+    type: "Promotion" | "Voucher";
+    description?: string;
+}
+
+export interface CheckoutSummaryDto {
+    subTotal: number;
+    totalDiscount: number;
+    finalAmount: number;
+    discounts: DiscountDetailDto[];
+}
+
+export interface CalculatePriceRequest {
+    items: CalculatePriceItem[];
+    voucherCode?: string;
+}
+
+export interface CalculatePriceResponse {
+    message: string;
+    summary: CheckoutSummaryDto;
+}
+
+export interface ValidateVoucherResponse {
+    message: string;
+    summary: CheckoutSummaryDto;
+}
+
+export interface CheckoutResponse {
+    message: string;
+    checkout: {
+        orderId: number;
+        invoiceId: number;
+        totalAmount: number;
+        status: string;
+    };
+}
+
+export interface CreatePaymentResponse {
+    paymentUrl: string;
+    qrCode: string;
+    orderCode: number;
+    status: string;
+    invoiceId: number;
+    amount: number;
+}
+
+export interface VoucherData {
+    id: number;
+    name: string;
+    code: string;
+    discountAmount: number;
+    discountType: string;
+}
+
+export interface PromotionData {
+    id: number;
+    name: string;
+    description: string;
+    discountAmount: number;
+    discountType: string;
 }

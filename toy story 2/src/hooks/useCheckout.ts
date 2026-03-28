@@ -18,25 +18,14 @@ interface CheckoutFormData {
 }
 
 export const useCheckout = () => {
-  const { cartItems, getTotalPrice } = useCart();
+  const { cartItems, getTotalPrice, clearCart } = useCart();
   const { user } = useAuth();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isCalculating] = useState(false);
-  const [calculation, setCalculation] = useState<CalculatePriceResponse | null>(
-    null,
-  );
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [calculation, setCalculation] = useState<CalculatePriceResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [qrCodeData, setQrCodeData] = useState<string | null>(null);
-
-  const [voucherCode, setVoucherCode] = useState("");
-  const [isValidatingVoucher, setIsValidatingVoucher] = useState(false);
-  const [voucherError, setVoucherError] = useState<string | null>(null);
-  const [voucherData, setVoucherData] = useState<{
-    name: string;
-    totalDiscount: number;
-    finalAmount: number;
-  } | null>(null);
 
   // Form state
   const [formData, setFormData] = useState<CheckoutFormData>({
@@ -60,6 +49,32 @@ export const useCheckout = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    const fetchPrice = async () => {
+      if (cartItems.length === 0) {
+        setCalculation(null);
+        return;
+      }
+
+      setIsCalculating(true);
+      setError(null);
+
+      try {
+        // Don't send items - backend gets cart from account
+        const result = await calculatePrice();
+        setCalculation(result);
+        console.log("Price calculation:", result);
+      } catch (err: any) {
+        console.error("Failed to calculate price:", err);
+        setError(err.message || "Không thể tính toán giá trị đơn hàng");
+      } finally {
+        setIsCalculating(false);
+      }
+    };
+
+    fetchPrice();
+  }, [cartItems]);
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -67,62 +82,12 @@ export const useCheckout = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleApplyVoucher = async () => {
-    if (!voucherCode.trim()) return;
-
-    setIsValidatingVoucher(true);
-    setVoucherError(null);
-
-    try {
-      const result = await calculatePrice({
-        items: cartItems.map((item) => {
-          if ("productId" in item.product) {
-            return {
-              productId: item.product.productId,
-              quantity: item.quantity,
-            }
-          } else {
-            return {
-              setId: item.product.setId,
-              quantity: item.quantity,
-            }
-          }
-        }
-        ),
-        voucherCode: voucherCode.trim(),
-      });
-
-      setCalculation(result);
-      setVoucherData({
-        name: "Voucher áp dụng",
-        totalDiscount: result.discount,
-        finalAmount: result.total,
-      });
-      setError(null);
-    } catch (err: any) {
-      console.error("Voucher calculation error:", err);
-      const detailMsg =
-        err.response?.data?.data?.message ||
-        err.message ||
-        "Mã voucher không hợp lệ hoặc giỏ hàng trống";
-      setVoucherError(detailMsg);
-      setVoucherData(null);
-      setCalculation(null);
-    } finally {
-      setIsValidatingVoucher(false);
-    }
-  };
-
+  // hooks/useCheckout.ts - Remove items from checkout
   const handleCheckout = async (e?: React.FormEvent) => {
     if (e && e.preventDefault) e.preventDefault();
 
-    if (cartItems.length === 0) return;
-
-    // Basic validation
-    if (!formData.name || !formData.phoneNumber || !formData.address) {
-      setError(
-        "Vui lòng nhập đầy đủ thông tin giao hàng (Họ tên, SĐT, Địa chỉ).",
-      );
+    if (cartItems.length === 0) {
+      setError("Giỏ hàng trống");
       return;
     }
 
@@ -130,38 +95,29 @@ export const useCheckout = () => {
     setError(null);
 
     try {
-      const payload =
-        voucherData && voucherCode.trim()
-          ? { voucherCode: voucherCode.trim() }
-          : undefined;
-
-      const checkoutResult = await checkout(payload);
+      // Don't send items - backend gets cart from account
+      const checkoutResult = await checkout({});
 
       const invoiceId = checkoutResult?.checkout?.invoiceId;
       if (!invoiceId) {
-        throw new Error(
-          "Không thể tạo hóa đơn thanh toán. Vui lòng liên hệ hỗ trợ.",
-        );
+        throw new Error("Không thể tạo hóa đơn thanh toán. Vui lòng liên hệ hỗ trợ.");
       }
 
       const paymentResult = await createPayment(invoiceId);
-      const checkoutUrl = paymentResult?.data?.paymentUrl;
+      const checkoutUrl = paymentResult?.data?.paymentUrl || paymentResult?.paymentUrl;
 
       if (checkoutUrl) {
-        window.location.href = checkoutUrl;
+        setTimeout(() => {
+          window.location.href = checkoutUrl;
+        }, 2000);
       } else {
         throw new Error("Không nhận được liên kết thanh toán từ PayOS.");
       }
     } catch (err: any) {
       console.error("Checkout error:", err);
-      const detailMsg = err.errors
-        ? Object.values(err.errors).flat().join(", ")
-        : "";
-      setError(
-        detailMsg ||
-        err.message ||
-        "Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.",
-      );
+      const detailMsg = err.errors ? Object.values(err.errors).flat().join(", ") : "";
+      setError(detailMsg || err.message || "Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.");
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -176,19 +132,13 @@ export const useCheckout = () => {
     calculation,
     error,
     qrCodeData,
-    voucherCode,
-    voucherError,
-    voucherData,
-    isValidatingVoucher,
 
     // Setters
-    setVoucherCode,
     setQrCodeData,
     setError,
 
     // Handlers
     handleInputChange,
-    handleApplyVoucher,
     handleCheckout,
   };
 };

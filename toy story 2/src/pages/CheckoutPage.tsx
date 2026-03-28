@@ -10,7 +10,6 @@ import CheckoutForm from "@/components/checkout/CheckoutForm";
 import CartItemsList from "@/components/checkout/CartItemsList";
 import OrderSummary from "@/components/checkout/OrderSummary";
 import EmptyCart from "@/components/checkout/EmptyCart";
-import QrCodeModal from "@/components/checkout/QrCodeModal";
 
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
@@ -23,13 +22,7 @@ const CheckoutPage: React.FC = () => {
     calculation,
     error,
     qrCodeData,
-    voucherCode,
-    voucherError,
-    voucherData,
-    isValidatingVoucher,
-    setVoucherCode,
     setQrCodeData,
-    handleApplyVoucher,
     handleCheckout,
   } = useCheckout();
 
@@ -68,7 +61,6 @@ const CheckoutPage: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
-            {/* Read-only form, no onChange/onSubmit */}
             <CheckoutForm formData={formData} />
             <CartItemsList items={cartItems} />
           </div>
@@ -78,14 +70,8 @@ const CheckoutPage: React.FC = () => {
               <OrderSummary
                 subtotal={getTotalPrice()}
                 calculation={calculation}
-                voucherCode={voucherCode}
-                voucherError={voucherError}
-                voucherData={voucherData}
-                isValidatingVoucher={isValidatingVoucher}
                 isSubmitting={isSubmitting}
                 isCalculating={isCalculating}
-                onVoucherCodeChange={setVoucherCode}
-                onApplyVoucher={handleApplyVoucher}
                 onCheckout={handleCheckout}
               />
 
@@ -99,14 +85,6 @@ const CheckoutPage: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {qrCodeData && (
-        <QrCodeModal
-          isOpen={!!qrCodeData}
-          qrCodeData={qrCodeData}
-          onClose={() => setQrCodeData(null)}
-        />
-      )}
     </div>
   );
 };

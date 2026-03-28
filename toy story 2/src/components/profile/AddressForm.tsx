@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { locationService } from "../../hooks/useLocation";
 import type { AddressFormData } from "../../types/Location";
+import type { Province, District, Ward } from "@/types/LocationDTO";
 
 import { updateUser, getCurrentUser } from "../../services/authService";
 import { useAuth } from "../../hooks/useAuth";
@@ -15,23 +16,24 @@ interface AddressFormProps {
 
 const AddressForm: React.FC<AddressFormProps> = ({
   onSave,
+  onCancel,
   initialAddress,
   isEditing = false,
 }) => {
   const { refreshUser } = useAuth();
-  const [provinces, setProvinces] = useState<any[]>([]); 
-  const [districts, setDistricts] = useState<any[]>([]);
-  const [wards, setWards] = useState<any[]>([]);
+  const [provinces, setProvinces] = useState<Province[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [wards, setWards] = useState<Ward[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const {
-    register,
     handleSubmit,
     watch,
     control,
     formState: { errors },
     setValue,
+    reset
   } = useForm<AddressFormData>({
     defaultValues: {
       recipientName: "",
@@ -45,14 +47,13 @@ const AddressForm: React.FC<AddressFormProps> = ({
   const selectedProvince = watch("province");
   const selectedDistrict = watch("district");
 
-  // Load provinces on mount using locationService
+  // Load provinces on mount
   useEffect(() => {
     const loadProvinces = async () => {
       setIsLoading(true);
       try {
         const data = await locationService.getAllProvinces();
-        // Cast to any to avoid type errors
-        setProvinces(data as any[]);
+        setProvinces(data);
       } catch (error) {
         console.error("Failed to load provinces:", error);
       } finally {
@@ -62,49 +63,22 @@ const AddressForm: React.FC<AddressFormProps> = ({
     loadProvinces();
   }, []);
 
-  // Parse initial address when editing
-  useEffect(() => {
-    if (initialAddress && isEditing) {
-      let recipientName = "";
-      let addressParts: string[];
-
-      if (initialAddress.includes("|")) {
-        const [name, addressString] = initialAddress
-          .split("|")
-          .map((s) => s.trim());
-        recipientName = name;
-        addressParts = addressString.split(",").map((p) => p.trim());
-      } else {
-        addressParts = initialAddress.split(",").map((p) => p.trim());
-      }
-
-      if (recipientName) {
-        setValue("recipientName", recipientName);
-      }
-
-      const specificAddress = addressParts[0]?.trim();
-      if (specificAddress) {
-        setValue("specificAddress", specificAddress);
-      }
-    }
-  }, [initialAddress, isEditing, setValue]);
-
   // Load districts when province changes
   useEffect(() => {
     const loadDistricts = async () => {
       if (selectedProvince) {
         try {
           const provinceCode = parseInt(selectedProvince);
-          const province =
-            await locationService.getProvinceByCode(provinceCode);
+          const province = await locationService.getProvinceByCode(provinceCode);
           if (province && province.districts) {
-            setDistricts(province.districts as any[]);
+            setDistricts(province.districts);
             setWards([]);
             setValue("district", "");
             setValue("ward", "");
           }
         } catch (error) {
           console.error("Failed to load districts:", error);
+          setDistricts([]);
         }
       } else {
         setDistricts([]);
@@ -120,14 +94,14 @@ const AddressForm: React.FC<AddressFormProps> = ({
       if (selectedDistrict) {
         try {
           const districtCode = parseInt(selectedDistrict);
-          const district =
-            await locationService.getDistrictByCode(districtCode);
+          const district = await locationService.getDistrictByCode(districtCode);
           if (district && district.wards) {
-            setWards(district.wards as any[]);
+            setWards(district.wards);
             setValue("ward", "");
           }
         } catch (error) {
           console.error("Failed to load wards:", error);
+          setWards([]);
         }
       } else {
         setWards([]);
@@ -141,10 +115,10 @@ const AddressForm: React.FC<AddressFormProps> = ({
       setIsSaving(true);
 
       const province = provinces.find(
-        (p) => p.code.toString() === data.province,
+        (p) => p.code.toString() === data.province
       );
       const district = districts.find(
-        (d) => d.code.toString() === data.district,
+        (d) => d.code.toString() === data.district
       );
       const ward = wards.find((w) => w.code.toString() === data.ward);
 
@@ -157,9 +131,7 @@ const AddressForm: React.FC<AddressFormProps> = ({
         .filter(Boolean)
         .join(", ");
 
-      const fullAddress = data.recipientName
-        ? `${data.recipientName} | ${locationParts}`
-        : locationParts;
+      const fullAddress = locationParts;
 
       await updateUser({
         address: fullAddress,
@@ -172,6 +144,7 @@ const AddressForm: React.FC<AddressFormProps> = ({
       refreshUser();
 
       onSave(fullAddress);
+      reset(); // Reset form after successful save
     } catch (error) {
       console.error("Error saving address:", error);
       alert("Có lỗi xảy ra khi lưu địa chỉ");
@@ -181,39 +154,15 @@ const AddressForm: React.FC<AddressFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div>
-     
-        {isEditing && initialAddress && (
-          <p className="text-sm text-gray-600 mb-4">
+    <form onSubmit={handleSubmit(onSubmit)} >
+      {isEditing && initialAddress && (
+        <div className="mb-4 rounded-lg">
+          <p className="text-md text-gray-600">
             <strong>Địa chỉ hiện tại:</strong> {initialAddress}
           </p>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Recipient Name */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Tên người nhận <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
-          {...register("recipientName", {
-            required: "Vui lòng nhập tên người nhận",
-          })}
-          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ab0007] ${
-            errors.recipientName ? "border-red-500" : "border-gray-300"
-          }`}
-          placeholder="Tên"
-        />
-        {errors.recipientName && (
-          <p className="mt-1 text-sm text-red-500">
-            {errors.recipientName.message}
-          </p>
-        )}
-      </div>
-
-      {/* Province */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Tỉnh/Thành phố <span className="text-red-500">*</span>
@@ -225,14 +174,15 @@ const AddressForm: React.FC<AddressFormProps> = ({
           render={({ field }) => (
             <select
               {...field}
+              value={field.value || ""}
+              onChange={(e) => field.onChange(e.target.value)}
               disabled={isLoading}
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ab0007] bg-white ${
-                errors.province ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ab0007] bg-white ${errors.province ? "border-red-500" : "border-gray-300"
+                }`}
             >
-              <option value="">Chọn tỉnh/thành phố</option>
+              <option value="">-- Chọn tỉnh/thành phố --</option>
               {provinces.map((province) => (
-                <option key={province.code} value={province.code}>
+                <option key={province.code} value={province.code.toString()}>
                   {province.name}
                 </option>
               ))}
@@ -244,9 +194,9 @@ const AddressForm: React.FC<AddressFormProps> = ({
         )}
       </div>
 
-      {/* District */}
+      {/* District Dropdown */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2 mt-2">
           Quận/Huyện <span className="text-red-500">*</span>
         </label>
         <Controller
@@ -256,14 +206,15 @@ const AddressForm: React.FC<AddressFormProps> = ({
           render={({ field }) => (
             <select
               {...field}
+              value={field.value || ""}
+              onChange={(e) => field.onChange(e.target.value)}
               disabled={!selectedProvince || districts.length === 0}
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ab0007] bg-white ${
-                errors.district ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ab0007] bg-white ${errors.district ? "border-red-500" : "border-gray-300"
+                }`}
             >
-              <option value="">Chọn quận/huyện</option>
+              <option value="">-- Chọn quận/huyện --</option>
               {districts.map((district) => (
-                <option key={district.code} value={district.code}>
+                <option key={district.code} value={district.code.toString()}>
                   {district.name}
                 </option>
               ))}
@@ -275,9 +226,9 @@ const AddressForm: React.FC<AddressFormProps> = ({
         )}
       </div>
 
-      {/* Ward */}
+      {/* Ward Dropdown */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2 mt-2">
           Phường/Xã <span className="text-red-500">*</span>
         </label>
         <Controller
@@ -287,14 +238,15 @@ const AddressForm: React.FC<AddressFormProps> = ({
           render={({ field }) => (
             <select
               {...field}
+              value={field.value || ""}
+              onChange={(e) => field.onChange(e.target.value)}
               disabled={!selectedDistrict || wards.length === 0}
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ab0007] bg-white ${
-                errors.ward ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ab0007] bg-white ${errors.ward ? "border-red-500" : "border-gray-300"
+                }`}
             >
-              <option value="">Chọn phường/xã</option>
+              <option value="">-- Chọn phường/xã --</option>
               {wards.map((ward) => (
-                <option key={ward.code} value={ward.code}>
+                <option key={ward.code} value={ward.code.toString()}>
                   {ward.name}
                 </option>
               ))}
@@ -308,18 +260,22 @@ const AddressForm: React.FC<AddressFormProps> = ({
 
       {/* Specific Address */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2 mt-2">
           Địa chỉ cụ thể <span className="text-red-500">*</span>
         </label>
-        <input
-          type="text"
-          {...register("specificAddress", {
-            required: "Vui lòng nhập địa chỉ cụ thể",
-          })}
-          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ab0007] ${
-            errors.specificAddress ? "border-red-500" : "border-gray-300"
-          }`}
-          placeholder="Số nhà, tên đường"
+        <Controller
+          name="specificAddress"
+          control={control}
+          rules={{ required: "Vui lòng nhập địa chỉ cụ thể" }}
+          render={({ field }) => (
+            <input
+              {...field}
+              type="text"
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ab0007] ${errors.specificAddress ? "border-red-500" : "border-gray-300"
+                }`}
+              placeholder="Số nhà, tên đường"
+            />
+          )}
         />
         {errors.specificAddress && (
           <p className="mt-1 text-sm text-red-500">
@@ -329,16 +285,22 @@ const AddressForm: React.FC<AddressFormProps> = ({
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-center pt-4">
+      <div className="flex justify-center gap-4 pt-4">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-8 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+        >
+          Hủy
+        </button>
         <button
           type="submit"
           disabled={isSaving}
-          className={`min-w-[220px] px-8 py-3 bg-[#ab0007] text-white rounded-lg font-medium hover:bg-[#8a0006] transition-colors ${
-            isSaving ? "opacity-50 cursor-not-allowed" : ""
-          }`}
+          className={`min-w-[220px] px-8 py-3 bg-[#ab0007] text-white rounded-lg font-medium hover:bg-[#8a0006] transition-colors ${isSaving ? "opacity-50 cursor-not-allowed" : ""
+            }`}
         >
           {isSaving
-            ? "Đang lưu..." 
+            ? "Đang lưu..."
             : isEditing
               ? "Cập nhật địa chỉ"
               : "Thêm địa chỉ"}

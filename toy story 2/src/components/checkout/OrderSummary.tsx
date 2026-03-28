@@ -1,35 +1,27 @@
-// components/OrderSummary.tsx
+// components/checkout/OrderSummary.tsx
 import React from "react";
-import { ShoppingBag, Ticket, Loader2, CreditCard } from "lucide-react";
+import { ShoppingBag, Loader2, CreditCard, Gift } from "lucide-react";
 import { formatPrice } from "@/utils/formatPrice";
 import { CalculatePriceResponse } from "@/types/CheckoutDTO";
+
 interface OrderSummaryProps {
   subtotal: number;
   calculation: CalculatePriceResponse | null;
-  voucherCode: string;
-  voucherError: string | null;
-  voucherData: any;
-  isValidatingVoucher: boolean;
   isSubmitting: boolean;
   isCalculating: boolean;
-  onVoucherCodeChange: (code: string) => void;
-  onApplyVoucher: () => void;
   onCheckout: () => void;
 }
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({
   subtotal,
   calculation,
-  voucherCode,
-  voucherError,
-  voucherData,
-  isValidatingVoucher,
   isSubmitting,
   isCalculating,
-  onVoucherCodeChange,
-  onApplyVoucher,
   onCheckout,
 }) => {
+  // Get the summary data from calculation
+  const summary = calculation?.summary;
+
   return (
     <section className="bg-white rounded-3xl p-6 md:p-8 shadow-xl border border-red-50 relative overflow-hidden">
       <div className="absolute -top-10 -right-10 w-32 h-32 bg-red-50 rounded-full opacity-50 blur-3xl pointer-events-none"></div>
@@ -40,88 +32,59 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
       </h2>
 
       <div className="space-y-4 font-reddit-sans">
-        {/* Voucher Section */}
-        <div className="pt-2 pb-4 border-b border-gray-100">
-          <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-            <Ticket size={16} className="text-gray-500" /> Mã giảm giá
-          </label>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={voucherCode}
-              onChange={(e) => onVoucherCodeChange(e.target.value)}
-              placeholder="Nhập mã voucher"
-              className="flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:border-red-400 focus:ring-2 focus:ring-red-50 outline-none transition-all uppercase"
-              disabled={isSubmitting || isValidatingVoucher}
-            />
-            <button
-              type="button"
-              onClick={onApplyVoucher}
-              disabled={
-                isSubmitting || isValidatingVoucher || !voucherCode.trim()
-              }
-              className={`px-4 py-2 font-medium rounded-xl transition-all whitespace-nowrap ${
-                !voucherCode.trim() || isValidatingVoucher
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-gray-800 text-white hover:bg-gray-900 active:scale-95"
-              }`}
-            >
-              {isValidatingVoucher ? (
-                <Loader2 size={20} className="animate-spin" />
-              ) : (
-                "Áp dụng"
-              )}
-            </button>
-          </div>
-          {voucherError && (
-            <p className="text-red-500 text-sm mt-2">{voucherError}</p>
-          )}
-        </div>
-
         <div className="flex justify-between text-gray-600">
           <span>Tạm tính</span>
           <span className="font-medium">{formatPrice(subtotal)}</span>
         </div>
 
-        {voucherData && (
-          <div className="flex justify-between text-green-600">
-            <span className="flex flex-col">
-              <span>Voucher áp dụng</span>
-              <span className="text-xs text-green-500">{voucherData.name}</span>
-            </span>
-            <span className="font-medium">
-              - {formatPrice(voucherData.totalDiscount)}
-            </span>
-          </div>
+        {/* Promotions Section - Display each discount */}
+        {summary?.discounts && summary.discounts.length > 0 && (
+          <>
+            {summary.discounts.map((discount, index) => (
+              <div key={index} className="flex justify-between text-green-600">
+                <div className="flex items-center gap-2">
+                  <Gift size={16} />
+                  <span>{discount.name}</span>
+                </div>
+                <span className="font-medium">
+                  -{formatPrice(discount.amount)}
+                </span>
+              </div>
+            ))}
+          </>
         )}
 
-        {calculation && (
-          <>
-            <div className="flex justify-between text-gray-600">
-              <span>Giảm giá</span>
-              <span className="text-green-600 font-medium">
-                -{formatPrice(calculation.discount)}
-              </span>
-            </div>
-            <div className="h-px bg-gray-100 my-2"></div>
-            <div className="flex justify-between text-lg font-bold text-gray-900">
-              <span>Tổng tiền</span>
+        <div className="h-px bg-gray-100 my-2"></div>
+
+        <div className="flex justify-between text-lg font-bold text-gray-900">
+          <span>Tổng tiền</span>
+          <div className="text-right">
+            {summary?.finalAmount !== undefined ? (
               <span className="text-red-600 text-2xl font-tilt-warp">
-                {formatPrice(calculation.total)}
+                {formatPrice(summary.finalAmount)}
               </span>
-            </div>
-          </>
+            ) : (
+              <Loader2 size={20} className="animate-spin text-gray-400" />
+            )}
+
+          </div>
+        </div>
+
+        {/* Total discount saved */}
+        {summary?.totalDiscount && summary.totalDiscount > 0 && (
+          <p className="text-sm text-green-600 text-right">
+            Tiết kiệm: {formatPrice(summary.totalDiscount)}
+          </p>
         )}
 
         <div className="pt-6">
           <button
             disabled={isSubmitting || isCalculating}
             onClick={onCheckout}
-            className={`w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-lg transition-all transform hover:-translate-y-1 active:scale-95 ${
-              isSubmitting || isCalculating
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-red-600 text-white hover:bg-red-700 hover:shadow-red-200"
-            }`}
+            className={`w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-lg transition-all transform hover:-translate-y-1 active:scale-95 ${isSubmitting || isCalculating
+              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+              : "bg-red-600 text-white hover:bg-red-700 hover:shadow-red-200"
+              }`}
           >
             {isSubmitting ? (
               <>
