@@ -1,46 +1,46 @@
-// components/event/EventFilter.tsx
-import React, { useState, useEffect } from 'react'
-import { Calendar, Warehouse, X, Loader2 } from 'lucide-react'
+// components/transfer/TransferFilter.tsx
+import React, { useState, useEffect, useRef } from 'react'
+import { Warehouse, X, Filter, Loader2 } from 'lucide-react'
 import { getWarehouses } from '@/services/warehouseService'
 import { WarehouseSummaryDto } from '@/types/WarehouseDTO'
+import { TransferFilterDto, TransferStatus, TransferStatusLabels, TransferType, TransferTypeLabels } from '@/types/TransferDTO'
 
-interface EventFilterProps {
-    onFilter: (filter: EventFilterDto) => void
+interface TransferFilterProps {
+    onFilter: (filter: TransferFilterDto) => void
     onReset: () => void
     showWarehouseFilter?: boolean
     userWarehouseId?: number | null
 }
 
-export interface EventFilterDto {
-    warehouseId?: number
-    startDate?: string
-    endDate?: string
-}
-
-const EventFilter: React.FC<EventFilterProps> = ({
+const TransferFilter: React.FC<TransferFilterProps> = ({
     onFilter,
     onReset,
     showWarehouseFilter = true,
     userWarehouseId
 }) => {
-    const [filter, setFilter] = useState<EventFilterDto>({
+    const [filter, setFilter] = useState<TransferFilterDto>({
         warehouseId: userWarehouseId || undefined,
-        startDate: undefined,
-        endDate: undefined
+        status: undefined,
+        type: undefined
     })
     const [warehouses, setWarehouses] = useState<WarehouseSummaryDto[]>([])
     const [loadingWarehouses, setLoadingWarehouses] = useState(false)
     const isWarehouseManager = !!userWarehouseId
 
+    // Track if initial filter has been applied
+    const isInitialFilterApplied = useRef(false)
+
     // Force filter on mount if user is warehouse manager
     useEffect(() => {
-        if (userWarehouseId) {
-            const forcedFilter = {
+        if (userWarehouseId && !isInitialFilterApplied.current) {
+            isInitialFilterApplied.current = true
+            const forcedFilter: TransferFilterDto = {
                 warehouseId: userWarehouseId,
-                startDate: undefined,
-                endDate: undefined
+                status: undefined,
+                type: undefined
             }
             console.log('FORCING FILTER for warehouse manager:', forcedFilter)
+            setFilter(forcedFilter)
             onFilter(forcedFilter)
         }
     }, [userWarehouseId, onFilter])
@@ -69,10 +69,10 @@ const EventFilter: React.FC<EventFilterProps> = ({
     }
 
     const handleReset = () => {
-        const resetFilter = {
+        const resetFilter: TransferFilterDto = {
             warehouseId: userWarehouseId || undefined,
-            startDate: undefined,
-            endDate: undefined
+            status: undefined,
+            type: undefined
         }
         setFilter(resetFilter)
         onReset()
@@ -87,10 +87,19 @@ const EventFilter: React.FC<EventFilterProps> = ({
         onFilter(newFilter)
     }
 
-    const handleDateChange = (field: 'startDate' | 'endDate', value: string) => {
+    const handleStatusChange = (value: string) => {
         const newFilter = {
             ...filter,
-            [field]: value ? new Date(value).toISOString() : undefined
+            status: (value || undefined) as unknown as TransferStatus
+        }
+        setFilter(newFilter)
+        onFilter(newFilter)
+    }
+
+    const handleTypeChange = (value: string) => {
+        const newFilter = {
+            ...filter,
+            type: (value || undefined) as unknown as TransferType
         }
         setFilter(newFilter)
         onFilter(newFilter)
@@ -137,35 +146,46 @@ const EventFilter: React.FC<EventFilterProps> = ({
 
                 <div className="flex-1 min-w-[180px]">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                        <Calendar size={14} className="inline mr-1" />
-                        Từ ngày
+                        Trạng thái
                     </label>
-                    <input
-                        type="datetime-local"
-                        value={filter.startDate?.slice(0, 16) || ''}
-                        onChange={(e) => handleDateChange('startDate', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
+                    <select
+                        value={filter.status ?? ''}
+                        onChange={(e) => handleStatusChange(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                    >
+                        <option value="">Tất cả</option>
+                        {Object.values(TransferStatus).map((s) => (
+                            <option key={s} value={s}>
+                                {TransferStatusLabels[s as TransferStatus]}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
                 <div className="flex-1 min-w-[180px]">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                        <Calendar size={14} className="inline mr-1" />
-                        Đến ngày
+                        Loại yêu cầu
                     </label>
-                    <input
-                        type="datetime-local"
-                        value={filter.endDate?.slice(0, 16) || ''}
-                        onChange={(e) => handleDateChange('endDate', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
+                    <select
+                        value={filter.type ?? ''}
+                        onChange={(e) => handleTypeChange(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                    >
+                        <option value="">Tất cả</option>
+                        {Object.values(TransferType).map((t) => (
+                            <option key={t} value={t}>
+                                {TransferTypeLabels[t as TransferType]}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
                 <div className="flex gap-2">
                     <button
                         type="submit"
-                        className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                        className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-1"
                     >
+                        <Filter size={16} />
                         Lọc
                     </button>
                     <button
@@ -182,4 +202,4 @@ const EventFilter: React.FC<EventFilterProps> = ({
     )
 }
 
-export default EventFilter
+export default TransferFilter

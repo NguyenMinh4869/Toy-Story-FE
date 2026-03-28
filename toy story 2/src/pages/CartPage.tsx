@@ -10,8 +10,7 @@ const CartPage: React.FC = () => {
         cartItems,
         removeFromCart,
         updateQuantity,
-        getTotalPrice,
-        clearCart
+        getTotalPrice
     } = useCart()
     const navigate = useNavigate()
 

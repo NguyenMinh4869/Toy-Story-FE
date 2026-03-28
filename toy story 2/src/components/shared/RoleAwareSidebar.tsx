@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { LayoutDashboard, ShoppingBag, Users, Tag, Percent, Layers, Warehouse, List, BookOpen, Album } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Users, Tag, Percent, Layers, Warehouse, List, BookOpen, Album, Truck } from 'lucide-react';
 import { ROUTES } from '../../routes/routePaths';
 import { getUserRole } from '../../services/authService';
 
@@ -93,6 +93,11 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
       label: 'Lịch sử thay đổi'
     });
 
+    baseLinks.push({
+      to: effectiveMode === 'admin' ? ROUTES.ADMIN_TRANSFER : ROUTES.STAFF_TRANSFER,
+      icon: <Truck size={20} />,
+      label: 'Lịch sử chuyển kho'
+    });
 
     return baseLinks;
   };

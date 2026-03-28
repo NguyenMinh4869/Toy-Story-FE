@@ -18,7 +18,7 @@ interface CheckoutFormData {
 }
 
 export const useCheckout = () => {
-  const { cartItems, getTotalPrice, clearCart } = useCart();
+  const { cartItems, getTotalPrice } = useCart();
   const { user } = useAuth();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -109,7 +109,7 @@ export const useCheckout = () => {
       if (checkoutUrl) {
         setTimeout(() => {
           window.location.href = checkoutUrl;
-        }, 2000);
+        }, 1000);
       } else {
         throw new Error("Không nhận được liên kết thanh toán từ PayOS.");
       }

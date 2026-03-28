@@ -1,0 +1,165 @@
+// pages/TransferPage.tsx
+import React, { useEffect, useState, useCallback, useRef } from 'react'
+import { createTransfer, getAllTransfers, getFilteredTransfers, getTransferById } from '@/services/transferService'
+import { ViewTransDetailDto, ViewTransSummaryDto, TransferFilterDto, CreateTransferDto } from '@/types/TransferDTO'
+import TransferFilter from '@/components/transfer/TransferFilter'
+import TransferCard from '@/components/transfer/TransferCard'
+import TransferModal from '@/components/transfer/TransferModal'
+import { Loader2 } from 'lucide-react'
+import CreateTransferModal from '@/components/transfer/CreateTransferModal'
+import { useAuth } from '@/hooks/useAuth'
+
+const TransferPage: React.FC = () => {
+  const [transfers, setTransfers] = useState<ViewTransSummaryDto[]>([])
+  const [loading, setLoading] = useState(false)
+  const [selectedTransfer, setSelectedTransfer] = useState<ViewTransDetailDto | null>(null)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [filter, setFilter] = useState<TransferFilterDto>({})
+  const { user } = useAuth()
+  const userWarehouseId = user?.warehouseId
+
+  // Track if initial filter has been applied
+  const isInitialFilterApplied = useRef(false)
+
+  const fetchTransfers = useCallback(async (currentFilter: TransferFilterDto) => {
+    console.log('FETCHING transfers with filter:', currentFilter)
+    setLoading(true)
+    try {
+      const hasFilter = currentFilter.warehouseId || currentFilter.status || currentFilter.type
+      const data = hasFilter
+        ? await getFilteredTransfers(currentFilter)
+        : await getAllTransfers()
+      if (data) setTransfers(data)
+    } catch (error) {
+      console.error('Error fetching transfers:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  // Set initial filter for warehouse manager
+  useEffect(() => {
+    if (userWarehouseId && !isInitialFilterApplied.current) {
+      isInitialFilterApplied.current = true
+      console.log('Setting initial filter for warehouse manager:', userWarehouseId)
+      const initialFilter: TransferFilterDto = {
+        warehouseId: userWarehouseId,
+        status: undefined,
+        type: undefined
+      }
+      setFilter(initialFilter)
+      // Immediately fetch with the filter
+      fetchTransfers(initialFilter)
+    }
+  }, [userWarehouseId, fetchTransfers])
+
+  // Fetch when filter changes (but skip if it's the initial load for warehouse manager)
+  useEffect(() => {
+    // If it's a warehouse manager and the initial filter hasn't been applied yet, skip
+    if (userWarehouseId && !isInitialFilterApplied.current) {
+      return
+    }
+    // If filter is empty and we have a warehouse manager, don't fetch yet
+    if (userWarehouseId && Object.keys(filter).length === 0) {
+      return
+    }
+    fetchTransfers(filter)
+  }, [filter, fetchTransfers, userWarehouseId])
+
+  const handleFilter = useCallback((newFilter: TransferFilterDto) => {
+    console.log('Filter changed:', newFilter)
+    setFilter(newFilter)
+  }, [])
+
+  const handleReset = useCallback(() => {
+    console.log('Reset filter')
+    if (userWarehouseId) {
+      // For warehouse manager, reset to their warehouse filter
+      const resetFilter: TransferFilterDto = {
+        warehouseId: userWarehouseId,
+        status: undefined,
+        type: undefined
+      }
+      setFilter(resetFilter)
+    } else {
+      setFilter({})
+    }
+  }, [userWarehouseId])
+
+  const handleOpenModal = () => setShowCreateModal(true)
+  const handleCloseModal = () => setShowCreateModal(false)
+
+  const handleSubmitTransfer = async (dto: CreateTransferDto) => {
+    try {
+      const result = await createTransfer(dto)
+      console.log('Transfer created:', result)
+      // Refresh with current filter
+      fetchTransfers(filter)
+    } catch (error) {
+      console.error('Error creating transfer:', error)
+    }
+  }
+
+  const openTransferModal = async (transferId: number) => {
+    try {
+      const detail = await getTransferById(transferId)
+      if (detail) setSelectedTransfer(detail)
+    } catch (error) {
+      console.error('Error fetching transfer detail:', error)
+    }
+  }
+
+  const closeTransferModal = () => {
+    setSelectedTransfer(null)
+  }
+
+  return (
+    <div>
+      <div className="flex justify-between mb-4">
+        <h1 className="text-2xl font-black">Quản lý yêu cầu chuyển kho</h1>
+        <button
+          onClick={handleOpenModal}
+          className="px-4 py-2 bg-blue-600 text-white rounded-3xl font-bold hover:bg-blue-700"
+        >
+          Tạo yêu cầu chuyển kho
+        </button>
+      </div>
+
+      {/* Filter */}
+      <TransferFilter
+        onFilter={handleFilter}
+        onReset={handleReset}
+        userWarehouseId={userWarehouseId}
+      />
+
+      {/* List */}
+      {loading ? (
+        <div className="flex justify-center items-center py-10">
+          <Loader2 size={24} className="animate-spin text-blue-600" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-4 mt-4">
+          {transfers.map(t => (
+            <div key={t.transferId} onClick={() => openTransferModal(t.transferId)} className="cursor-pointer">
+              <TransferCard transfer={t} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Modal */}
+      {selectedTransfer && (
+        <TransferModal transfer={selectedTransfer} onClose={closeTransferModal} onUpdated={() => fetchTransfers(filter)} />
+      )}
+
+      {showCreateModal && (
+        <CreateTransferModal
+          onClose={handleCloseModal}
+          onSubmit={handleSubmitTransfer}
+        />
+      )}
+    </div>
+  )
+}
+
+export default TransferPage

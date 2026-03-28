@@ -50,6 +50,7 @@ import InvoiceManagementPage from "@/pages/admin/InvoiceManagementPage";
 import OrderManagementPage from "@/pages/admin/OrderManagementPage";
 import StaffOrderManagementPage from "@/pages/staff/StaffOrderManagementPage";
 import EventHistoryPage from "@/pages/EventHistoryPage";
+import TransferPage from "@/pages/TransferPage";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -158,6 +159,15 @@ const AppRoutes: React.FC = () => {
             </DashboardLayout>
           }
         />
+
+        <Route
+          path={ROUTES.ADMIN_TRANSFER}
+          element={
+            <DashboardLayout mode="admin">
+              <TransferPage />
+            </DashboardLayout>
+          }
+        />
       </Route>
 
       {/* Staff Routes - Staff Only */}
@@ -233,6 +243,15 @@ const AppRoutes: React.FC = () => {
           element={
             <DashboardLayout mode="staff">
               <EventHistoryPage />
+            </DashboardLayout>
+          }
+        />
+
+        <Route
+          path={ROUTES.STAFF_TRANSFER}
+          element={
+            <DashboardLayout mode="staff">
+              <TransferPage />
             </DashboardLayout>
           }
         />

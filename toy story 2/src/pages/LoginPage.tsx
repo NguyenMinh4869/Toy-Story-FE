@@ -113,7 +113,6 @@ const LoginPage: React.FC = () => {
             <div className="flex flex-col gap-2.5 mb-2">
               <label className="text-base font-bold text-black m-0" data-node-id="52:2">Email</label>
               <input
-                type="email"
                 placeholder="Nhập địa chỉ email của bạn"
                 className={`w-full h-[40px] px-3.5 rounded-2xl bg-white text-sm text-black placeholder:text-gray-400 outline-none box-border focus:border-[#f20000] shadow-md`}
                 data-node-id="51:15"

@@ -21,8 +21,6 @@ const CheckoutPage: React.FC = () => {
     isCalculating,
     calculation,
     error,
-    qrCodeData,
-    setQrCodeData,
     handleCheckout,
   } = useCheckout();
 

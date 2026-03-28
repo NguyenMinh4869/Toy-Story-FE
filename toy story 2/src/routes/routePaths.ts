@@ -18,6 +18,7 @@ export const ROUTES = {
   ADMIN_ARTICLE_CATEGORIES: "/admin/article-categories",
   ADMIN_WAREHOUSE: "/admin/warehouse",
   ADMIN_EVENT: "/admin/event",
+  ADMIN_TRANSFER: "/admin/transfer",
 
   // Staff (mirrors Admin routes but with Staff-only access)
   STAFF_DASHBOARD: "/staff/dashboard",
@@ -31,6 +32,7 @@ export const ROUTES = {
   STAFF_ARTICLE_CATEGORIES: "/staff/article-categories",
   STAFF_WAREHOUSE: "/staff/warehouse",
   STAFF_EVENT: "/staff/event",
+  STAFF_TRANSFER: "/staff/transfer",
 
   // Public
   HOME: "/",

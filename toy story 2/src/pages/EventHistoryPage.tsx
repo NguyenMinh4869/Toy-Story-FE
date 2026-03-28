@@ -1,5 +1,5 @@
 // pages/EventHistoryPage.tsx
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { getAllOrderEvents, getAllStockEvents, filterOrderEvents, filterStockEvents } from '@/services/eventService'
 import { OrderEventDto, StockEventDto, EventFilterDto } from '@/types/EventDto'
 import OrderEventCard from '@/components/event/OrderEventCard'
@@ -18,54 +18,84 @@ const EventHistoryPage: React.FC = () => {
     const { user } = useAuth()
     const userWarehouseId = user?.warehouseId
 
+    // Ref to track if initial filter has been applied
+    const isInitialFilterApplied = useRef(false)
+
+    const fetchEvents = useCallback(async (currentFilter: EventFilterDto) => {
+        console.log('FETCHING with filter:', currentFilter)
+        setLoading(true)
+        try {
+            if (activeTab === 'order') {
+                const hasFilter = currentFilter.warehouseId || currentFilter.startDate || currentFilter.endDate
+                const events = hasFilter
+                    ? await filterOrderEvents(currentFilter)
+                    : await getAllOrderEvents()
+                setOrderEvents(events || [])
+            } else {
+                const hasFilter = currentFilter.warehouseId || currentFilter.startDate || currentFilter.endDate
+                const events = hasFilter
+                    ? await filterStockEvents(currentFilter)
+                    : await getAllStockEvents()
+                setStockEvents(events || [])
+            }
+        } catch (error) {
+            console.error('Error fetching events:', error)
+        } finally {
+            setLoading(false)
+        }
+    }, [activeTab])
+
+    // Set initial filter for warehouse manager
     useEffect(() => {
-        if (activeTab === 'order') {
-            fetchOrderEvents()
-        } else {
-            fetchStockEvents()
+        if (userWarehouseId && !isInitialFilterApplied.current) {
+            isInitialFilterApplied.current = true
+            console.log('Setting initial filter for warehouse manager:', userWarehouseId)
+            const initialFilter = {
+                warehouseId: userWarehouseId,
+                startDate: undefined,
+                endDate: undefined
+            }
+            setFilter(initialFilter)
+            // Immediately fetch with the filter
+            fetchEvents(initialFilter)
         }
-    }, [activeTab, filter])
+    }, [userWarehouseId, fetchEvents])
 
-    const fetchOrderEvents = async () => {
-        setLoading(true)
-        try {
-            const hasFilter = filter.warehouseId || filter.startDate || filter.endDate
-            const events = hasFilter
-                ? await filterOrderEvents(filter)
-                : await getAllOrderEvents()
-            setOrderEvents(events || [])
-        } catch (error) {
-            console.error('Error fetching order events:', error)
-        } finally {
-            setLoading(false)
+    // Fetch when filter changes (but skip if it's the initial load for warehouse manager)
+    useEffect(() => {
+        // If it's a warehouse manager and the initial filter hasn't been applied yet, skip
+        if (userWarehouseId && !isInitialFilterApplied.current) {
+            return
         }
-    }
-
-    const fetchStockEvents = async () => {
-        setLoading(true)
-        try {
-            const hasFilter = filter.warehouseId || filter.startDate || filter.endDate
-            const events = hasFilter
-                ? await filterStockEvents(filter)
-                : await getAllStockEvents()
-            setStockEvents(events || [])
-        } catch (error) {
-            console.error('Error fetching stock events:', error)
-        } finally {
-            setLoading(false)
+        // If filter is empty and we have a warehouse manager, don't fetch yet
+        if (userWarehouseId && Object.keys(filter).length === 0) {
+            return
         }
-    }
+        fetchEvents(filter)
+    }, [filter, fetchEvents, userWarehouseId])
 
-    const handleFilter = (newFilter: EventFilterDto) => {
+    const handleFilter = useCallback((newFilter: EventFilterDto) => {
+        console.log('Filter changed:', newFilter)
         setFilter(newFilter)
-    }
+    }, [])
 
-    const handleReset = () => {
-        setFilter({})
-    }
+    const handleReset = useCallback(() => {
+        console.log('Reset filter')
+        if (userWarehouseId) {
+            // For warehouse manager, reset to their warehouse filter
+            const resetFilter = {
+                warehouseId: userWarehouseId,
+                startDate: undefined,
+                endDate: undefined
+            }
+            setFilter(resetFilter)
+        } else {
+            setFilter({})
+        }
+    }, [userWarehouseId])
 
     return (
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto">
             <div className="mb-4">
                 <h1 className="text-2xl font-black text-gray-900 mb-2">Lịch sử thay đổi</h1>
             </div>
