@@ -8,6 +8,11 @@ import EventFilter from '@/components/event/EventFilter'
 import { Loader2, Package, TrendingUp } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/hooks/useAuth'
+import Pagination from '@/components/ui/Pagination'
+import { useClientPagination } from '@/hooks/useClientPagination'
+
+const ORDER_EVENTS_PAGE_SIZE = 6
+const STOCK_EVENTS_PAGE_SIZE = 3
 
 const EventHistoryPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'order' | 'stock'>('order')
@@ -15,8 +20,20 @@ const EventHistoryPage: React.FC = () => {
     const [stockEvents, setStockEvents] = useState<StockEventDto[]>([])
     const [loading, setLoading] = useState(true)
     const [filter, setFilter] = useState<EventFilterDto>({})
+    const [orderPage, setOrderPage] = useState(1)
+    const [stockPage, setStockPage] = useState(1)
     const { user } = useAuth()
     const userWarehouseId = user?.warehouseId
+    const {
+        paginatedItems: paginatedOrderEvents,
+        totalPages: orderTotalPages,
+        currentPage: safeOrderPage
+    } = useClientPagination(orderEvents, orderPage, ORDER_EVENTS_PAGE_SIZE)
+    const {
+        paginatedItems: paginatedStockEvents,
+        totalPages: stockTotalPages,
+        currentPage: safeStockPage
+    } = useClientPagination(stockEvents, stockPage, STOCK_EVENTS_PAGE_SIZE)
 
     // Ref to track if initial filter has been applied
     const isInitialFilterApplied = useRef(false)
@@ -31,12 +48,14 @@ const EventHistoryPage: React.FC = () => {
                     ? await filterOrderEvents(currentFilter)
                     : await getAllOrderEvents()
                 setOrderEvents(events || [])
+                setOrderPage(1)
             } else {
                 const hasFilter = currentFilter.warehouseId || currentFilter.startDate || currentFilter.endDate
                 const events = hasFilter
                     ? await filterStockEvents(currentFilter)
                     : await getAllStockEvents()
                 setStockEvents(events || [])
+                setStockPage(1)
             }
         } catch (error) {
             console.error('Error fetching events:', error)
@@ -77,6 +96,8 @@ const EventHistoryPage: React.FC = () => {
     const handleFilter = useCallback((newFilter: EventFilterDto) => {
         console.log('Filter changed:', newFilter)
         setFilter(newFilter)
+        setOrderPage(1)
+        setStockPage(1)
     }, [])
 
     const handleReset = useCallback(() => {
@@ -109,7 +130,15 @@ const EventHistoryPage: React.FC = () => {
                 />
             </div>
 
-            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'order' | 'stock')} className="w-full">
+            <Tabs
+                value={activeTab}
+                onValueChange={(v) => {
+                    setActiveTab(v as 'order' | 'stock')
+                    if (v === 'order') setOrderPage(1)
+                    if (v === 'stock') setStockPage(1)
+                }}
+                className="w-full"
+            >
                 <TabsList className="grid w-full grid-cols-2 mb-6">
                     <TabsTrigger
                         value="order"
@@ -153,11 +182,20 @@ const EventHistoryPage: React.FC = () => {
                             </p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {orderEvents.map((event) => (
-                                <OrderEventCard key={event.id} event={event} />
-                            ))}
-                        </div>
+                        <>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {paginatedOrderEvents.map((event) => (
+                                    <OrderEventCard key={event.id} event={event} />
+                                ))}
+                            </div>
+                            <div className="mt-6">
+                                <Pagination
+                                    currentPage={safeOrderPage}
+                                    totalPages={orderTotalPages}
+                                    onPageChange={setOrderPage}
+                                />
+                            </div>
+                        </>
                     )}
                 </TabsContent>
 
@@ -177,11 +215,20 @@ const EventHistoryPage: React.FC = () => {
                             </p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {stockEvents.map((event) => (
-                                <StockEventCard key={event.id} event={event} />
-                            ))}
-                        </div>
+                        <>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {paginatedStockEvents.map((event) => (
+                                    <StockEventCard key={event.id} event={event} />
+                                ))}
+                            </div>
+                            <div className="mt-6">
+                                <Pagination
+                                    currentPage={safeStockPage}
+                                    totalPages={stockTotalPages}
+                                    onPageChange={setStockPage}
+                                />
+                            </div>
+                        </>
                     )}
                 </TabsContent>
             </Tabs>

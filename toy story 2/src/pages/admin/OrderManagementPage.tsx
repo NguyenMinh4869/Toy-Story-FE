@@ -7,17 +7,24 @@ import OrderEventsModal from '@/components/event/OrderEventsModal'
 import { OrderEventDto } from '@/types/EventDto'
 import { getOrderEventsByOrderId } from '@/services/eventService'
 import OrderList from './order/OrderList'
+import Pagination from '@/components/ui/Pagination'
+import { useClientPagination } from '@/hooks/useClientPagination'
+
+const PAGE_SIZE = 6
 
 const OrderManagementPage: React.FC = () => {
     const [orders, setOrders] = useState<ViewOrderDto[]>([])
     const [loading, setLoading] = useState(true)
     const [selectedOrder, setSelectedOrder] = useState<OrderDetailDto | null>(null)
     const [selectedOrderEvents, setSelectedOrderEvents] = useState<OrderEventDto[] | null>(null)
+    const [currentPage, setCurrentPage] = useState(1)
+    const { paginatedItems: paginatedOrders, totalPages, currentPage: safePage } = useClientPagination(orders, currentPage, PAGE_SIZE)
 
     const fetchOrders = async () => {
         try {
             const data = await getOrders()
             setOrders(data)
+            setCurrentPage(1)
         } catch (error) {
             console.error('Error fetching orders:', error)
         } finally {
@@ -81,7 +88,16 @@ const OrderManagementPage: React.FC = () => {
                     </p>
                 </div>
             ) : (
-                <OrderList orders={orders} onSelect={handleSelectOrder} onViewHistory={handleViewHistory} />
+                <>
+                    <OrderList orders={paginatedOrders} onSelect={handleSelectOrder} onViewHistory={handleViewHistory} />
+                    <div className="mt-6">
+                        <Pagination
+                            currentPage={safePage}
+                            totalPages={totalPages}
+                            onPageChange={setCurrentPage}
+                        />
+                    </div>
+                </>
             )}
 
             {selectedOrder && !selectedOrderEvents && (

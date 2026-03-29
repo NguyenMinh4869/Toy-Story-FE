@@ -18,6 +18,7 @@ import type { ViewBrandDto } from '../../types/BrandDTO';
 import type { ViewCategoryDto } from '../../types/CategoryDTO';
 import { confirmAction } from '../../utils/confirmAction';
 import { runAsync } from '../../utils/runAsync';
+import { useClientPagination } from '../../hooks/useClientPagination';
 
 const PAGE_SIZE = 5;
 
@@ -111,24 +112,24 @@ const ProductManagementPage: React.FC = () => {
     }
   };
 
-  const { paginatedProducts, totalPages } = useMemo(() => {
+  const filteredProducts = useMemo(() => {
     const searchParams = new URLSearchParams(location.search);
     const q = searchParams.get('q') || '';
-    const page = Math.max(1, Number(searchParams.get('page') || '1'));
 
-    const filtered = allProducts.filter(p => {
+    return allProducts.filter(p => {
       if (!q) return true;
       const lowerCaseQuery = q.toLowerCase();
       return p.name?.toLowerCase().includes(lowerCaseQuery) ||
         p.brandName?.toLowerCase().includes(lowerCaseQuery) ||
         p.categoryName?.toLowerCase().includes(lowerCaseQuery);
     });
-
-    const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-    const total = Math.ceil(filtered.length / PAGE_SIZE);
-
-    return { paginatedProducts: paginated, totalPages: total };
   }, [allProducts, location.search]);
+
+  const {
+    paginatedItems: paginatedProducts,
+    totalPages,
+    currentPage: safePage
+  } = useClientPagination(filteredProducts, page, PAGE_SIZE)
 
   const handleStatusChange = async (id: number) => {
     await confirmAction('Are you sure you want to change status of this product?', async () => {
@@ -207,7 +208,7 @@ const ProductManagementPage: React.FC = () => {
             onStatusChange={handleStatusChange}
           />
           <Pagination
-            currentPage={page}
+            currentPage={safePage}
             totalPages={totalPages}
             onPageChange={(nextPage) => {
               const next = new URLSearchParams(location.search)
