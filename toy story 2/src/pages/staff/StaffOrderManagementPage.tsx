@@ -13,17 +13,19 @@ const StaffOrderManagementPage: React.FC = () => {
     const [selectedOrder, setSelectedOrder] = useState<OrderDetailDto | null>(null)
     const [selectedOrderEvents, setSelectedOrderEvents] = useState<OrderEventDto[] | null>(null)
 
-    useEffect(() => {
-        const fetchOrders = async () => {
-            try {
-                const data = await getWarehouseOrders()
-                setOrders(data)
-            } catch (error) {
-                console.error('Error fetching orders:', error)
-            } finally {
-                setLoading(false)
-            }
+    const fetchOrders = async () => {
+        setLoading(true)
+        try {
+            const data = await getWarehouseOrders()
+            setOrders(data)
+        } catch (error) {
+            console.error('Error fetching orders:', error)
+        } finally {
+            setLoading(false)
         }
+    }
+
+    useEffect(() => {
         fetchOrders()
     }, [])
 
@@ -85,6 +87,7 @@ const StaffOrderManagementPage: React.FC = () => {
                 <OrderDetail
                     order={selectedOrder}
                     onClose={() => setSelectedOrder(null)}
+                    onRefresh={fetchOrders}
                 />
             )}
 

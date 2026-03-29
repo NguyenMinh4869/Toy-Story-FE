@@ -12,7 +12,7 @@ import {
 import Pagination from '../../components/ui/Pagination';
 import type { ViewBrandDto, CreateBrandDto, UpdateBrandDto } from '../../types/BrandDTO';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
 const BrandManagementPage: React.FC = () => {
   const [brands, setBrands] = useState<ViewBrandDto[]>([]);
