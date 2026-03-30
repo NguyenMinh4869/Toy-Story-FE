@@ -33,6 +33,11 @@ export const getWarehousesExcept = async (): Promise<WarehouseSummaryDto[]> => {
   return response.data;
 };
 
+export const getProductWarehouseByWarehouseId = async (warehouseId: number): Promise<WarehouseSummaryDto[]> => {
+  const response = await apiGet<WarehouseSummaryDto[]>(`/warehouses/${warehouseId}/product`);
+  return response.data;
+};
+
 export const getLowStockWarehouses = async (): Promise<ProductStockDto[]> => {
   const response = await apiGet<ProductStockDto[]>("/warehouses/low-stock");
   return response.data;

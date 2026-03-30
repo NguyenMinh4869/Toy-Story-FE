@@ -90,7 +90,7 @@ const PromotionPage: React.FC = () => {
             <Gift className="w-12 h-12 text-white/50" />
           </div>
           <p className="text-xl font-medium opacity-90">{error}</p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="mt-6 px-8 py-3 bg-white text-[#a70001] rounded-full font-bold hover:bg-opacity-90 transition-all"
           >
@@ -102,8 +102,8 @@ const PromotionPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-[#a70001] bg-gradient-to-b from-[#a70001] via-[#8b0000] to-[#600000] min-h-screen flex flex-col overflow-x-hidden selection:bg-white selection:text-[#a70001]">
-      <div className="fixed inset-0 pointer-events-none opacity-20" style={{ 
+    <div className="bg-slate-50 min-h-screen flex flex-col overflow-x-hidden selection:bg-white selection:text-[#a70001]">
+      <div className="fixed inset-0 pointer-events-none opacity-20" style={{
         backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
         backgroundSize: '40px 40px'
       }} />
@@ -112,27 +112,27 @@ const PromotionPage: React.FC = () => {
 
       <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 md:px-8 py-12 relative z-10">
         {/* Hero Banner Section */}
-        <section className="mb-16">
+        <section className="mb-8">
           {loading ? (
             <BannerSkeleton />
           ) : (
             promotions[0] && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className="relative group rounded-[2rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.4)] border border-white/10"
+                className="relative group rounded-xl overflow-hidden shadow-lg border border-white/10 h-[200px] md:h-[280px]"
               >
                 <img
                   src={promotions[0].imageUrl!}
                   alt={promotions[0].name || "Khuyến mãi hấp dẫn"}
-                  className="w-full h-auto object-cover transform transition-transform duration-700 group-hover:scale-105"
+                  className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                
+
                 {/* Hero Badge */}
-                <div className="absolute top-6 left-6 flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 text-white font-medium text-sm">
-                  <Sparkles className="w-4 h-4 text-yellow-400" />
+                <div className="absolute top-4 left-4 flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 text-white font-medium text-xs">
+                  <Sparkles className="w-3 h-3 text-yellow-400" />
                   <span>Ưu đãi Hot nhất tuần</span>
                 </div>
               </motion.div>
@@ -157,7 +157,7 @@ const PromotionPage: React.FC = () => {
               const discountPercentage = promo.discountType === 0 ? (promo.discountValue ?? 0) : 0;
 
               return (
-                <motion.section 
+                <motion.section
                   key={promo.promotionId}
                   initial={{ opacity: 0, y: 50 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -167,15 +167,15 @@ const PromotionPage: React.FC = () => {
                 >
                   {/* Section Title with Decorative Line */}
                   <div className="flex flex-col items-center mb-12">
-                    <motion.div 
+                    <motion.div
                       initial={{ scale: 0 }}
                       whileInView={{ scale: 1 }}
                       viewport={{ once: true }}
-                      className="bg-white/10 p-3 rounded-2xl mb-4 backdrop-blur-sm border border-white/10"
+                      className="bg-white/10 rounded-2xl backdrop-blur-sm border border-white/10"
                     >
                       <Gift className="w-8 h-8 text-white" />
                     </motion.div>
-                    <h2 className="font-['Rowdies',sans-serif] text-3xl md:text-5xl text-white text-center mb-4 tracking-tight">
+                    <h2 className="font-['Rowdies',sans-serif] text-3xl md:text-5xl text-red-700 text-center tracking-tight">
                       {promo.name}
                     </h2>
                     <div className="w-24 h-1.5 bg-gradient-to-r from-transparent via-white/40 to-transparent rounded-full" />
@@ -184,18 +184,18 @@ const PromotionPage: React.FC = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-[300px,1fr] gap-8 items-start">
                     {/* Left: Promotion Insight Card */}
                     <div className="space-y-6">
-                      <motion.div 
+                      <motion.div
                         whileHover={{ y: -10 }}
                         className="bg-white/5 backdrop-blur-md rounded-[2.5rem] p-6 border border-white/10 shadow-xl overflow-hidden relative group"
                       >
                         <div className="absolute -top-10 -right-10 w-32 h-32 bg-red-500/20 rounded-full blur-3xl group-hover:bg-red-400/30 transition-colors" />
-                        
+
                         <img
                           src={promo.imageUrl!}
                           alt={promo.name || ""}
                           className="w-full h-48 object-cover rounded-2xl mb-6 shadow-lg transform transition-transform group-hover:scale-105"
                         />
-                        
+
                         <div className="space-y-4">
                           <div className="flex items-center gap-3 text-white/80">
                             <Timer className="w-5 h-5 text-red-300" />
@@ -255,7 +255,7 @@ const PromotionPage: React.FC = () => {
                         direction: "left",
                         variant: "red",
                         className: "absolute left-[-80px] top-1/2 -translate-y-1/2 border-white/20 backdrop-blur-md bg-white/10 hover:bg-white/20",
-                        onClick: () => {}
+                        onClick: () => { }
                       }}
                     />
                     <NavigationButton
@@ -263,7 +263,7 @@ const PromotionPage: React.FC = () => {
                         direction: "right",
                         variant: "red",
                         className: "absolute right-[-80px] top-1/2 -translate-y-1/2 border-white/20 backdrop-blur-md bg-white/10 hover:bg-white/20",
-                        onClick: () => {}
+                        onClick: () => { }
                       }}
                     />
                   </div>
@@ -272,28 +272,6 @@ const PromotionPage: React.FC = () => {
             })
           )}
         </div>
-
-        {/* Bottom Call to Action */}
-        {!loading && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            className="mt-32 text-center"
-          >
-            <div className="flex items-center justify-center gap-6 mb-12">
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent to-white/20" />
-              <Sparkles className="w-10 h-10 text-yellow-400 opacity-50" />
-              <div className="flex-1 h-px bg-gradient-to-l from-transparent to-white/20" />
-            </div>
-            <h3 className="text-white text-2xl font-['Rowdies',sans-serif] mb-6">Đừng bỏ lỡ bất kỳ ưu đãi nào!</h3>
-            <button 
-              onClick={() => navigate("/products")}
-              className="px-12 py-5 bg-gradient-to-r from-white to-gray-100 text-[#a70001] rounded-full font-bold text-xl hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:-translate-y-1 transition-all duration-300"
-            >
-              Khám phá tất cả sản phẩm
-            </button>
-          </motion.div>
-        )}
       </main>
     </div>
   );
