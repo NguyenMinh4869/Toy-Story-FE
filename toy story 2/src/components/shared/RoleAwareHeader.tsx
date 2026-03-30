@@ -3,6 +3,7 @@ import { ChevronDown, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../routes/routePaths';
 import { getUserRole, getStoredUser, logout } from '../../services/authService';
+import { getSimpleWarehouseById } from '@/services/warehouseService';
 
 interface HeaderProps {
   /**
@@ -16,24 +17,39 @@ const Header: React.FC<HeaderProps> = ({ mode }) => {
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [userName, setUserName] = useState<string>('');
+  const [warehouse, setWarehouse] = useState<any | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const userRole = getUserRole();
   const effectiveMode = mode || (userRole === 'Admin' ? 'admin' : 'staff');
   const displayName = effectiveMode === 'admin' ? 'Quan tri vien' : 'Nhan vien';
   const isAdminMode = effectiveMode === 'admin';
 
-  // Get user name from stored user data
   useEffect(() => {
     const user = getStoredUser();
+
     if (user?.name) {
       setUserName(user.name);
     } else if (user?.email) {
-      // Fallback to email if name is not available
       setUserName(user.email.split('@')[0]);
     } else {
       setUserName(displayName);
     }
   }, [displayName]);
+
+  useEffect(() => {
+    const fetchWarehouse = async () => {
+      try {
+        const warehouse = await getSimpleWarehouseById();
+        if (warehouse) {
+          setWarehouse(warehouse!);
+        }
+      } catch (error) {
+        console.error('Error fetching warehouse:', error);
+      }
+    };
+
+    fetchWarehouse();
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -53,9 +69,10 @@ const Header: React.FC<HeaderProps> = ({ mode }) => {
 
   return (
     <header className={`h-20 bg-white border-b border-gray-200 flex items-center px-6 flex-shrink-0 ${isAdminMode ? 'justify-end' : 'justify-between'}`}>
-      {!isAdminMode && <h1 className="text-2xl font-black text-gray-800">Tổng quan</h1>}
+      {!isAdminMode && <h1 className="text-2xl font-black text-gray-800">Tổng quan kho {warehouse?.name}</h1>}
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-4">
+          <span className="font-black text-gray-700 text-right">{warehouse?.location}</span>
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
