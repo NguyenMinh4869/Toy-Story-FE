@@ -7,6 +7,7 @@ import { BrandsSection } from "../components/homepage/BrandsSection";
 import { getActiveProducts } from "../services/productService";
 import { getActiveBrands } from "../services/brandService";
 import { getCategories } from "../services/categoryService";
+import { getPromotionsCustomerFilter } from "../services/promotionService";
 import type { ViewProductDto } from "../types/ProductDTO";
 import type { ViewBrandDto } from "../types/BrandDTO";
 
@@ -26,6 +27,7 @@ export const Homepage = (): React.JSX.Element => {
   const [heroPage, setHeroPage] = useState(0);
   const [promotionsPage, setPromotionsPage] = useState(0);
   const [gundamPage, setGundamPage] = useState(0);
+  const [promotionDiscountValue, setPromotionDiscountValue] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,6 +52,20 @@ export const Homepage = (): React.JSX.Element => {
 
         const brandsData = await getActiveBrands();
         setBrands(brandsData);
+
+        // Fetch active promotions to get the real discount percentage
+        try {
+          const promos = await getPromotionsCustomerFilter();
+          // Prefer a percentage-type promotion (discountType === 0)
+          const activePromo = promos.find(
+            (p) => p.isActive && p.discountType === 0 && (p.discountValue ?? 0) > 0
+          ) ?? promos.find((p) => p.isActive && (p.discountValue ?? 0) > 0);
+          if (activePromo?.discountValue) {
+            setPromotionDiscountValue(activePromo.discountValue);
+          }
+        } catch {
+          // silently ignore – badge simply won't show
+        }
       } catch (err) {
         console.error("Error fetching homepage data:", err);
         setError("Không thể tải dữ liệu. Vui lòng thử lại sau.");
@@ -92,6 +108,7 @@ export const Homepage = (): React.JSX.Element => {
               isLoading={isLoading}
               page={promotionsPage}
               onPageChange={setPromotionsPage}
+              promotionDiscountValue={promotionDiscountValue}
             />
           </div>
         </motion.section>

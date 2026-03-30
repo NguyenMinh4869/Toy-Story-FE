@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   ShoppingCart,
-  Heart,
   Share2,
   ShieldCheck,
   Truck,
@@ -19,6 +18,8 @@ import { BreadcrumbHeader } from "../components/BreadcrumbHeader";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import { getPromotionsCustomerFilter } from "../services/promotionService";
+import { useToast } from "../hooks/useToast";
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<ProductDTO | null>(null);
@@ -28,6 +29,7 @@ const ProductDetail: React.FC = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const { addToCart } = useCart();
   const { user } = useAuth();
+  const { toast } = useToast();
   useEffect(() => {
     if (!id) return;
     const productId = Number(id);
@@ -41,10 +43,39 @@ const ProductDetail: React.FC = () => {
         setIsLoading(true);
         setError(null);
         const data = await getProductById(productId);
+        let appliedDiscount = 0;
+        try {
+          const promos = await getPromotionsCustomerFilter();
+          const applicablePromos = promos.filter(p => {
+            if (!p.isActive) return false;
+            // Does it target productId?
+            if (p.productId && p.productId === data.productId) return true;
+            if (p.productId && p.productId !== data.productId) return false;
+            // It targets category?
+            if (p.categoryId && p.categoryId === data.categoryId) return true;
+            if (p.categoryId && p.categoryId !== data.categoryId) return false;
+            // It targets brand?
+            if (p.brandId && p.brandId === data.brandId) return true;
+            if (p.brandId && p.brandId !== data.brandId) return false;
+            // targets all
+            return true;
+          });
+          const bestPromo = applicablePromos
+            .filter((p) => p.discountType === 0)
+            .sort((a, b) => (b.discountValue ?? 0) - (a.discountValue ?? 0))[0];
+          appliedDiscount = bestPromo?.discountValue ?? 0;
+        } catch { }
+
+        const originalPrice = data.price ?? 0;
+        const currentPrice = appliedDiscount > 0 ? originalPrice * (1 - appliedDiscount / 100) : originalPrice;
+
         const mapped: ProductDTO = {
           ...data,
           id: String(data.productId ?? id),
           images: data.imageUrl ? [data.imageUrl] : [],
+          price: currentPrice,
+          originalPrice: originalPrice,
+          discount: appliedDiscount
         };
         setProduct(mapped);
       } catch (err) {
@@ -64,8 +95,17 @@ const ProductDetail: React.FC = () => {
   };
 
   const handleAddToCart = (): void => {
+    if (!user) {
+      toast({
+        title: "Vui lòng đăng nhập",
+        description: "Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.",
+        variant: "destructive"
+      });
+      return;
+    }
     if (product) addToCart(product.productId, undefined, quantity);
   };
+
 
   if (isLoading) {
     return (
@@ -241,46 +281,38 @@ const ProductDetail: React.FC = () => {
               </div>
             </div>
 
-            {user && (
-              < div className="flex flex-col gap-6 mb-12">
-                <div className="flex items-center justify-between px-2">
-                  <span className="font-tilt-warp text-gray-900 uppercase tracking-wide">Số lượng</span>
-                  <div className="flex items-center bg-gray-100 rounded-2xl p-1 shadow-inner">
-                    <button
-                      onClick={() => handleQuantityChange(-1)}
-                      className="p-3 hover:bg-white hover:text-red-600 rounded-xl transition-all text-gray-500"
-                    >
-                      <Minus className="w-4 h-4" />
-                    </button>
-                    <span className="w-12 text-center font-tilt-warp text-lg">{quantity}</span>
-                    <button
-                      onClick={() => handleQuantityChange(1)}
-                      className="p-3 hover:bg-white hover:text-red-600 rounded-xl transition-all text-gray-500"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleAddToCart}
-                    className="flex-1 bg-red-600 text-white h-16 rounded-3xl font-tilt-warp text-xl uppercase tracking-widest shadow-2xl hover:bg-black transition-colors flex items-center justify-center gap-4 group"
+            < div className="flex flex-col gap-6 mb-12">
+              <div className="flex items-center justify-between px-2">
+                <span className="font-tilt-warp text-gray-900 uppercase tracking-wide">Số lượng</span>
+                <div className="flex items-center bg-gray-100 rounded-2xl p-1 shadow-inner">
+                  <button
+                    onClick={() => handleQuantityChange(-1)}
+                    className="p-3 hover:bg-white hover:text-red-600 rounded-xl transition-all text-gray-500"
                   >
-                    <ShoppingCart className="w-6 h-6 group-hover:rotate-12 transition-transform" />
-                    Thêm vào giỏ
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    className="aspect-square bg-gray-100 text-gray-400 h-16 rounded-3xl flex items-center justify-center hover:bg-red-50 hover:text-red-600 transition-all border border-transparent hover:border-red-100"
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="w-12 text-center font-tilt-warp text-lg">{quantity}</span>
+                  <button
+                    onClick={() => handleQuantityChange(1)}
+                    className="p-3 hover:bg-white hover:text-red-600 rounded-xl transition-all text-gray-500"
                   >
-                    <Heart className="w-6 h-6" />
-                  </motion.button>
+                    <Plus className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-            )}
+
+              <div className="flex gap-4">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleAddToCart}
+                  className="flex-1 bg-red-600 text-white h-16 rounded-3xl font-tilt-warp text-xl uppercase tracking-widest shadow-2xl hover:bg-black transition-colors flex items-center justify-center gap-4 group"
+                >
+                  <ShoppingCart className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+                  Thêm vào giỏ
+                </motion.button>
+              </div>
+            </div>
             {/* Product Meta Stats */}
             <div className="border-t border-gray-100 pt-8 flex items-center justify-around text-gray-400 text-xs font-medium">
               <div className="flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> Chính hãng 100%</div>

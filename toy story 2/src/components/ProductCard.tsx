@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import type { ViewProductDto } from "../types/ProductDTO";
 import { formatPrice } from "../utils/formatPrice";
 import { PRODUCT_IMAGE_87 } from "../constants/imageAssets";
-import { Heart, ShoppingCart } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "../lib/utils";
 
@@ -26,9 +26,10 @@ export const ProductCard = ({
   const productImage = product.imageUrl ?? PRODUCT_IMAGE_87;
 
   const hasDiscount = typeof discount === "number" && discount > 0;
-  const originalPrice = hasDiscount
-    ? productPrice / (1 - (discount ?? 0) / 100)
+  const discountedPrice = hasDiscount
+    ? productPrice * (1 - discount / 100)
     : productPrice;
+  const originalPrice = productPrice;
 
   const handleCardClick = () => {
     navigate(`/product/${product.productId}`);
@@ -82,7 +83,7 @@ export const ProductCard = ({
           {/* Pricing */}
           <div className="flex flex-col mb-3">
             <span className="text-red-600 font-tilt-warp text-2xl leading-none tracking-tight">
-              {formatPrice(productPrice)}
+              {formatPrice(discountedPrice)}
             </span>
             {hasDiscount && (
               <span className="text-gray-400 text-[13px] line-through mt-1">
@@ -102,16 +103,7 @@ export const ProductCard = ({
               <span>Thêm</span>
             </Link>
             
-            <button 
-              className="p-3 rounded-[1rem] border border-gray-100 text-gray-400 hover:text-red-500 hover:bg-red-50 hover:border-red-100 transition-all shadow-sm"
-              aria-label="Wishlist"
-              onClick={(e) => {
-                e.stopPropagation();
-                // Add to wishlist logic here
-              }}
-            >
-              <Heart className="w-4 h-4 group-hover:scale-110 transition-transform" />
-            </button>
+
           </div>
         </div>
       </div>

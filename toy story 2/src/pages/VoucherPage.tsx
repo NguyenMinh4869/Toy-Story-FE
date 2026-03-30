@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useState } from 'react'
-import { Heart } from 'lucide-react'
+
 import { BreadcrumbHeader } from '../components/BreadcrumbHeader'
 import { getCustomerFilterVouchers } from '../services/voucherService'
 import type { ViewVoucherSummaryDto } from '../types/VoucherDTO'
@@ -147,13 +147,7 @@ export const VoucherPage: React.FC = () => {
                         >
                           Xem chi tiết
                         </button>
-                        <button
-                          type="button"
-                          className="w-8 h-8 rounded-full bg-[#c40029] flex items-center justify-center text-white border-none cursor-pointer hover:bg-[#a00022] transition-colors"
-                          aria-label="Yêu thích"
-                        >
-                          <Heart size={16} strokeWidth={2} fill="currentColor" />
-                        </button>
+
                       </div>
                     </div>
                   </div>

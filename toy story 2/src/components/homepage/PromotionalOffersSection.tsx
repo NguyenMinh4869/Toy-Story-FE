@@ -11,6 +11,8 @@ interface PromotionalOffersSectionProps {
   page?: number;
   onPageChange?: (nextPage: number) => void;
   maxPages?: number;
+  /** Discount percentage from the active promotion (e.g. 50 means 50%). 0 = no badge shown */
+  promotionDiscountValue?: number;
 }
 
 export const PromotionalOffersSection = ({
@@ -19,6 +21,7 @@ export const PromotionalOffersSection = ({
   page = 0,
   onPageChange,
   maxPages = 3,
+  promotionDiscountValue = 0,
 }: PromotionalOffersSectionProps): React.JSX.Element => {
   const pageSize = 4;
   const pageCount = Math.max(1, Math.min(maxPages, Math.ceil(products.length / pageSize)));
@@ -72,7 +75,7 @@ export const PromotionalOffersSection = ({
                   >
                     <ProductCard
                       product={product}
-                      discount={30}
+                      discount={promotionDiscountValue}
                     />
                   </div>
                 ))}
