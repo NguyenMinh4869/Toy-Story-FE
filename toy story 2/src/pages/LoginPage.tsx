@@ -47,12 +47,6 @@ const LoginPage: React.FC = () => {
       const loginDto = toLoginDto(data)
       const response = await login(loginDto)
 
-      // Login successful - token, role, and user data are stored automatically
-      console.log('Login successful:', response.message)
-      if (response.user) {
-        console.log('User data loaded:', response.user)
-      }
-
       // Update global auth state
       refreshUser()
       if (response.role === 'Admin' || response.role === 'Staff') {
@@ -63,26 +57,6 @@ const LoginPage: React.FC = () => {
     } catch (err: any) {
       // Handle backend validation/error messages
       console.error('Login error:', err)
-
-      // If backend returns field-specific validation errors
-      if (err.errors && typeof err.errors === 'object') {
-        Object.entries(err.errors).forEach(([field, messages]) => {
-          const fieldName = field as keyof LoginFormData
-          if (fieldName === 'email' || fieldName === 'password') {
-            setFieldError(fieldName, {
-              type: 'server',
-              message: Array.isArray(messages) ? messages[0] : String(messages)
-            })
-          }
-        })
-        // Also show general error if available
-        if (err.message) {
-          setError(err.message)
-        }
-      } else {
-        // Show general backend error message (e.g., "Sai mật khẩu!", "Không tìm thấy tài khoản!")
-        setError(err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra thông tin đăng nhập.')
-      }
     } finally {
       setIsLoading(false)
     }
