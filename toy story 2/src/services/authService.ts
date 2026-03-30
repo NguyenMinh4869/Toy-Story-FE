@@ -300,3 +300,22 @@ export const storeAccountId = (accountId: number): void => {
   localStorage.setItem('accountId', accountId.toString())
 }
 
+/**
+ * Forgot password — send OTP to email
+ * POST /api/auth/forgot-password
+ * Always returns 200 (anti-enumeration)
+ */
+export const forgotPassword = async (email: string): Promise<{ message: string }> => {
+  const response = await apiPost<{ message: string }>('/auth/forgot-password', { email })
+  return response.data
+}
+
+/**
+ * Reset password with OTP token
+ * POST /api/auth/reset-password
+ */
+export const resetPassword = async (email: string, token: string, newPassword: string): Promise<{ message: string }> => {
+  const response = await apiPost<{ message: string }>('/auth/reset-password', { email, token, newPassword })
+  return response.data
+}
+
