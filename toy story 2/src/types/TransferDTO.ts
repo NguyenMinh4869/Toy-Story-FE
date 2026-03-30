@@ -12,7 +12,9 @@ export enum TransferType {
 
 export interface ViewTransSummaryDto {
     transferId: number;
+    sourceWarehouseId: number;
     sourceWarehouseName?: string;
+    destinationWarehouseId: number;
     destinationWarehouseName?: string;
     status: TransferStatus;
     type: TransferType;

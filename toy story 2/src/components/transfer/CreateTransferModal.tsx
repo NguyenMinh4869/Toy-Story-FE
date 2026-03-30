@@ -1,7 +1,7 @@
 // components/transfer/CreateTransferModal.tsx
 import React, { useEffect, useState } from 'react'
 import { X, PlusCircle, MinusCircle } from 'lucide-react'
-import { getWarehouseProductsForStaff, getWarehouses } from '@/services/warehouseService'
+import { getWarehouseProductsForStaff, getWarehousesExcept } from '@/services/warehouseService'
 import { WarehouseSummaryDto } from '@/types/WarehouseDTO'
 import { TransferType, TransferTypeLabels, CreateTransferDto, CreateTransferItemDto } from '@/types/TransferDTO'
 import { ViewProductDto } from '@/types/ProductDTO'
@@ -40,7 +40,7 @@ const CreateTransferModal: React.FC<CreateTransferModalProps> = ({ onClose, onSu
         const fetchWarehouses = async () => {
             setLoadingWarehouses(true)
             try {
-                const data = await getWarehouses()
+                const data = await getWarehousesExcept()
                 setWarehouses(data)
             } catch (error) {
                 console.error('Error fetching warehouses:', error)

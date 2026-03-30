@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import type { ViewProductDto } from "../../types/ProductDTO";
 import { formatPrice } from "../../utils/formatPrice";
 import { useCart } from "@/context/CartContext";
-
+import { useAuth } from "@/hooks/useAuth";
 interface ProductGridCardProps {
   product: ViewProductDto;
   className?: string;
@@ -20,7 +20,7 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({
   const productName = product.name ?? "Unnamed Product";
   const productImage = product.imageUrl ?? PRODUCT_PLACEHOLDER;
   const { addToCart } = useCart();
-
+  const { user } = useAuth();
   const handleAddToCart = (e: React.MouseEvent): void => {
     e.preventDefault()
     e.stopPropagation()
@@ -53,15 +53,16 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({
             {formatPrice(productPrice)}
           </span>
         </div>
-
-        <div className="flex items-center gap-4">
-          <button
-            onClick={handleAddToCart}
-            className="flex-1 bg-[#c40029] hover:bg-[#a00022] text-white font-tilt-warp text-[16px] py-[10px] px-6 rounded-[6px] transition-colors cursor-pointer border-none"
-          >
-            Thêm vào giỏ hàng
-          </button>
-        </div>
+        {user && (
+          <div className="flex items-center gap-4">
+            <button
+              onClick={handleAddToCart}
+              className="flex-1 bg-[#c40029] hover:bg-[#a00022] text-white font-tilt-warp text-[16px] py-[10px] px-6 rounded-[6px] transition-colors cursor-pointer border-none"
+            >
+              Thêm vào giỏ hàng
+            </button>
+          </div>
+        )}
       </div>
     </Link>
   );

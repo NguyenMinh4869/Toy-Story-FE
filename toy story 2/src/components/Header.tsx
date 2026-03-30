@@ -169,16 +169,17 @@ const Header: React.FC = () => {
               </Link>
             </>
           )}
-
-          <button
-            onClick={openCart}
-            className="flex items-center gap-2 bg-transparent border-none"
-          >
-            <ShoppingBag size={22} stroke="white" strokeWidth={2} />
-            <span>
-              Giỏ hàng {getTotalItems() > 0 && `(${getTotalItems()})`}
-            </span>
-          </button>
+          {user && (
+            <button
+              onClick={openCart}
+              className="flex items-center gap-2 bg-transparent border-none"
+            >
+              <ShoppingBag size={22} stroke="white" strokeWidth={2} />
+              <span>
+                Giỏ hàng {getTotalItems() > 0 && `(${getTotalItems()})`}
+              </span>
+            </button>
+          )}
         </nav>
       </div>
     </header>

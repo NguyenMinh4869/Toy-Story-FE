@@ -59,11 +59,11 @@ export const ProductCard = ({
       )}
 
       {/* Image Container with Hover Effect */}
-      <div className="relative w-full aspect-square mb-4 bg-gray-50 rounded-2xl overflow-hidden flex items-center justify-center border border-gray-100 group-hover:border-red-100 transition-colors">
+      <div className="relative aspect-square mb-4 bg-gray-50 rounded-2xl overflow-hidden flex items-center justify-center border border-gray-100 group-hover:border-red-100 transition-colors">
         <motion.img
           whileHover={{ scale: 1.15, rotate: 2 }}
           transition={{ type: "spring", stiffness: 300, damping: 15 }}
-          className="w-[85%] h-[85%] object-contain drop-shadow-xl p-2"
+          className="w-full h-full object-contain drop-shadow-xl"
           alt={productName}
           src={productImage}
         />

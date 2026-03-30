@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
-import { CalendarDays, Hash, Phone, Store, User, X } from 'lucide-react'
+import { CalendarDays, Hash, Phone, Store, User } from 'lucide-react'
 import { formatPrice } from '@/utils/formatPrice'
 import { OrderDetailDto } from '@/types/OrderDTO'
 import { getWarehouses } from '@/services/warehouseService'
 import { assignWarehouse, updateOrderStatus } from '@/services/orderService'
 import { WarehouseSummaryDto } from '@/types/WarehouseDTO'
+import { useAuth } from '@/hooks/useAuth'
 interface OrderDetailProps {
   order: OrderDetailDto | null
   onClose: () => void
@@ -15,7 +16,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onClose, onRefresh }) 
   const [warehouses, setWarehouses] = useState<WarehouseSummaryDto[]>([])
   const [loadingWarehouses, setLoadingWarehouses] = useState(false)
   const [selectedWarehouse, setSelectedWarehouse] = useState<number | null>(null)
-
+  const { user } = useAuth()
   if (!order) return null
 
   const handleFetchWarehouses = async () => {
@@ -46,24 +47,28 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onClose, onRefresh }) 
         className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[1.5rem] border border-white/20 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.24)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between border-b border-slate-200/80 bg-white/95 px-4 py-3.5">
-          <div className="space-y-1">
-            <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-              <Hash size={14} /> Đơn hàng #{order.orderId}
-            </div>
-            <h2 className="text-lg font-black text-slate-900">Chi tiết đơn hàng</h2>
+        <div className="flex justify-between border-b border-slate-200/80 bg-white/95 px-4 py-3.5">
+          <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <Hash size={14} /> Đơn hàng #{order.orderId}
           </div>
-          <button
-            onClick={onClose}
-            className="rounded-full border border-slate-200 bg-white p-1.5 text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-700"
-          >
-            <X size={18} />
-          </button>
+          <div>
+            <span
+              className={`rounded-full px-2.5 py-0.5 text-md font-bold ${String(order.status).toLowerCase().includes('giao')
+                ? 'bg-emerald-100 text-emerald-700'
+                : String(order.status).toLowerCase().includes('hủy')
+                  ? 'bg-rose-100 text-rose-700'
+                  : 'bg-amber-100 text-amber-700'
+                }`}
+            >
+              {order.status}
+            </span>
+          </div>
+
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-4">
           <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50/70 p-3.5">
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+            <div className="grid gap-3 grid-cols-3">
               <div>
                 <div className="mb-1 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
                   <User size={12} /> Khách hàng
@@ -82,18 +87,13 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onClose, onRefresh }) 
                 </div>
                 <p className="text-xs font-bold text-slate-900">{new Date(order.orderDate).toLocaleString('vi-VN')}</p>
               </div>
+            </div>
+            <div className="grid gap-3 grid-cols-2 mt-4">
               <div>
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Trạng thái</div>
-                <span
-                  className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold ${String(order.status).toLowerCase().includes('giao')
-                    ? 'bg-emerald-100 text-emerald-700'
-                    : String(order.status).toLowerCase().includes('hủy')
-                      ? 'bg-rose-100 text-rose-700'
-                      : 'bg-amber-100 text-amber-700'
-                    }`}
-                >
-                  {order.status}
-                </span>
+                <div className="mb-1 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  <Store size={12} /> Địa chỉ giao hàng
+                </div>
+                <p className="text-xs font-bold text-slate-900">{order.address || 'N/A'}</p>
               </div>
               <div>
                 <div className="mb-1 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
@@ -101,6 +101,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onClose, onRefresh }) 
                 </div>
                 <p className="text-xs font-bold text-slate-900">{order.warehouseName || 'N/A'}</p>
               </div>
+              <div />
             </div>
           </div>
 
@@ -226,7 +227,8 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onClose, onRefresh }) 
             <p className="text-xs text-slate-500">Tổng cộng</p>
             <p className="text-xl font-black text-rose-600">{formatPrice(order.totalAmount)}</p>
           </div>
-          {order.isDelivered && (
+
+          {order.isDelivered && user?.role === 'Staff' && (
             <button
               onClick={async () => {
                 try {

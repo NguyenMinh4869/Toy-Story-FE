@@ -3,7 +3,7 @@ import React from 'react'
 import TransferStatusBadge from '../badge/TransferStatusBadge'
 import { Calendar } from 'lucide-react'
 import { ViewTransSummaryDto } from '@/types/TransferDTO'
-
+import { useAuth } from '@/hooks/useAuth'
 interface TransferCardProps {
     transfer: ViewTransSummaryDto
 }
@@ -22,6 +22,7 @@ const TransferCard: React.FC<TransferCardProps> = ({ transfer }) => {
         return { label: '', value: undefined }
     }
 
+    const { user } = useAuth()
     const secondary = getSecondaryDate()
 
     return (
@@ -34,7 +35,15 @@ const TransferCard: React.FC<TransferCardProps> = ({ transfer }) => {
             </div>
 
             <div className="text-sm text-gray-700">
-                <strong>{transfer.sourceWarehouseName}</strong> → <strong>{transfer.destinationWarehouseName}</strong>
+                {user?.warehouseId === transfer.sourceWarehouseId ? (
+                    <span>
+                        <strong>{transfer.sourceWarehouseName}</strong> → <strong>{transfer.destinationWarehouseName}</strong>
+                    </span>
+                ) : (
+                    <span>
+                        <strong>{transfer.destinationWarehouseName}</strong> ← <strong>{transfer.sourceWarehouseName}</strong>
+                    </span>
+                )}
             </div>
 
             <div className="flex flex-col gap-1 text-sm text-gray-600">

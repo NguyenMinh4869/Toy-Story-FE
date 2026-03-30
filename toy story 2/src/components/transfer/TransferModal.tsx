@@ -74,7 +74,15 @@ const TransferModal: React.FC<TransferModalProps> = ({ transfer, onClose, onUpda
 
                 {/* Warehouses */}
                 <div className="mb-4 text-sm text-gray-700">
-                    <strong>{transfer.sourceWarehouseName}</strong> → <strong>{transfer.destinationWarehouseName}</strong>
+                    {user?.warehouseId === transfer.sourceWarehouseId ? (
+                        <span>
+                            <strong>{transfer.sourceWarehouseName}</strong> → <strong>{transfer.destinationWarehouseName}</strong>
+                        </span>
+                    ) : (
+                        <span>
+                            <strong>{transfer.destinationWarehouseName}</strong> ← <strong>{transfer.sourceWarehouseName}</strong>
+                        </span>
+                    )}
                 </div>
 
                 {/* Staff info */}
