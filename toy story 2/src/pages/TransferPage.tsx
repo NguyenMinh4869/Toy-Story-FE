@@ -8,6 +8,10 @@ import TransferModal from '@/components/transfer/TransferModal'
 import { Loader2 } from 'lucide-react'
 import CreateTransferModal from '@/components/transfer/CreateTransferModal'
 import { useAuth } from '@/hooks/useAuth'
+import Pagination from '@/components/ui/Pagination'
+import { useClientPagination } from '@/hooks/useClientPagination'
+
+const TRANSFERS_PAGE_SIZE = 6
 
 const TransferPage: React.FC = () => {
   const [transfers, setTransfers] = useState<ViewTransSummaryDto[]>([])
@@ -15,8 +19,16 @@ const TransferPage: React.FC = () => {
   const [selectedTransfer, setSelectedTransfer] = useState<ViewTransDetailDto | null>(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [filter, setFilter] = useState<TransferFilterDto>({})
+  const [currentPage, setCurrentPage] = useState(1)
   const { user } = useAuth()
   const userWarehouseId = user?.warehouseId
+
+  // Pagination
+  const {
+    paginatedItems: paginatedTransfers,
+    totalPages,
+    currentPage: safeCurrentPage
+  } = useClientPagination(transfers, currentPage, TRANSFERS_PAGE_SIZE)
 
   // Track if initial filter has been applied
   const isInitialFilterApplied = useRef(false)
@@ -29,7 +41,10 @@ const TransferPage: React.FC = () => {
       const data = hasFilter
         ? await getFilteredTransfers(currentFilter)
         : await getAllTransfers()
-      if (data) setTransfers(data)
+      if (data) {
+        setTransfers(data)
+        setCurrentPage(1) // Reset to first page when new data arrives
+      }
     } catch (error) {
       console.error('Error fetching transfers:', error)
     } finally {
@@ -69,6 +84,7 @@ const TransferPage: React.FC = () => {
   const handleFilter = useCallback((newFilter: TransferFilterDto) => {
     console.log('Filter changed:', newFilter)
     setFilter(newFilter)
+    setCurrentPage(1) // Reset to first page when filter changes
   }, [])
 
   const handleReset = useCallback(() => {
@@ -84,6 +100,7 @@ const TransferPage: React.FC = () => {
     } else {
       setFilter({})
     }
+    setCurrentPage(1) // Reset to first page when resetting filter
   }, [userWarehouseId])
 
   const handleOpenModal = () => setShowCreateModal(true)
@@ -117,12 +134,14 @@ const TransferPage: React.FC = () => {
     <div>
       <div className="flex justify-between mb-4">
         <h1 className="text-2xl font-black">Quản lý yêu cầu chuyển kho</h1>
-        <button
-          onClick={handleOpenModal}
-          className="px-4 py-2 bg-blue-600 text-white rounded-3xl font-bold hover:bg-blue-700"
-        >
-          Tạo yêu cầu chuyển kho
-        </button>
+        {userWarehouseId != null && (
+          <button
+            onClick={handleOpenModal}
+            className="px-4 py-2 bg-blue-600 text-white rounded-3xl font-bold hover:bg-blue-700"
+          >
+            Tạo yêu cầu chuyển kho
+          </button>
+        )}
       </div>
 
       {/* Filter */}
@@ -137,14 +156,36 @@ const TransferPage: React.FC = () => {
         <div className="flex justify-center items-center py-10">
           <Loader2 size={24} className="animate-spin text-blue-600" />
         </div>
-      ) : (
-        <div className="grid grid-cols-3 gap-4 mt-4">
-          {transfers.map(t => (
-            <div key={t.transferId} onClick={() => openTransferModal(t.transferId)} className="cursor-pointer">
-              <TransferCard transfer={t} />
-            </div>
-          ))}
+      ) : transfers.length === 0 ? (
+        <div className="text-center py-20 bg-gray-50 rounded-xl mt-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-1">Không có yêu cầu chuyển kho</h3>
+          <p className="text-gray-500">
+            {filter.warehouseId || filter.status || filter.type
+              ? 'Không tìm thấy yêu cầu phù hợp với bộ lọc'
+              : 'Chưa có yêu cầu chuyển kho nào được tạo'}
+          </p>
         </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-3 gap-4 mt-4">
+            {paginatedTransfers.map(t => (
+              <div key={t.transferId} onClick={() => openTransferModal(t.transferId)} className="cursor-pointer">
+                <TransferCard transfer={t} />
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-2">
+              <Pagination
+                currentPage={safeCurrentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          )}
+        </>
       )}
 
       {/* Modal */}
