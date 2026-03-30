@@ -116,12 +116,12 @@ const EventHistoryPage: React.FC = () => {
     }, [userWarehouseId])
 
     return (
-        <div className="max-w-7xl mx-auto">
+        <div>
             <div className="mb-4">
                 <h1 className="text-2xl font-black text-gray-900 mb-2">Lịch sử thay đổi</h1>
             </div>
 
-            <div className="mb-6">
+            <div className="mb-4">
                 <EventFilter
                     onFilter={handleFilter}
                     onReset={handleReset}
@@ -139,7 +139,7 @@ const EventHistoryPage: React.FC = () => {
                 }}
                 className="w-full"
             >
-                <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsList className="grid w-full grid-cols-2 mb-4">
                     <TabsTrigger
                         value="order"
                         className="flex items-center justify-center gap-2 w-full"
@@ -183,12 +183,12 @@ const EventHistoryPage: React.FC = () => {
                         </div>
                     ) : (
                         <>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-3 gap-2">
                                 {paginatedOrderEvents.map((event) => (
                                     <OrderEventCard key={event.id} event={event} />
                                 ))}
                             </div>
-                            <div className="mt-6">
+                            <div className="mt-2">
                                 <Pagination
                                     currentPage={safeOrderPage}
                                     totalPages={orderTotalPages}

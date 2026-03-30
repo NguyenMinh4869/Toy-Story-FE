@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getPending } from "@/services/orderService";
-import { Badge, Loader2, Truck } from "lucide-react";
+import { Loader2, Truck } from "lucide-react";
 import { ViewOrderDto } from "@/types/OrderDTO";
 
 const PendingOrders = () => {
@@ -64,9 +64,7 @@ const PendingOrders = () => {
                             <div className="space-y-1">
                                 <div className="flex items-center gap-2">
                                     <span className="font-medium">#{order.orderId}</span>
-                                    <Badge className="text-yellow-600 border-yellow-600">
-                                        {order.status}
-                                    </Badge>
+
                                 </div>
                                 <div className="text-sm text-gray-600">
                                     <p>Khách hàng: {order.accountName}</p>
