@@ -7,6 +7,7 @@ import {
   getCartServer,
 } from '../services/cartService'
 import type { CartItemDto, CartProduct } from '../types/CartDTO'
+import { useAuth } from '@/hooks/useAuth'
 
 export interface CartItem {
   product: CartProduct
@@ -66,18 +67,21 @@ const mapDtoToCartItem = (dto: CartItemDto): CartItem => {
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [isCartOpen, setIsCartOpen] = useState(false)
+  const { isAuthenticated } = useAuth();
 
   const loadServerCart = async (): Promise<void> => {
     try {
       const cart = await getCartServer()
       setCartItems(cart?.items?.map(mapDtoToCartItem) ?? [])
-    } catch {
+    } catch (error) {
     }
   }
 
   useEffect(() => {
-    loadServerCart()
-  }, [])
+    if (isAuthenticated) {
+      loadServerCart()
+    }
+  }, [isAuthenticated])
 
   const addToCart = (productId?: number, setId?: number, quantity: number = 1): void => {
     addToCartServer(productId, setId, quantity).then(loadServerCart).catch(() => { })

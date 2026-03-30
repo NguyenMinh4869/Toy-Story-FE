@@ -28,6 +28,11 @@ export const getWarehouses = async (): Promise<WarehouseSummaryDto[]> => {
   return response.data;
 };
 
+export const getLowStockWarehouses = async (): Promise<ProductStockDto[]> => {
+  const response = await apiGet<ProductStockDto[]>("/warehouses/low-stock");
+  return response.data;
+};
+
 export const getWarehouseById = async (
   warehouseId: number,
 ): Promise<WarehouseDetailDto> => {

@@ -16,10 +16,10 @@ export interface ViewTransSummaryDto {
     destinationWarehouseName?: string;
     status: TransferStatus;
     type: TransferType;
-    createdAt: Date;
-    acceptedAt?: Date;
-    completedAt?: Date;
-    rejectedAt?: Date;
+    createdAt: string;
+    acceptedAt?: string;
+    completedAt?: string;
+    rejectedAt?: string;
 }
 
 export interface ViewTransDetailDto {

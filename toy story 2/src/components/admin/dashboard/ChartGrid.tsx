@@ -6,10 +6,14 @@ import TopSellingProductsChart from './TopSellingProductsChart'
 import TopSellingSetsChart from './TopSellingSetsChart'
 import WarehouseWorkloadChart from './WarehouseWorkloadChart'
 import OrderGrowthChart from './OrderGrowthChart'
+import PendingOrders from './PendingOrders'
+import DeliveryOrders from './DeliveryOrders'
 
 const ChartGrid: React.FC = () => {
     return (
         <div className="grid grid-cols-2 gap-6">
+            <PendingOrders />
+            <DeliveryOrders />
             <RevenueOverviewChart />
             <OrderStatusChart />
             <TopSellingProductsChart />

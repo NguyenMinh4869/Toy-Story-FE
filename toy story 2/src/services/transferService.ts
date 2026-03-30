@@ -15,6 +15,16 @@ export const getAllTransfers = async (): Promise<ViewTransSummaryDto[] | null> =
     }
 }
 
+export const getPendingTransfers = async (): Promise<ViewTransSummaryDto[] | null> => {
+    try {
+        const response = await apiGet<ViewTransSummaryDto[]>('/transfers/pending', undefined, true)
+        return response.data
+    } catch (error: any) {
+        console.error("Error fetching transfers:", error)
+        return null
+    }
+}
+
 const buildQueryString = (params: Record<string, any>): string => {
     const query = Object.entries(params)
         .filter(([_, v]) => v !== undefined && v !== null)
