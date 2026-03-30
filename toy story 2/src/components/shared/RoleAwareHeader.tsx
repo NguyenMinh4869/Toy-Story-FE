@@ -72,7 +72,6 @@ const Header: React.FC<HeaderProps> = ({ mode }) => {
       {!isAdminMode && <h1 className="text-2xl font-black text-gray-800">Tổng quan kho {warehouse?.name}</h1>}
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-4">
-          <span className="font-black text-gray-700 text-right">{warehouse?.location}</span>
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
