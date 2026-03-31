@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getPromotionsCustomerFilter } from "../services/promotionService";
 import { filterProducts, getProductById } from "../services/productService";
 import { BreadcrumbHeader } from "../components/BreadcrumbHeader";
-import { ProductCard } from "../components/ProductCard";
+
 import type { ViewPromotionDto } from "../types/PromotionDTO";
 import type { ProductDTO } from "../types/ProductDTO";
 import { motion } from "framer-motion";
@@ -14,6 +14,7 @@ import {
   ArrowLeft,
   Percent,
   ShoppingBag,
+  ShoppingCart,
   Clock,
   Layers,
 } from "lucide-react";
@@ -280,21 +281,69 @@ const PromotionDetailPage: React.FC = () => {
               <p className="text-gray-400 font-medium text-lg">Sản phẩm đang được cập nhật...</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center">
-              {products.map((product, idx) => (
-                <motion.div
-                  key={product.productId}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.35, delay: idx * 0.06 }}
-                >
-                  <ProductCard
-                    product={product}
-                    discount={discountValue}
-                  />
-                </motion.div>
-              ))}
+            <div className="flex flex-col gap-4">
+              {products.map((product, idx) => {
+                const price = product.price ?? 0;
+                const finalPrice = discountValue > 0 ? price * (1 - discountValue / 100) : price;
+
+                return (
+                  <motion.div
+                    key={product.productId}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.3, delay: idx * 0.05 }}
+                    onClick={() => navigate(`/product/${product.productId}`)}
+                    className="group bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all flex items-center gap-4 sm:gap-6 cursor-pointer"
+                  >
+                    {/* Image */}
+                    <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gray-50 rounded-xl flex items-center justify-center p-2 relative overflow-hidden flex-shrink-0">
+                      {product.imageUrl ? (
+                        <img 
+                          src={product.imageUrl} 
+                          alt={product.name || "Product image"} 
+                          className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
+                        />
+                      ) : (
+                        <ShoppingBag className="w-8 h-8 text-gray-300" />
+                      )}
+                      {discountValue > 0 && (
+                        <div className="absolute top-2 left-2 bg-[#a70001] text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-sm">
+                          -{discountValue}%
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 flex flex-col justify-center min-w-0">
+                      <div className="text-[10px] sm:text-xs text-gray-400 font-bold mb-1 uppercase tracking-wider">
+                        {product.brandName || "Thương hiệu nổi bật"}
+                      </div>
+                      <h3 className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-[#a70001] transition-colors mb-2 truncate">
+                        {product.name}
+                      </h3>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                        <span className="text-lg sm:text-xl font-['Tilt_Warp',sans-serif] text-red-600">
+                          {formatPrice(finalPrice)}
+                        </span>
+                        {discountValue > 0 && (
+                          <span className="text-xs sm:text-sm text-gray-400 line-through font-medium">
+                            {formatPrice(price)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Action Button */}
+                    <div className="pr-2 sm:pr-4">
+                      <button className="flex items-center justify-center w-10 h-10 sm:w-auto sm:h-auto sm:px-6 sm:py-3 bg-red-50 text-[#a70001] rounded-full sm:rounded-xl font-bold group-hover:bg-[#a70001] group-hover:text-white transition-colors duration-300">
+                        <ShoppingCart className="w-5 h-5 sm:mr-2" />
+                        <span className="hidden sm:inline">Mua ngay</span>
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           )}
         </div>

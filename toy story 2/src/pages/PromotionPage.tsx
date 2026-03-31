@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getPromotionsCustomerFilter } from "../services/promotionService";
+import { getActiveBrands } from "../services/brandService";
+import { getCategories } from "../services/categoryService";
 import { BreadcrumbHeader } from "../components/BreadcrumbHeader";
 import type { ViewPromotionDto } from "../types/PromotionDTO";
+import type { ViewBrandDto } from "../types/BrandDTO";
+import type { ViewCategoryDto } from "../types/CategoryDTO";
 import { motion } from "framer-motion";
-import { Gift, Tag, Calendar, ChevronRight, Sparkles, Percent } from "lucide-react";
+import { Gift, Tag, Calendar, ChevronRight, Sparkles, Percent, Globe, Package, Grid, Diamond } from "lucide-react";
 
 const PromotionPage: React.FC = () => {
   const [promotions, setPromotions] = useState<ViewPromotionDto[]>([]);
+  const [brands, setBrands] = useState<Record<number, string>>({});
+  const [categories, setCategories] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,8 +22,21 @@ const PromotionPage: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        const promos = await getPromotionsCustomerFilter();
+        const [promos, brandList, categoryList] = await Promise.all([
+          getPromotionsCustomerFilter(),
+          getActiveBrands().catch(() => [] as ViewBrandDto[]),
+          getCategories().catch(() => [] as ViewCategoryDto[]),
+        ]);
         setPromotions(promos.filter((p) => p.isActive));
+
+        // Map id -> name for lookup
+        const brandMap: Record<number, string> = {};
+        brandList.forEach((b) => { if (b.brandId) brandMap[b.brandId] = b.name ?? ""; });
+        setBrands(brandMap);
+
+        const catMap: Record<number, string> = {};
+        categoryList.forEach((c) => { if (c.categoryId) catMap[c.categoryId] = c.name ?? ""; });
+        setCategories(catMap);
       } catch (err) {
         console.error("Error fetching promotions:", err);
         setError("Không thể tải khuyến mãi. Vui lòng thử lại sau.");
@@ -39,8 +58,8 @@ const PromotionPage: React.FC = () => {
 
   const getScopeLabel = (promo: ViewPromotionDto) => {
     if (promo.productId) return "Sản phẩm cụ thể";
-    if (promo.categoryId) return "Danh mục";
-    if (promo.brandId) return "Thương hiệu";
+    if (promo.categoryId) return categories[promo.categoryId] || "Danh mục";
+    if (promo.brandId) return brands[promo.brandId] || "Thương hiệu";
     return "Toàn bộ sản phẩm";
   };
 
@@ -71,6 +90,113 @@ const PromotionPage: React.FC = () => {
     );
   }
 
+  const globalPromotions = promotions.filter((p) => !p.productId && !p.categoryId && !p.brandId);
+  const brandPromotions = promotions.filter((p) => p.brandId);
+  const categoryPromotions = promotions.filter((p) => p.categoryId);
+  const productPromotions = promotions.filter((p) => p.productId);
+
+  const renderPromotionCard = (promo: ViewPromotionDto, index: number) => (
+    <motion.div
+      key={promo.promotionId}
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.4, delay: index * 0.06 }}
+      whileHover={{ y: -6 }}
+      className="group bg-white rounded-[2rem] overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 flex flex-col"
+    >
+      {/* Image */}
+      <div className="relative h-52 overflow-hidden bg-gray-100 flex-shrink-0">
+        {promo.imageUrl ? (
+          <img
+            src={promo.imageUrl}
+            alt={promo.name || ""}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50">
+            <Gift className="w-16 h-16 text-red-200" />
+          </div>
+        )}
+        {/* Discount badge */}
+        {promo.discountType === 0 && (promo.discountValue ?? 0) > 0 && (
+          <div className="absolute top-4 right-4 bg-[#a70001] text-white font-['Tilt_Warp',sans-serif] text-xl px-4 py-1.5 rounded-2xl shadow-lg">
+            -{promo.discountValue}%
+          </div>
+        )}
+        {/* Scope badge */}
+        <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold max-w-[55%] truncate ${getScopeBadgeColor(promo)}`}>
+          {getScopeLabel(promo)}
+        </div>
+      </div>
+
+      {/* Content — flex-1 to push button to bottom */}
+      <div className="p-6 flex flex-col flex-1">
+        <h2 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-[#a70001] transition-colors">
+          {promo.name}
+        </h2>
+
+        {promo.description && (
+          <p className="text-gray-500 text-sm leading-relaxed mb-3 line-clamp-2">
+            {promo.description}
+          </p>
+        )}
+
+        {/* Info chips */}
+        <div className="flex flex-wrap gap-2 mb-5">
+          {promo.discountType === 0 && (promo.discountValue ?? 0) > 0 && (
+            <div className="flex items-center gap-1.5 bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-bold">
+              <Percent className="w-3 h-3" />
+              Giảm {promo.discountValue}%
+            </div>
+          )}
+          {promo.endDate && (
+            <div className="flex items-center gap-1.5 bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-xs font-medium">
+              <Calendar className="w-3 h-3" />
+              Đến {formatDate(promo.endDate)}
+            </div>
+          )}
+          {(promo.minimumAmount ?? 0) > 0 && (
+            <div className="flex items-center gap-1.5 bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-medium">
+              <Tag className="w-3 h-3" />
+              Tối thiểu {promo.minimumAmount!.toLocaleString("vi-VN")}₫
+            </div>
+          )}
+        </div>
+
+        {/* Button pinned to bottom */}
+        <div className="mt-auto">
+          <Link
+            to={`/promotions/${promo.promotionId}`}
+            className="flex items-center justify-center gap-2 w-full py-3 bg-[#a70001] text-white rounded-xl font-bold text-sm hover:bg-black transition-colors duration-300 group/btn"
+          >
+            Xem chi tiết
+            <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  const renderSection = (title: string, promos: ViewPromotionDto[], icon: React.ReactNode) => {
+    if (promos.length === 0) return null;
+    return (
+      <section className="mb-16">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="p-3 bg-red-50 rounded-xl text-[#a70001]">
+            {icon}
+          </div>
+          <h2 className="text-2xl md:text-3xl font-['Tilt_Warp',sans-serif] text-gray-900 uppercase">
+            {title}
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {promos.map((promo, index) => renderPromotionCard(promo, index))}
+        </div>
+      </section>
+    );
+  };
+
   return (
     <div className="bg-slate-50 min-h-screen flex flex-col overflow-x-hidden">
       <BreadcrumbHeader items={[{ label: "Khuyến mãi" }]} />
@@ -95,7 +221,6 @@ const PromotionPage: React.FC = () => {
           </p>
         </motion.div>
 
-        {/* Promotion Grid */}
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -119,86 +244,11 @@ const PromotionPage: React.FC = () => {
             <p className="text-gray-500">Hãy quay lại sau để xem các ưu đãi mới nhất!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {promotions.map((promo, index) => (
-              <motion.div
-                key={promo.promotionId}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.06 }}
-                whileHover={{ y: -6 }}
-                className="group bg-white rounded-[2rem] overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300"
-              >
-                {/* Image */}
-                <div className="relative h-52 overflow-hidden bg-gray-100">
-                  {promo.imageUrl ? (
-                    <img
-                      src={promo.imageUrl}
-                      alt={promo.name || ""}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50">
-                      <Gift className="w-16 h-16 text-red-200" />
-                    </div>
-                  )}
-                  {/* Discount badge */}
-                  {promo.discountType === 0 && (promo.discountValue ?? 0) > 0 && (
-                    <div className="absolute top-4 right-4 bg-[#a70001] text-white font-['Tilt_Warp',sans-serif] text-xl px-4 py-1.5 rounded-2xl shadow-lg">
-                      -{promo.discountValue}%
-                    </div>
-                  )}
-                  {/* Scope badge */}
-                  <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold ${getScopeBadgeColor(promo)}`}>
-                    {getScopeLabel(promo)}
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-6">
-                  <h2 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-[#a70001] transition-colors">
-                    {promo.name}
-                  </h2>
-
-                  {promo.description && (
-                    <p className="text-gray-500 text-sm leading-relaxed mb-4 line-clamp-2">
-                      {promo.description}
-                    </p>
-                  )}
-
-                  {/* Info chips */}
-                  <div className="flex flex-wrap gap-2 mb-5">
-                    {promo.discountType === 0 && (promo.discountValue ?? 0) > 0 && (
-                      <div className="flex items-center gap-1.5 bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-bold">
-                        <Percent className="w-3 h-3" />
-                        Giảm {promo.discountValue}%
-                      </div>
-                    )}
-                    {promo.endDate && (
-                      <div className="flex items-center gap-1.5 bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-xs font-medium">
-                        <Calendar className="w-3 h-3" />
-                        Đến {formatDate(promo.endDate)}
-                      </div>
-                    )}
-                    {promo.minimumAmount && (
-                      <div className="flex items-center gap-1.5 bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-medium">
-                        <Tag className="w-3 h-3" />
-                        Tối thiểu {promo.minimumAmount.toLocaleString("vi-VN")}₫
-                      </div>
-                    )}
-                  </div>
-
-                  <Link
-                    to={`/promotions/${promo.promotionId}`}
-                    className="flex items-center justify-center gap-2 w-full py-3 bg-[#a70001] text-white rounded-xl font-bold text-sm hover:bg-black transition-colors duration-300 group/btn"
-                  >
-                    Xem chi tiết
-                    <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
+          <div>
+            {renderSection("Toàn bộ sản phẩm", globalPromotions, <Globe className="w-6 h-6" />)}
+            {renderSection("Theo Thương hiệu", brandPromotions, <Diamond className="w-6 h-6" />)}
+            {renderSection("Theo Phân loại", categoryPromotions, <Grid className="w-6 h-6" />)}
+            {renderSection("Theo Sản phẩm", productPromotions, <Package className="w-6 h-6" />)}
           </div>
         )}
       </main>
