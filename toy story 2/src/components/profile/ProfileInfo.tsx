@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { User, Upload, CheckCircle, AlertCircle, X } from 'lucide-react'
+import { User, CheckCircle, AlertCircle, X } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { updateUser, getCurrentUser } from '../../services/authService'
 import type { UpdateUserDto } from '../../types/AccountDTO'
@@ -152,14 +152,6 @@ const ProfileInfo: React.FC = () => {
           <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center shadow-sm">
             <User size={48} className="text-gray-400" />
           </div>
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors bg-white cursor-pointer"
-          >
-            <Upload size={14} />
-            Tải ảnh lên
-          </button>
-          <p className="text-[11px] text-gray-500">JPG, PNG hoặc GIF (Tối đa 2MB)</p>
         </div>
 
         <div className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
