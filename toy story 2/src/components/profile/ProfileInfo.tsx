@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { User, CheckCircle, AlertCircle, X } from 'lucide-react'
+import { CheckCircle, AlertCircle, X } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { updateUser, getCurrentUser } from '../../services/authService'
 import type { UpdateUserDto } from '../../types/AccountDTO'
@@ -149,9 +149,7 @@ const ProfileInfo: React.FC = () => {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="flex flex-col items-center gap-3 pb-6 border-b text-center">
-          <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center shadow-sm">
-            <User size={48} className="text-gray-400" />
-          </div>
+          <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center shadow-sm" />
         </div>
 
         <div className="grid grid-cols-2 gap-6 max-md:grid-cols-1">

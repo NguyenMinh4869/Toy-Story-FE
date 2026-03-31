@@ -104,7 +104,9 @@ const ChartWidget = ({ title, data, type, horizontal = false, description }: Cha
                 grid: { color: "#F1F5F9" },
                 ticks: {
                     font: { size: 10, weight: "bold" as const },
-                    stepSize: 1,
+                    // Avoid generating tens of thousands of ticks on large ranges
+                    autoSkip: true,
+                    maxTicksLimit: 8,
                     color: "#94A3B8",
                 },
             },
