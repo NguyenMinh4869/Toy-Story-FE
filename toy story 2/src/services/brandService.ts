@@ -73,10 +73,18 @@ export const updateBrand = async (brandId: number, data: UpdateBrandDto, imageFi
  * Change brand status (toggle Active/Inactive) (Admin only)
  * PUT /api/brand/change-status/{brandId}
  */
-export const changeBrandStatus = async (brandId: number): Promise<{ message: string }> => {
+export const changeBrandStatus = async (
+  brandId: number
+): Promise<{
+  success: boolean
+  message: string
+  affectedProducts: string[]
+}> => {
   const form = new FormData()
-  const response = await apiPutForm<{ message: string }>(`/brands/status/${brandId}`, form)
+  const response = await apiPutForm<{
+    success: boolean
+    message: string
+    affectedProducts: string[]
+  }>(`/brands/status/${brandId}`, form)
   return response.data
 }
-
-

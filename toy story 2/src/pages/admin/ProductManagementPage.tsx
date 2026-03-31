@@ -131,15 +131,35 @@ const ProductManagementPage: React.FC = () => {
     currentPage: safePage
   } = useClientPagination(filteredProducts, page, PAGE_SIZE)
 
+  // const handleStatusChange = async (id: number) => {
+  //   await confirmAction('Are you sure you want to change status of this product?', async () => {
+  //     await runAsync(async () => {
+  //       setError(null)
+  //       await changeProductStatus(id)
+  //       await fetchData()
+  //     }, setError, 'Failed to change product status')
+  //   })
+  // };
+
   const handleStatusChange = async (id: number) => {
-    await confirmAction('Are you sure you want to change status of this product?', async () => {
-      await runAsync(async () => {
-        setError(null)
-        await changeProductStatus(id)
-        await fetchData()
-      }, setError, 'Failed to change product status')
-    })
-  };
+  const confirmed = await confirmAction(
+    'Are you sure you want to change status of this product?'
+  );
+
+  if (!confirmed) return;
+
+  try {
+    setError(null);
+
+    await changeProductStatus(id);
+
+    await fetchData(); 
+
+  } catch (err: any) {
+    console.error(err);
+    // toast.error(err.message || 'Failed to change product status');
+  }
+};
 
   const openCreateModal = () => {
     setCurrentProduct(null);
