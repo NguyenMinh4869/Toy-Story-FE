@@ -34,7 +34,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
       <div className="space-y-4 font-reddit-sans">
         <div className="flex justify-between text-gray-600">
           <span>Tạm tính</span>
-          <span className="font-medium">{formatPrice(subtotal)}</span>
+          <span className="font-medium">{formatPrice(summary?.originalTotal ?? subtotal)}</span>
         </div>
 
         {/* Promotions Section - Display each discount */}

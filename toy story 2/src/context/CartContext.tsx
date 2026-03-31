@@ -13,6 +13,8 @@ export interface CartItem {
   product: CartProduct
   quantity: number
   serverTotalPrice?: number
+  originalUnitPrice?: number
+  originalTotalPrice?: number
 }
 
 interface CartContextType {
@@ -22,6 +24,7 @@ interface CartContextType {
   updateQuantity: (item: CartItem, quantity: number) => void
   clearCart: () => void
   getTotalPrice: () => number
+  getTotalOriginalPrice: () => number
   getTotalItems: () => number
   isCartOpen: boolean
   openCart: () => void
@@ -51,6 +54,8 @@ const mapDtoToCartItem = (dto: CartItemDto): CartItem => {
       },
       quantity: dto.quantity,
       serverTotalPrice: dto.totalPrice,
+      originalUnitPrice: dto.originalUnitPrice,
+      originalTotalPrice: dto.originalTotalPrice,
     }
   } else {
     return {
@@ -62,6 +67,8 @@ const mapDtoToCartItem = (dto: CartItemDto): CartItem => {
       },
       quantity: dto.quantity,
       serverTotalPrice: dto.totalPrice,
+      originalUnitPrice: dto.originalUnitPrice,
+      originalTotalPrice: dto.originalTotalPrice,
     }
   }
 }
@@ -118,6 +125,9 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const getTotalPrice = (): number =>
     cartItems.reduce((total, item) => total + (item.serverTotalPrice ?? ((item.product.price ?? 0) * item.quantity)), 0)
 
+  const getTotalOriginalPrice = (): number =>
+    cartItems.reduce((total, item) => total + (item.originalTotalPrice ?? item.serverTotalPrice ?? ((item.product.price ?? 0) * item.quantity)), 0)
+
   const getTotalItems = (): number =>
     cartItems.reduce((total, item) => total + item.quantity, 0)
 
@@ -131,6 +141,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     updateQuantity,
     clearCart,
     getTotalPrice,
+    getTotalOriginalPrice,
     getTotalItems,
     isCartOpen,
     openCart,

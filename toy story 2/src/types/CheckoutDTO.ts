@@ -86,7 +86,8 @@ export interface DiscountDetailDto {
 }
 
 export interface CheckoutSummaryDto {
-    subTotal: number;
+    originalTotal: number;
+    subTotal?: number;
     totalDiscount: number;
     finalAmount: number;
     discounts: DiscountDetailDto[];

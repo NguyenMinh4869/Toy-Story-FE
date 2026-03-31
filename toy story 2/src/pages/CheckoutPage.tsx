@@ -13,7 +13,7 @@ import EmptyCart from "@/components/checkout/EmptyCart";
 
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
-  const { cartItems, getTotalPrice } = useCart();
+  const { cartItems, getTotalOriginalPrice } = useCart();
 
   const {
     formData,
@@ -66,7 +66,7 @@ const CheckoutPage: React.FC = () => {
           <div className="lg:col-span-1">
             <div className="sticky top-8 space-y-6">
               <OrderSummary
-                subtotal={getTotalPrice()}
+                subtotal={getTotalOriginalPrice()}
                 calculation={calculation}
                 isSubmitting={isSubmitting}
                 isCalculating={isCalculating}

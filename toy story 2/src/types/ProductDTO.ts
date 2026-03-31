@@ -22,6 +22,9 @@ export type ProductDTO = ViewProductDto & {
   storeAddress?: string
   storePhone?: string
   stock?: number
+  hasPromotion?: boolean
+  promotionName?: string
+  finalPrice?: number
 }
 
 // Note: CartItem is now in CartDTO.ts

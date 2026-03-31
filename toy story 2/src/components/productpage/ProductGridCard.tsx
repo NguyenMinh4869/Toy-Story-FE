@@ -1,11 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import type { ViewProductDto } from "../../types/ProductDTO";
+import type { ProductDTO } from "../../types/ProductDTO";
 import { formatPrice } from "../../utils/formatPrice";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/hooks/useAuth";
 interface ProductGridCardProps {
-  product: ViewProductDto;
+  product: ProductDTO;
   className?: string;
 }
 
@@ -19,6 +19,8 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({
   const productPrice = product.price ?? 0;
   const productName = product.name ?? "Unnamed Product";
   const productImage = product.imageUrl ?? PRODUCT_PLACEHOLDER;
+  const hasPromotion = product.hasPromotion ?? false;
+  const discountedPrice = hasPromotion ? (product.finalPrice ?? productPrice) : productPrice;
   const { addToCart } = useCart();
   const { user } = useAuth();
   const handleAddToCart = (e: React.MouseEvent): void => {
@@ -48,10 +50,15 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({
           {productName}
         </h3>
 
-        <div className="flex items-center gap-4 mb-4">
+        <div className="flex flex-col mb-4">
           <span className="font-tilt-warp text-[20px] text-[#ff0000]">
-            {formatPrice(productPrice)}
+            {formatPrice(discountedPrice)}
           </span>
+          {hasPromotion && (
+            <span className="text-gray-400 text-[14px] line-through">
+              {formatPrice(productPrice)}
+            </span>
+          )}
         </div>
         {user && (
           <div className="flex items-center gap-4">

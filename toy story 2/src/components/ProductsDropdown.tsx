@@ -18,7 +18,7 @@ import {
   Flame
 } from 'lucide-react'
 import type { ViewCategoryDto } from '../types/CategoryDTO'
-import type { ViewProductDto } from '../types/ProductDTO'
+import type { ProductDTO } from '../types/ProductDTO'
 
 const FEATURED_BG = "https://www.figma.com/api/mcp/asset/05b9a086-cba0-4da8-80e9-b1ff25c8c382"
 const PRODUCT_PLACEHOLDER = "https://www.figma.com/api/mcp/asset/1b629d68-a06d-4580-8dbe-46fefd9ce76a"
@@ -30,7 +30,7 @@ interface ProductsDropdownProps {
 
 export const ProductsDropdown: React.FC<ProductsDropdownProps> = ({ isOpen, onClose }) => {
   const [categories, setCategories] = useState<ViewCategoryDto[]>([])
-  const [featuredProducts, setFeaturedProducts] = useState<ViewProductDto[]>([])
+  const [featuredProducts, setFeaturedProducts] = useState<ProductDTO[]>([])
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -75,10 +75,7 @@ export const ProductsDropdown: React.FC<ProductsDropdownProps> = ({ isOpen, onCl
 
   if (!isOpen) return null
 
-  // Calculate original price (assuming 30% discount for demo)
-  const getOriginalPrice = (price: number) => {
-    return price / 0.7
-  }
+
 
   // Map category names to icons
   const getCategoryIcon = (name: string) => {
@@ -209,13 +206,15 @@ export const ProductsDropdown: React.FC<ProductsDropdownProps> = ({ isOpen, onCl
                   
                   {/* Price */}
                   <p className="font-unbounded text-[12px] text-[#ff0000] text-center mb-1">
-                    {formatPrice(product.price ?? 0)}
+                    {formatPrice(product.hasPromotion ? (product.finalPrice ?? product.price ?? 0) : (product.price ?? 0))}
                   </p>
                   
                   {/* Original Price */}
-                  <p className="font-unbounded text-[9px] text-[#725656] text-center line-through">
-                    {formatPrice(getOriginalPrice(product.price ?? 0))}
-                  </p>
+                  {product.hasPromotion ? (
+                    <p className="font-unbounded text-[9px] text-[#725656] text-center line-through">
+                      {formatPrice(product.price ?? 0)}
+                    </p>
+                  ) : null}
                 </Link>
               ))
             ) : (

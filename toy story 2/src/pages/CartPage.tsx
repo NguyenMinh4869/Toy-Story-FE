@@ -10,7 +10,8 @@ const CartPage: React.FC = () => {
         cartItems,
         removeFromCart,
         updateQuantity,
-        getTotalPrice
+        getTotalPrice,
+        getTotalOriginalPrice
     } = useCart()
     const navigate = useNavigate()
 
@@ -60,7 +61,16 @@ const CartPage: React.FC = () => {
                                 <h3 className="font-bold text-lg text-gray-900 line-clamp-1">
                                     {item.product.name}
                                 </h3>
-                                {item.serverTotalPrice !== undefined && item.serverTotalPrice < ((item.product.price ?? 0) * item.quantity) ? (
+                                {item.originalTotalPrice !== undefined && item.originalTotalPrice > (item.serverTotalPrice ?? 0) ? (
+                                    <div className="mb-2">
+                                        <p className="text-red-600 font-bold">
+                                            {formatPrice(item.serverTotalPrice ?? 0)}
+                                        </p>
+                                        <p className="text-gray-400 text-xs line-through mt-0.5">
+                                            {formatPrice(item.originalTotalPrice)}
+                                        </p>
+                                    </div>
+                                ) : item.serverTotalPrice !== undefined && item.serverTotalPrice < ((item.product.price ?? 0) * item.quantity) ? (
                                     <div className="mb-2">
                                         <p className="text-red-600 font-bold">
                                             {formatPrice(item.serverTotalPrice)}
@@ -126,8 +136,14 @@ const CartPage: React.FC = () => {
                             </div>
                             <div className="flex justify-between text-gray-600">
                                 <span>Tạm tính:</span>
-                                <span className="font-bold">{formatPrice(getTotalPrice())}</span>
+                                <span>{formatPrice(getTotalOriginalPrice())}</span>
                             </div>
+                            {getTotalOriginalPrice() > getTotalPrice() && (
+                                <div className="flex justify-between text-green-600 pb-2">
+                                    <span>Giảm giá:</span>
+                                    <span>-{formatPrice(getTotalOriginalPrice() - getTotalPrice())}</span>
+                                </div>
+                            )}
                             <div className="border-t border-dashed border-gray-200 pt-4 flex justify-between items-center text-xl">
                                 <span className="font-bold text-gray-900">Tổng cộng:</span>
                                 <span className="font-black text-red-600">{formatPrice(getTotalPrice())}</span>

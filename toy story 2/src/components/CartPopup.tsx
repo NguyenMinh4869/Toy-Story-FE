@@ -11,6 +11,7 @@ const CartPopup: React.FC = () => {
     removeFromCart,
     updateQuantity,
     getTotalPrice,
+    getTotalOriginalPrice,
     isCartOpen,
     closeCart,
   } = useCart();
@@ -109,9 +110,16 @@ const CartPopup: React.FC = () => {
                   <span className="font-red-hat text-[14px] text-[#ff2c2c]">
                     Tổng cộng
                   </span>
-                  <span className="font-tilt-warp text-[15px] text-red-600">
-                    {formatPrice(getTotalPrice())}
-                  </span>
+                  <div className="flex flex-col items-end">
+                    <span className="font-tilt-warp text-[15px] text-red-600">
+                      {formatPrice(getTotalPrice())}
+                    </span>
+                    {getTotalOriginalPrice() > getTotalPrice() && (
+                      <span className="text-gray-500 line-through text-xs mt-0.5">
+                        {formatPrice(getTotalOriginalPrice())}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 

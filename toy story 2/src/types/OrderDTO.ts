@@ -15,6 +15,9 @@ export interface ViewOrderDto {
   manuallyAssign: boolean;
   isDelivered: boolean;
   warehouseName?: string | null;
+  originalTotal?: number;
+  totalDiscount?: number;
+  finalAmount?: number;
 }
 
 
@@ -23,8 +26,10 @@ export interface OrderItemDto {
   productId: number;
   productName: string;
   unitPrice: number;
+  originalUnitPrice?: number;
   quantity: number;
   totalPrice: number;
+  totalOriginalPrice?: number;
   imageUrl?: string | null;
 }
 
@@ -58,4 +63,7 @@ export interface OrderDetailDto {
   isDelivered: boolean;
   items: OrderItemDto[];
   invoice?: ViewInvoiceDto | null;
+  originalTotal?: number;
+  totalDiscount?: number;
+  finalAmount?: number;
 }

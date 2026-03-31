@@ -59,13 +59,27 @@ const CartItemsList: React.FC<CartItemsListProps> = ({ items }) => {
               <p className="text-sm text-gray-500 mt-1">
                 Số lượng: {item.quantity}
               </p>
-              <div className="flex justify-between items-center mt-2">
-                <span className="text-red-600 font-semibold">
-                  {formatPrice(item.product.price)}
-                </span>
-                <span className="text-gray-500 text-sm">
-                  Thành tiền: {formatPrice(item.serverTotalPrice ?? (item.product.price * item.quantity))}
-                </span>
+              <div className="flex justify-between items-start mt-2">
+                <div className="flex flex-col">
+                  <span className="text-red-600 font-semibold">
+                    {formatPrice(item.product.price)}
+                  </span>
+                  {item.originalUnitPrice && item.originalUnitPrice > item.product.price ? (
+                    <span className="text-gray-400 text-xs line-through mt-0.5">
+                      {formatPrice(item.originalUnitPrice)}
+                    </span>
+                  ) : null}
+                </div>
+                <div className="flex flex-col text-right">
+                  <span className="text-gray-500 text-sm">
+                    Thành tiền: <span className="text-gray-900 font-medium">{formatPrice(item.serverTotalPrice ?? (item.product.price * item.quantity))}</span>
+                  </span>
+                  {item.originalTotalPrice && item.originalTotalPrice > (item.serverTotalPrice ?? 0) ? (
+                    <span className="text-gray-400 text-xs line-through mt-0.5">
+                      {formatPrice(item.originalTotalPrice)}
+                    </span>
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>

@@ -6,7 +6,9 @@ export interface CartItemDto {
     cartItemId: number;
     quantity: number;
     unitPrice: number;
+    originalUnitPrice: number;
     totalPrice: number;
+    originalTotalPrice: number;
 
     // Product properties
     productId?: number;
@@ -27,6 +29,7 @@ export interface CartDto {
     accountId: number;
     items: CartItemDto[];
     totalPrice: number;
+    originalTotalPrice: number;
     totalItems: number;
 }
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import type { ViewProductDto } from "../types/ProductDTO";
+import type { ProductDTO } from "../types/ProductDTO";
 import { formatPrice } from "../utils/formatPrice";
 import { PRODUCT_IMAGE_87 } from "../constants/imageAssets";
 import { ShoppingCart } from "lucide-react";
@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 import { cn } from "../lib/utils";
 
 interface ProductCardProps {
-  product: ViewProductDto;
+  product: ProductDTO;
   className?: string;
   style?: React.CSSProperties;
   discount?: number;
@@ -25,11 +25,15 @@ export const ProductCard = ({
   const productName = product.name ?? "Unnamed Product";
   const productImage = product.imageUrl ?? PRODUCT_IMAGE_87;
 
-  const hasDiscount = typeof discount === "number" && discount > 0;
-  const discountedPrice = hasDiscount
-    ? productPrice * (1 - discount / 100)
-    : productPrice;
+  const hasPromotion = product.hasPromotion || (typeof discount === "number" && discount > 0);
+  const discountedPrice = product.hasPromotion 
+    ? (product.finalPrice ?? productPrice) 
+    : (typeof discount === "number" && discount > 0 ? productPrice * (1 - discount / 100) : productPrice);
   const originalPrice = productPrice;
+  
+  const discountPercent = product.hasPromotion && originalPrice > 0 
+    ? Math.round((1 - discountedPrice / originalPrice) * 100)
+    : discount;
 
   const handleCardClick = () => {
     navigate(`/product/${product.productId}`);
@@ -51,10 +55,10 @@ export const ProductCard = ({
       style={style}
     >
       {/* Discount Badge */}
-      {hasDiscount && (
-        <div className="absolute top-6 right-6 z-20 overflow-hidden rounded-xl">
-           <div className="bg-red-600 text-white px-3 py-1.5 text-[11px] font-bold font-archivo tracking-tight shadow-md">
-            -{discount}%
+      {hasPromotion && (
+        <div className="absolute top-6 right-6 z-20 flex flex-col gap-1 items-end overflow-hidden rounded-xl">
+           <div className="bg-red-600 text-white px-3 py-1.5 text-[11px] font-bold font-archivo tracking-tight shadow-md rounded-lg">
+            {product.promotionName ? product.promotionName : `-${discountPercent}%`}
           </div>
         </div>
       )}
@@ -85,7 +89,7 @@ export const ProductCard = ({
             <span className="text-red-600 font-tilt-warp text-2xl leading-none tracking-tight">
               {formatPrice(discountedPrice)}
             </span>
-            {hasDiscount && (
+            {hasPromotion && (
               <span className="text-gray-400 text-[13px] line-through mt-1">
                 {formatPrice(originalPrice)}
               </span>
