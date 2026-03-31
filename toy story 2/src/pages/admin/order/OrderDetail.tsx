@@ -182,10 +182,18 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onClose, onRefresh }) 
                           <p className="truncate text-[11px] font-bold text-slate-900">{item.productName}</p>
                           <p className="mt-0.5 text-[10px] text-slate-500">SL: {item.quantity}</p>
                         </div>
-                        <p className="text-right text-[11px] font-black text-rose-600">{formatPrice(item.totalPrice)}</p>
+                        <div className="text-right">
+                          <p className="text-[11px] font-black text-rose-600">{formatPrice(item.totalPrice)}</p>
+                          {item.totalOriginalPrice && item.totalOriginalPrice > item.totalPrice ? (
+                            <p className="text-[9px] font-medium text-slate-400 line-through mt-0.5">{formatPrice(item.totalOriginalPrice)}</p>
+                          ) : null}
+                        </div>
                       </div>
                       <div className="mt-1.5 flex flex-wrap gap-1.5 text-[9px] text-slate-500">
                         <span className="rounded-full bg-slate-100 px-2 py-0.5">ĐG: {formatPrice(item.unitPrice)}</span>
+                        {item.originalUnitPrice && item.originalUnitPrice > item.unitPrice ? (
+                          <span className="rounded-full bg-slate-100 px-2 py-0.5 line-through decoration-slate-400 text-slate-400">Gốc: {formatPrice(item.originalUnitPrice)}</span>
+                        ) : null}
                         <span className="rounded-full bg-slate-100 px-2 py-0.5">Tổng: {formatPrice(item.totalPrice)}</span>
                       </div>
                     </div>
@@ -224,8 +232,13 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ order, onClose, onRefresh }) 
 
         <div className="flex items-center justify-between gap-4 border-t border-slate-200 bg-white px-4 py-3.5">
           <div>
-            <p className="text-xs text-slate-500">Tổng cộng</p>
-            <p className="text-xl font-black text-rose-600">{formatPrice(order.totalAmount)}</p>
+            <p className="text-xs text-slate-500">Tổng cộng {order.totalDiscount ? '(sau giảm giá)' : ''}</p>
+            <p className="text-xl font-black text-rose-600">{formatPrice(order.finalAmount ?? order.totalAmount ?? 0)}</p>
+            {order.totalDiscount ? (
+              <p className="text-[11px] text-emerald-600 font-semibold mt-0.5">
+                Đã giảm: {formatPrice(order.totalDiscount)}
+              </p>
+            ) : null}
           </div>
 
           {order.isDelivered && user?.role === 'Staff' && (

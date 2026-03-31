@@ -76,7 +76,7 @@ const PendingOrders = () => {
                             </div>
                             <div className="text-right">
                                 <p className="text-lg font-semibold text-primary">
-                                    {order.totalAmount.toLocaleString('vi-VN')}₫
+                                    {(order.finalAmount ?? order.totalAmount ?? 0).toLocaleString('vi-VN')}₫
                                 </p>
                             </div>
                         </div>

@@ -41,7 +41,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onClick, onViewHistory }) 
             Tổng tiền
           </p>
           <div className="text-xl font-black text-red-600">
-            {formatPrice(order.totalAmount)}
+            {formatPrice(order.finalAmount ?? order.totalAmount ?? 0)}
           </div>
         </div>
       </div>

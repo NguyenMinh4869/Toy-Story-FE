@@ -101,7 +101,7 @@ const OrderPage: React.FC = () => {
                                     <div className="flex items-center justify-between">
                                         <StatusBadge status={order.status} />
                                         <div className="text-xl font-extrabold tracking-tight text-red-600">
-                                            {formatPrice(order.totalAmount)}
+                                            {formatPrice(order.finalAmount ?? order.totalAmount ?? 0)}
                                         </div>
                                     </div>
                                 </div>
