@@ -16,22 +16,19 @@ export const findBestPromotion = (
   product: ProductDTO,
   promotions: ViewPromotionDto[]
 ): PromotionInfo => {
-  // If product already has promotion info from API, use it (it's most accurate for name/price)
-  if (product.hasPromotion && (product.finalPrice || product.promotionName)) {
-    const discountValue = product.price && product.finalPrice 
-      ? Math.round((1 - product.finalPrice / product.price) * 100)
-      : 0;
-    
-    return {
-      discountValue,
-      promotionName: product.promotionName || 'Giảm Giá',
-      label: product.promotionName || 'Giảm Giá',
-      hasPromotion: true,
-      promotionType: 'api'
-    };
-  }
-
   if (!promotions || promotions.length === 0) {
+    if (product.hasPromotion && (product.finalPrice || product.promotionName)) {
+      const discountValue = product.price && product.finalPrice 
+        ? Math.round((1 - product.finalPrice / product.price) * 100)
+        : 0;
+      return {
+        discountValue,
+        promotionName: product.promotionName || 'Khuyến Mãi',
+        label: product.promotionName || 'Khuyến Mãi',
+        hasPromotion: true,
+        promotionType: 'api'
+      };
+    }
     return { discountValue: 0, promotionName: '', label: '', hasPromotion: false, promotionType: 'none' };
   }
 
@@ -52,16 +49,26 @@ export const findBestPromotion = (
     return !p.productId && !p.categoryId && !p.brandId;
   });
 
-  if (applicablePromos.length === 0) {
-    return { discountValue: 0, promotionName: '', label: '', hasPromotion: false, promotionType: 'none' };
-  }
-
   // Find the highest percentage discount
   const bestPromo = applicablePromos
     .filter(p => p.discountType === 0) // type 0 is percentage
     .sort((a, b) => (b.discountValue ?? 0) - (a.discountValue ?? 0))[0];
 
   if (!bestPromo) {
+    // Ưu tiên sử dụng giá đã được tính sẵn từ backend nếu frontend không tự map được
+    if (product.hasPromotion && (product.finalPrice || product.promotionName)) {
+      const discountValue = product.price && product.finalPrice 
+        ? Math.round((1 - product.finalPrice / product.price) * 100)
+        : 0;
+      
+      return {
+        discountValue,
+        promotionName: product.promotionName || 'Khuyến Mãi',
+        label: product.promotionName || 'Khuyến Mãi',
+        hasPromotion: true,
+        promotionType: 'api'
+      };
+    }
     return { discountValue: 0, promotionName: '', label: '', hasPromotion: false, promotionType: 'none' };
   }
 
