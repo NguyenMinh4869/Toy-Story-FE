@@ -8,7 +8,7 @@ import {
   RotateCcw,
   Minus,
   Plus,
-  Star
+  Star,
 } from "lucide-react";
 import type { ProductDTO } from "../types/ProductDTO";
 import { formatPrice } from "../utils/formatPrice";
@@ -20,6 +20,7 @@ import { cn } from "../lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { getPromotionsCustomerFilter } from "../services/promotionService";
 import { useToast } from "../hooks/useToast";
+import { Tag } from "lucide-react";
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<ProductDTO | null>(null);
@@ -27,6 +28,7 @@ const ProductDetail: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
+  const [bestPromoName, setBestPromoName] = useState<string | null>(null);
   const { addToCart } = useCart();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -44,26 +46,32 @@ const ProductDetail: React.FC = () => {
         setError(null);
         const data = await getProductById(productId);
         let appliedDiscount = 0;
+        let promotionName: string | null = null;
         try {
           const promos = await getPromotionsCustomerFilter();
+          // Filter: promotion áp dụng cho sản phẩm nếu:
+          //   1. isActive = true
+          //   2. productId khớp, HOẶC categoryId khớp, HOẶC brandId khớp, HOẶC không giới hạn gì cả
           const applicablePromos = promos.filter(p => {
             if (!p.isActive) return false;
-            // Does it target productId?
-            if (p.productId && p.productId === data.productId) return true;
-            if (p.productId && p.productId !== data.productId) return false;
-            // It targets category?
-            if (p.categoryId && p.categoryId === data.categoryId) return true;
-            if (p.categoryId && p.categoryId !== data.categoryId) return false;
-            // It targets brand?
-            if (p.brandId && p.brandId === data.brandId) return true;
-            if (p.brandId && p.brandId !== data.brandId) return false;
-            // targets all
+            const hasProductScope = p.productId != null;
+            const hasCategoryScope = p.categoryId != null;
+            const hasBrandScope = p.brandId != null;
+            // Nếu chỉ định productId cụ thể → phải khớp
+            if (hasProductScope) return p.productId === data.productId;
+            // Nếu chỉ định categoryId → phải khớp
+            if (hasCategoryScope) return p.categoryId === data.categoryId;
+            // Nếu chỉ định brandId → phải khớp
+            if (hasBrandScope) return p.brandId === data.brandId;
+            // Không giới hạn phạm vi → áp dụng tất cả
             return true;
           });
+          // Ưu tiên promotion % (type = 0), lấy cái có discountValue cao nhất
           const bestPromo = applicablePromos
             .filter((p) => p.discountType === 0)
             .sort((a, b) => (b.discountValue ?? 0) - (a.discountValue ?? 0))[0];
           appliedDiscount = bestPromo?.discountValue ?? 0;
+          promotionName = bestPromo?.name ?? null;
         } catch { }
 
         const originalPrice = data.price ?? 0;
@@ -75,8 +83,11 @@ const ProductDetail: React.FC = () => {
           images: data.imageUrl ? [data.imageUrl] : [],
           price: currentPrice,
           originalPrice: originalPrice,
-          discount: appliedDiscount
+          discount: appliedDiscount,
+          hasPromotion: appliedDiscount > 0,
+          promotionName: promotionName ?? undefined,
         };
+        setBestPromoName(promotionName);
         setProduct(mapped);
       } catch (err) {
         console.error("Error fetching product:", err);
@@ -252,9 +263,17 @@ const ProductDetail: React.FC = () => {
                 )}
               </div>
               {hasDiscount && (
-                <div className="flex items-center gap-2 text-red-600 font-bold text-sm">
-                  <ShieldCheck className="w-4 h-4" />
-                  <span>Tiết kiệm: {formatPrice(((product.originalPrice ?? 0) - (product.price ?? 0)) * quantity)}</span>
+                <div className="flex flex-col gap-2 mt-2">
+                  <div className="flex items-center gap-2 text-red-600 font-bold text-sm">
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>Tiết kiệm: {formatPrice(((product.originalPrice ?? 0) - (product.price ?? 0)) * quantity)}</span>
+                  </div>
+                  {bestPromoName && (
+                    <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-1.5">
+                      <Tag className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                      <span className="text-red-600 text-xs font-bold tracking-wide">{bestPromoName}</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
