@@ -115,21 +115,32 @@ export const CamNangDetailPage = (): React.JSX.Element => {
                         </form>
                     </div>
 
-                    {/* Category List */}
-                    <div className="bg-white p-7 rounded-[40px] border border-gray-100 shadow-sm">
-                        <p className="text-[#ab0007] text-[11px] font-black mb-7 uppercase tracking-widest border-b border-red-100 pb-3">
+                    {/* Category List - match CamNangPage style */}
+                    <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm">
+                        <p className="text-[#ab0007] text-[11px] font-black mb-6 uppercase tracking-widest border-b border-red-100 pb-2">
                             Danh mục bài viết
                         </p>
                         <div className="space-y-1">
-                        {categories.map((cat) => (
+                          <Link
+                            to={ROUTES.CAM_NANG}
+                            className="block py-3 px-4 rounded-xl text-[13px] text-gray-600 hover:bg-gray-50 font-medium transition-all"
+                          >
+                            Tất cả bài viết
+                          </Link>
+
+                          {categories.map((cat) => (
                             <Link
-                                key={cat.articleCategoryId}
-                                to={`${ROUTES.CAM_NANG}?category=${encodeURIComponent(cat.name)}`}
-                                className={`block py-3.5 px-5 rounded-2xl text-[14px] transition-all ${cat.articleCategoryId === article.articleCategoryId ? "bg-red-50 text-red-600 font-black shadow-sm" : "text-gray-600 hover:bg-gray-50 font-medium"}`}
+                              key={cat.articleCategoryId}
+                              to={`${ROUTES.CAM_NANG}?category=${encodeURIComponent(cat.name)}`}
+                              className={`block py-3 px-4 rounded-xl text-[13px] transition-all ${
+                                cat.articleCategoryId === article.articleCategoryId
+                                  ? "bg-red-50 text-red-600 font-bold shadow-sm"
+                                  : "text-gray-600 hover:bg-gray-50 font-medium"
+                              }`}
                             >
-                                {cat.name}
+                              {cat.name}
                             </Link>
-                        ))}
+                          ))}
                         </div>
                     </div>
 
@@ -155,7 +166,7 @@ export const CamNangDetailPage = (): React.JSX.Element => {
                     </div>
                 </div>
 
-                <h1 className="text-4xl md:text-6xl font-black text-[#20147b] uppercase italic leading-[1.05] mb-10 tracking-tighter">
+                <h1 className="text-3xl md:text-5xl font-bold text-[#20147b] leading-[1.1] mb-8 tracking-tight">
                   {article.title}
                 </h1>
 
@@ -166,7 +177,7 @@ export const CamNangDetailPage = (): React.JSX.Element => {
                       </div>
                       <div className="flex flex-col">
                         <span className="text-gray-400 text-[10px] uppercase font-black tracking-widest leading-none mb-1">Được viết bởi</span>
-                        <span className="text-gray-900 text-[16px] font-black">{article.authorName}</span>
+                        <span className="text-gray-900 text-[14px] font-semibold">{article.authorName}</span>
                       </div>
                    </div>
                    
@@ -192,12 +203,12 @@ export const CamNangDetailPage = (): React.JSX.Element => {
               </div>
 
               {/* Reading Content */}
-              <div className="article-content rich-text font-medium text-gray-800 leading-[1.85] text-[19px]">
-                <div className="bg-gradient-to-br from-red-50 to-white p-12 rounded-[56px] mb-16 italic border-l-[16px] border-red-500 text-red-950 shadow-inner relative overflow-hidden">
-                    <p className="relative z-10 text-[22px] font-black leading-relaxed">"{article.shortDescription}"</p>
+              <div className="article-content rich-text font-normal text-gray-800 leading-[1.7] text-[16px]">
+                <div className="bg-gradient-to-br from-red-50 to-white p-10 rounded-[56px] mb-12 border-l-[16px] border-red-500 text-red-950 shadow-inner relative overflow-hidden">
+                    <p className="relative z-10 text-[18px] font-bold leading-relaxed">"{article.shortDescription}"</p>
                 </div>
 
-                <div className="prose prose-xl max-w-none prose-headings:font-black prose-headings:uppercase prose-headings:italic prose-headings:text-[#20147b] prose-p:mb-8 prose-img:rounded-[40px] prose-img:shadow-2xl prose-img:border-4 prose-img:border-white prose-blockquote:border-red-500 prose-blockquote:bg-gray-50 prose-blockquote:p-6 prose-blockquote:rounded-3xl">
+                <div className="prose prose-lg max-w-none prose-headings:font-bold prose-headings:normal-case prose-headings:text-[#20147b] prose-p:mb-5 prose-img:rounded-[32px] prose-img:shadow-lg prose-img:border-2 prose-img:border-white prose-blockquote:border-red-500 prose-blockquote:bg-gray-50 prose-blockquote:p-5 prose-blockquote:rounded-3xl">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {article.content}
                   </ReactMarkdown>
@@ -207,7 +218,7 @@ export const CamNangDetailPage = (): React.JSX.Element => {
               {/* Suggested Content */}
               <footer className="mt-32 pt-20 border-t border-gray-100">
                 <div className="flex items-center justify-between mb-16">
-                    <h3 className="text-4xl font-black text-[#20147b] uppercase italic tracking-tighter decoration-red-500 underline underline-offset-[12px] decoration-4">Bài viết liên quan</h3>
+                    <h3 className="text-2xl font-bold text-[#20147b] tracking-tight decoration-red-500 underline underline-offset-[10px] decoration-4">Bài viết liên quan</h3>
                     <Link to={ROUTES.CAM_NANG} className="text-sm font-black text-gray-400 uppercase tracking-widest hover:text-red-500 transition-colors">Xem tất cả →</Link>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -218,7 +229,7 @@ export const CamNangDetailPage = (): React.JSX.Element => {
                         </div>
                         <div className="flex flex-col flex-1">
                             <span className="text-[11px] font-black text-red-500 uppercase mb-2 tracking-[0.2em]">{ra.categoryName || "Cẩm nang"}</span>
-                            <h4 className="font-black text-[#20147b] text-[18px] line-clamp-2 leading-tight group-hover:text-red-600 transition-colors uppercase italic tracking-tight">{ra.title}</h4>
+                            <h4 className="font-bold text-[#20147b] text-[18px] line-clamp-2 leading-tight group-hover:text-red-600 transition-colors tracking-tight">{ra.title}</h4>
                         </div>
                      </Link>
                   ))}
