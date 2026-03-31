@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { getPromotionsCustomerFilter } from "../services/promotionService";
+import { findBestPromotion } from "../utils/promotionUtils";
 import { useToast } from "../hooks/useToast";
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -42,40 +43,40 @@ const ProductDetail: React.FC = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const data = await getProductById(productId);
-        let appliedDiscount = 0;
-        try {
-          const promos = await getPromotionsCustomerFilter();
-          const applicablePromos = promos.filter(p => {
-            if (!p.isActive) return false;
-            // Does it target productId?
-            if (p.productId && p.productId === data.productId) return true;
-            if (p.productId && p.productId !== data.productId) return false;
-            // It targets category?
-            if (p.categoryId && p.categoryId === data.categoryId) return true;
-            if (p.categoryId && p.categoryId !== data.categoryId) return false;
-            // It targets brand?
-            if (p.brandId && p.brandId === data.brandId) return true;
-            if (p.brandId && p.brandId !== data.brandId) return false;
-            // targets all
-            return true;
-          });
-          const bestPromo = applicablePromos
-            .filter((p) => p.discountType === 0)
-            .sort((a, b) => (b.discountValue ?? 0) - (a.discountValue ?? 0))[0];
-          appliedDiscount = bestPromo?.discountValue ?? 0;
-        } catch { }
+        const [productData, promos] = await Promise.all([
+          getProductById(productId),
+          getPromotionsCustomerFilter({ discountType: 0 })
+        ]);
 
-        const originalPrice = data.price ?? 0;
-        const currentPrice = appliedDiscount > 0 ? originalPrice * (1 - appliedDiscount / 100) : originalPrice;
+        const promoInfo = findBestPromotion(productData, promos);
+        
+        // Final Price choice: 
+        // 1. prefer API finalPrice
+        // 2. fallback to manual calculation from matching promotion
+        // 3. fallback to current price
+        const originalPrice = productData.price ?? 0;
+        let finalPrice = productData.hasPromotion ? (productData.finalPrice ?? originalPrice) : originalPrice;
+        let promotionName = productData.promotionName || '';
+        let hasPromotion = productData.hasPromotion ?? false;
+
+        // Ensure we show the best label (brand/category) if it's a targeted promotion
+        if (promoInfo.hasPromotion) {
+          hasPromotion = true;
+          promotionName = promoInfo.label;
+          // Apply discount if not already applied by API
+          if (finalPrice === originalPrice && promoInfo.discountValue > 0) {
+            finalPrice = originalPrice * (1 - promoInfo.discountValue / 100);
+          }
+        }
 
         const mapped: ProductDTO = {
-          ...data,
-          id: String(data.productId ?? id),
-          images: data.imageUrl ? [data.imageUrl] : [],
-          price: currentPrice,
+          ...productData,
+          id: String(productData.productId ?? id),
+          images: productData.imageUrl ? [productData.imageUrl] : [],
+          price: finalPrice,
           originalPrice: originalPrice,
-          discount: appliedDiscount
+          hasPromotion,
+          promotionName
         };
         setProduct(mapped);
       } catch (err) {
