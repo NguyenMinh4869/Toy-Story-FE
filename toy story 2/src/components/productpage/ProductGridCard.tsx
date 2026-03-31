@@ -35,6 +35,13 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({
       className={`block bg-white border border-[#5a5050]/20 rounded-[17px] overflow-hidden hover:shadow-lg transition-shadow no-underline ${className}`}
     >
       <div className="relative flex justify-center items-center pt-5 pb-4">
+        {hasPromotion && (
+          <div className="absolute top-4 right-4 z-10 flex flex-col items-end gap-1">
+            <div className="bg-[#e41e31] text-white text-[12px] font-bold py-1 px-2.5 rounded-full shadow-sm">
+              {product.promotionName || (product.finalPrice && product.price ? `-${Math.round((1 - product.finalPrice/product.price) * 100)}%` : 'GIẢM GIÁ')}
+            </div>
+          </div>
+        )}
         <img
           src={productImage}
           alt={productName}

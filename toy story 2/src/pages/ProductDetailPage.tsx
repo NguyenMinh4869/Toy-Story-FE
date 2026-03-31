@@ -9,6 +9,7 @@ import {
   Minus,
   Plus,
   Star,
+  Tag,
 } from "lucide-react";
 import type { ProductDTO } from "../types/ProductDTO";
 import { formatPrice } from "../utils/formatPrice";
@@ -19,8 +20,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { getPromotionsCustomerFilter } from "../services/promotionService";
+import { findBestPromotion } from "../utils/promotionUtils";
 import { useToast } from "../hooks/useToast";
-import { Tag } from "lucide-react";
+
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<ProductDTO | null>(null);
@@ -32,6 +34,7 @@ const ProductDetail: React.FC = () => {
   const { addToCart } = useCart();
   const { user } = useAuth();
   const { toast } = useToast();
+
   useEffect(() => {
     if (!id) return;
     const productId = Number(id);
@@ -44,50 +47,37 @@ const ProductDetail: React.FC = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const data = await getProductById(productId);
-        let appliedDiscount = 0;
-        let promotionName: string | null = null;
-        try {
-          const promos = await getPromotionsCustomerFilter();
-          // Filter: promotion áp dụng cho sản phẩm nếu:
-          //   1. isActive = true
-          //   2. productId khớp, HOẶC categoryId khớp, HOẶC brandId khớp, HOẶC không giới hạn gì cả
-          const applicablePromos = promos.filter(p => {
-            if (!p.isActive) return false;
-            const hasProductScope = p.productId != null;
-            const hasCategoryScope = p.categoryId != null;
-            const hasBrandScope = p.brandId != null;
-            // Nếu chỉ định productId cụ thể → phải khớp
-            if (hasProductScope) return p.productId === data.productId;
-            // Nếu chỉ định categoryId → phải khớp
-            if (hasCategoryScope) return p.categoryId === data.categoryId;
-            // Nếu chỉ định brandId → phải khớp
-            if (hasBrandScope) return p.brandId === data.brandId;
-            // Không giới hạn phạm vi → áp dụng tất cả
-            return true;
-          });
-          // Ưu tiên promotion % (type = 0), lấy cái có discountValue cao nhất
-          const bestPromo = applicablePromos
-            .filter((p) => p.discountType === 0)
-            .sort((a, b) => (b.discountValue ?? 0) - (a.discountValue ?? 0))[0];
-          appliedDiscount = bestPromo?.discountValue ?? 0;
-          promotionName = bestPromo?.name ?? null;
-        } catch { }
 
-        const originalPrice = data.price ?? 0;
-        const currentPrice = appliedDiscount > 0 ? originalPrice * (1 - appliedDiscount / 100) : originalPrice;
+        const [productData, promos] = await Promise.all([
+          getProductById(productId),
+          getPromotionsCustomerFilter({ discountType: 0 })
+        ]);
+
+        const promoInfo = findBestPromotion(productData, promos);
+
+        const originalPrice = productData.price ?? 0;
+        let finalPrice = productData.hasPromotion ? (productData.finalPrice ?? originalPrice) : originalPrice;
+        let promotionName = productData.promotionName || '';
+        let hasPromotion = productData.hasPromotion ?? false;
+
+        if (promoInfo.hasPromotion) {
+          hasPromotion = true;
+          promotionName = promoInfo.label;
+          if (finalPrice === originalPrice && promoInfo.discountValue > 0) {
+            finalPrice = originalPrice * (1 - promoInfo.discountValue / 100);
+          }
+        }
 
         const mapped: ProductDTO = {
-          ...data,
-          id: String(data.productId ?? id),
-          images: data.imageUrl ? [data.imageUrl] : [],
-          price: currentPrice,
+          ...productData,
+          id: String(productData.productId ?? id),
+          images: productData.imageUrl ? [productData.imageUrl] : [],
+          price: finalPrice,
           originalPrice: originalPrice,
-          discount: appliedDiscount,
-          hasPromotion: appliedDiscount > 0,
-          promotionName: promotionName ?? undefined,
+          hasPromotion,
+          promotionName
         };
-        setBestPromoName(promotionName);
+        setBestPromoName(promotionName || null);
         setProduct(mapped);
       } catch (err) {
         console.error("Error fetching product:", err);
@@ -300,7 +290,7 @@ const ProductDetail: React.FC = () => {
               </div>
             </div>
 
-            < div className="flex flex-col gap-6 mb-12">
+            <div className="flex flex-col gap-6 mb-12">
               <div className="flex items-center justify-between px-2">
                 <span className="font-tilt-warp text-gray-900 uppercase tracking-wide">Số lượng</span>
                 <div className="flex items-center bg-gray-100 rounded-2xl p-1 shadow-inner">
@@ -332,6 +322,7 @@ const ProductDetail: React.FC = () => {
                 </motion.button>
               </div>
             </div>
+
             {/* Product Meta Stats */}
             <div className="border-t border-gray-100 pt-8 flex items-center justify-around text-gray-400 text-xs font-medium">
               <div className="flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> Chính hãng 100%</div>
@@ -380,7 +371,7 @@ const ProductDetail: React.FC = () => {
               ))}
             </div>
 
-            {/* Description Graphic Placeholder */}
+            {/* Description Graphic */}
             <div className="mt-12 w-full aspect-[21/9] bg-gradient-to-br from-red-50 to-orange-50 rounded-[3rem] border border-red-100 flex items-center justify-center relative overflow-hidden group">
               <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_20%_20%,#a70001_0%,transparent_50%)]" />
               <motion.div
@@ -397,8 +388,8 @@ const ProductDetail: React.FC = () => {
           </div>
 
         </div>
-      </main >
-    </div >
+      </main>
+    </div>
   );
 };
 

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { getPromotionsCustomerFilter } from "../services/promotionService";
-import { filterProducts } from "../services/productService";
+import { filterProducts, getProductById } from "../services/productService";
 import { BreadcrumbHeader } from "../components/BreadcrumbHeader";
 import { ProductCard } from "../components/ProductCard";
 import { NavigationButton } from "../components/homepage/NavigationButton";
 import type { ViewPromotionDto } from "../types/PromotionDTO";
-import type { ViewProductDto } from "../types/ProductDTO";
+import type { ProductDTO } from "../types/ProductDTO";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Gift, Sparkles, Timer, ChevronRight, ShoppingBag } from "lucide-react";
@@ -13,7 +13,7 @@ import { Gift, Sparkles, Timer, ChevronRight, ShoppingBag } from "lucide-react";
 const PromotionPage: React.FC = () => {
   const [promotions, setPromotions] = useState<ViewPromotionDto[]>([]);
   const [productsByPromo, setProductsByPromo] = useState<
-    Record<number, ViewProductDto[]>
+    Record<number, ProductDTO[]>
   >({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,20 +28,24 @@ const PromotionPage: React.FC = () => {
         const promos = await getPromotionsCustomerFilter();
         setPromotions(promos);
 
-        const productFetches = promos.slice(1).map(async (promo) => {
+        const productFetches = promos.map(async (promo) => {
           try {
-            let products: ViewProductDto[] = [];
-            const filter: any = {};
-
+            let products: ProductDTO[] = [];
             if (promo.productId) {
-              filter.productId = promo.productId;
+              const product = await getProductById(promo.productId);
+              if (product) {
+                products = [product];
+              }
             } else {
+              const filter: any = {};
               if (promo.categoryId) filter.categoryId = promo.categoryId;
               if (promo.brandId) filter.brandId = promo.brandId;
-            }
 
-            if (Object.keys(filter).length > 0) {
-              products = await filterProducts(filter);
+              if (Object.keys(filter).length > 0) {
+                products = await filterProducts(filter);
+              } else {
+                products = await filterProducts({});
+              }
             }
 
             return {
@@ -57,7 +61,7 @@ const PromotionPage: React.FC = () => {
         });
 
         const results = await Promise.all(productFetches);
-        const map: Record<number, ViewProductDto[]> = {};
+        const map: Record<number, ProductDTO[]> = {};
         results.forEach(({ promoId, products }) => {
           map[promoId!] = products;
         });
@@ -78,7 +82,7 @@ const PromotionPage: React.FC = () => {
   );
 
   const BannerSkeleton = () => (
-    <div className="w-full h-[300px] md:h-[280px] bg-gray-200 animate-pulse rounded-[2rem] border border-gray-100" />
+    <div className="w-full h-[200px] md:h-[280px] bg-gray-200 animate-pulse rounded-[2rem] border border-gray-100" />
   );
 
   if (error) {
@@ -106,7 +110,7 @@ const PromotionPage: React.FC = () => {
       <BreadcrumbHeader items={[{ label: "Khuyến mãi" }]} />
 
       <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 md:px-8 py-12 relative z-10">
-        {/* Hero Banner Section */}
+        {/* Hero Banner Section — hiển thị promotion đầu tiên */}
         <section className="mb-8">
           {loading ? (
             <BannerSkeleton />
@@ -147,7 +151,7 @@ const PromotionPage: React.FC = () => {
               </div>
             ))
           ) : (
-            promotions.slice(1).map((promo, index) => {
+            promotions.map((promo, index) => {
               const products = productsByPromo[promo.promotionId!] || [];
               const discountPercentage = promo.discountType === 0 ? (promo.discountValue ?? 0) : 0;
 
@@ -170,8 +174,10 @@ const PromotionPage: React.FC = () => {
                     >
                       <Gift className="w-8 h-8 text-red-600" />
                     </motion.div>
-                    <h2 className="font-['Rowdies',sans-serif] text-3xl md:text-5xl text-red-700 text-center tracking-tight mb-3">
-                      {promo.name}
+                    <h2 className="font-['Rowdies',sans-serif] text-3xl md:text-5xl text-[#a70001] text-center tracking-tight mb-3">
+                      {promo.brandId && products[0]?.brandName
+                        ? products[0].brandName
+                        : (promo.categoryId && products[0]?.categoryName ? products[0].categoryName : promo.name)}
                     </h2>
                     <div className="w-24 h-1.5 bg-gradient-to-r from-transparent via-red-300 to-transparent rounded-full" />
                   </div>
@@ -181,26 +187,26 @@ const PromotionPage: React.FC = () => {
                     <div className="space-y-6">
                       <motion.div
                         whileHover={{ y: -10 }}
-                        className="bg-white rounded-[2.5rem] p-6 border border-gray-100 shadow-xl overflow-hidden relative group"
+                        className="bg-white rounded-[2.5rem] p-6 border border-gray-200 shadow-xl overflow-hidden relative group"
                       >
                         <div className="absolute -top-10 -right-10 w-32 h-32 bg-red-100 rounded-full blur-3xl group-hover:bg-red-200 transition-colors" />
 
                         <img
                           src={promo.imageUrl!}
                           alt={promo.name || ""}
-                          className="w-full h-48 object-cover rounded-2xl mb-6 shadow-lg transform transition-transform group-hover:scale-105"
+                          className="w-full h-48 object-cover rounded-2xl mb-6 shadow-md transform transition-transform group-hover:scale-105"
                         />
 
                         <div className="space-y-4">
-                          <div className="flex items-center gap-3 text-gray-600">
-                            <Timer className="w-5 h-5 text-red-500" />
-                            <span className="text-sm font-medium text-gray-700">Thời gian có hạn</span>
+                          <div className="flex items-center gap-3 text-gray-700">
+                            <Timer className="w-5 h-5 text-[#a70001]" />
+                            <span className="text-sm font-bold">Thời gian có hạn</span>
                           </div>
                           <p className="text-gray-600 text-sm leading-relaxed">
                             {promo.description || "Khám phá ngay bộ sưu tập đồ chơi chất lượng với giá ưu đãi cực hấp dẫn chỉ có tại Toy Story."}
                           </p>
                           {discountPercentage > 0 && (
-                            <div className="inline-block px-4 py-2 bg-red-600 text-white rounded-xl font-bold text-lg shadow-md">
+                            <div className="inline-block px-4 py-2 bg-[#a70001] text-white rounded-xl font-bold text-lg shadow-md">
                               Giảm tới {discountPercentage}%
                             </div>
                           )}
