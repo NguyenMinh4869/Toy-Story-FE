@@ -37,19 +37,23 @@ const Header: React.FC<HeaderProps> = ({ mode }) => {
   }, [displayName]);
 
   useEffect(() => {
+    if (isAdminMode) {
+      setWarehouse(null);
+      return;
+    }
+
     const fetchWarehouse = async () => {
       try {
-        const warehouse = await getSimpleWarehouseById();
-        if (warehouse) {
-          setWarehouse(warehouse!);
-        }
+        const detail = await getSimpleWarehouseById();
+        setWarehouse(detail);
       } catch (error) {
         console.error('Error fetching warehouse:', error);
+        setWarehouse(null);
       }
     };
 
     fetchWarehouse();
-  }, []);
+  }, [isAdminMode]);
 
   // Close dropdown when clicking outside
   useEffect(() => {

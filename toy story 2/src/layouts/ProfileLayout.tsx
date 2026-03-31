@@ -22,12 +22,6 @@ const ProfileLayout: React.FC<ProfileLayoutProps> = ({ children }) => {
       exact: true
     },
     {
-      path: '/profile/invoices',
-      label: 'Hóa đơn',
-      icon: ShoppingBag
-    },
-
-    {
       path: '/profile/orders',
       label: 'Lịch sử mua hàng',
       icon: ShoppingBag
