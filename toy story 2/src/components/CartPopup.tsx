@@ -38,7 +38,7 @@ const CartPopup: React.FC = () => {
           <X size={18} className="text-black" />
         </button>
 
-        <div className="p-5">
+        <div className="p-5 pt-12">
           {/* Cart Items List */}
           {cartItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
@@ -55,45 +55,56 @@ const CartPopup: React.FC = () => {
                   className="mb-4"
                 >
                   {/* Product Info */}
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 items-center">
                     <img
                       src={item.product.imageUrl ?? ""}
                       alt={item.product.name ?? "Product"}
-                      className="w-[88px] h-[88px] rounded-xl object-cover flex-shrink-0"
+                      className="w-[72px] h-[72px] rounded-xl object-cover flex-shrink-0 border border-gray-100"
                     />
 
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-red-hat text-[14px] text-black leading-tight mb-2 line-clamp-2 pr-6">
+                    {/* Middle Column: Name & Price */}
+                    <div className="flex-1 min-w-0 flex flex-col justify-center">
+                      <h3 className="font-red-hat text-[14px] text-black leading-tight mb-1.5 line-clamp-2 lg:pr-2">
                         {item.product.name}
                       </h3>
 
-                      {/* Quantity Controls */}
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="flex items-center border border-[#c6bfbf] rounded-[5px] overflow-hidden h-[26px]">
-                          <button
-                            onClick={() => updateQuantity(item, item.quantity - 1)}
-                            className="w-[27px] h-full flex items-center justify-center hover:bg-gray-100 transition-colors text-black font-tilt-warp text-[14px]"
-                          >
-                            -
-                          </button>
-                          <span className="px-3 h-full flex items-center justify-center min-w-[40px] text-black font-red-hat text-[14px] border-l border-r border-[#c6bfbf]">
-                            {item.quantity}
+                      <div className="flex flex-col">
+                        <span className="font-tilt-warp text-red-600 text-[14px]">
+                          {formatPrice(item.product.price)}
+                        </span>
+                        {item.originalUnitPrice && item.originalUnitPrice > item.product.price && (
+                          <span className="text-gray-400 text-[12px] line-through mt-0.5">
+                            {formatPrice(item.originalUnitPrice)}
                           </span>
-                          <button
-                            onClick={() => updateQuantity(item, item.quantity + 1)}
-                            className="w-[27px] h-full flex items-center justify-center hover:bg-gray-100 transition-colors text-black font-tilt-warp text-[14px]"
-                          >
-                            +
-                          </button>
-                        </div>
+                        )}
+                      </div>
+                    </div>
 
-                        {/* Delete Button */}
+                    {/* Right Column: Controls */}
+                    <div className="flex flex-col items-end gap-2 shrink-0">
+                      <button
+                        onClick={() => removeFromCart(item)}
+                        className="p-1 hover:bg-red-50 rounded transition-colors text-gray-400 hover:text-red-600"
+                        aria-label="Remove item"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+
+                      <div className="flex items-center border border-[#c6bfbf] rounded-[5px] overflow-hidden h-[26px]">
                         <button
-                          onClick={() => removeFromCart(item)}
-                          className="p-1.5 hover:bg-red-50 rounded transition-colors"
-                          aria-label="Remove item"
+                          onClick={() => updateQuantity(item, item.quantity - 1)}
+                          className="w-[26px] h-full flex items-center justify-center hover:bg-gray-100 transition-colors text-black font-tilt-warp text-[14px]"
                         >
-                          <Trash2 size={16} className="text-red-600" />
+                          -
+                        </button>
+                        <span className="px-2 h-full flex items-center justify-center min-w-[32px] text-black font-red-hat text-[13px] border-l border-r border-[#c6bfbf]">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() => updateQuantity(item, item.quantity + 1)}
+                          className="w-[26px] h-full flex items-center justify-center hover:bg-gray-100 transition-colors text-black font-tilt-warp text-[14px]"
+                        >
+                          +
                         </button>
                       </div>
                     </div>

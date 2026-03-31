@@ -50,6 +50,8 @@ export const ROUTES = {
   VOUCHERS: "/vouchers",
   SETS: "/sets",
   SET_DETAIL: "/sets/:id",
+  PROMOTIONS: "/promotion",
+  PROMOTION_DETAIL: "/promotions/:id",
 
   // Cart & Checkout
   CART: "/cart",

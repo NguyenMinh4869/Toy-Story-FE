@@ -1,10 +1,10 @@
 import React from 'react'
 import { Grid, List } from 'lucide-react'
 import { ProductGridCard } from './ProductGridCard'
-import type { ViewProductDto } from '../../types/ProductDTO'
+import type { ProductDTO } from '../../types/ProductDTO'
 
 interface ProductGridProps {
-  products: ViewProductDto[]
+  products: ProductDTO[]
   totalProducts: number
   isLoading?: boolean
   viewMode?: 'grid' | 'list'

@@ -10,6 +10,7 @@ import CamNangPage from "../pages/CamNangPage";
 import CamNangDetailPage from "../pages/CamNangDetailPage";
 import { ROUTES } from "./routePaths";
 import PromotionPage from "../pages/PromotionPage";
+import PromotionDetailPage from "../pages/PromotionDetailPage";
 import VoucherPage from "../pages/VoucherPage";
 import SetPage from "../pages/SetPage";
 import SetDetailPage from "../pages/SetDetailPage";
@@ -285,8 +286,9 @@ const AppRoutes: React.FC = () => {
       <Route path={ROUTES.BRANDS} element={<BrandPage />} />
       <Route path={ROUTES.BRAND_DETAIL} element={<BrandDetailPage />} />
 
-      {/* Promotion Route */}
+      {/* Promotion Routes */}
       <Route path="/promotion" element={<PromotionPage />} />
+      <Route path="/promotions/:id" element={<PromotionDetailPage />} />
 
       {/* Voucher Route (FR-3: customer-filter) */}
       <Route path={ROUTES.VOUCHERS} element={<VoucherPage />} />

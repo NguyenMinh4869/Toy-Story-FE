@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { FilterSidebar, ProductGrid, Pagination } from '../components/productpage'
 import { BreadcrumbHeader } from '../components/BreadcrumbHeader'
 import { getCustomerFilterProducts } from '../services/productService'
-import type { ViewProductDto } from '../types/ProductDTO'
+import type { ProductDTO } from '../types/ProductDTO'
+import { getPromotionsCustomerFilter } from '../services/promotionService'
+import { findBestPromotion } from '../utils/promotionUtils'
 
 // Breadcrumb items for the products page
 const breadcrumbItems = [
@@ -12,8 +14,8 @@ const breadcrumbItems = [
 const PRODUCTS_PER_PAGE = 12
 
 export const ProductsPage: React.FC = () => {
-  const [products, setProducts] = useState<ViewProductDto[]>([])
-  const [filteredProducts, setFilteredProducts] = useState<ViewProductDto[]>([])
+  const [products, setProducts] = useState<ProductDTO[]>([])
+  const [filteredProducts, setFilteredProducts] = useState<ProductDTO[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -30,24 +32,44 @@ export const ProductsPage: React.FC = () => {
   const [selectedBrandIds, setSelectedBrandIds] = useState<string[]>([])
 
 
-  // Fetch products on mount
+  // Fetch products and active promotions on mount
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
         setIsLoading(true)
         setError(null)
-        const data = await getCustomerFilterProducts()
-        setProducts(data)
-        setFilteredProducts(data)
+        
+        // Fetch both products and active promotions in parallel
+        const [productsData, promosData] = await Promise.all([
+          getCustomerFilterProducts(),
+          getPromotionsCustomerFilter({ discountType: 0 }) // percent-based as priority
+        ])
+
+        // Ensure each product has the best promotion info applied as a fallback
+        const productsWithPromos = productsData.map(p => {
+          const promoInfo = findBestPromotion(p, promosData)
+          if (promoInfo.hasPromotion) {
+            return {
+              ...p,
+              hasPromotion: true,
+              promotionName: promoInfo.label,
+              finalPrice: p.price ? p.price * (1 - promoInfo.discountValue / 100) : p.finalPrice
+            }
+          }
+          return p
+        })
+
+        setProducts(productsWithPromos)
+        setFilteredProducts(productsWithPromos)
       } catch (err) {
-        console.error('Error fetching products:', err)
+        console.error('Error fetching data:', err)
         setError('Không thể tải sản phẩm. Vui lòng thử lại sau.')
       } finally {
         setIsLoading(false)
       }
     }
 
-    fetchProducts()
+    fetchData()
   }, [])
 
   // filter and sort products when criteria or sortBy changes
@@ -57,7 +79,7 @@ export const ProductsPage: React.FC = () => {
     // 1. Filter by Price
     if (selectedPriceRanges.length > 0) {
       result = result.filter(product => {
-        const price = product.price || 0
+        const price = (product.hasPromotion ? product.finalPrice : product.price) || product.price || 0
         return selectedPriceRanges.some(range => {
           if (range === 'under-200k') return price < 200000
           if (range === '200k-500k') return price >= 200000 && price <= 500000
@@ -94,10 +116,18 @@ export const ProductsPage: React.FC = () => {
     // 4. Sort
     switch (sortBy) {
       case 'price-asc':
-        result.sort((a, b) => (a.price ?? 0) - (b.price ?? 0))
+        result.sort((a, b) => {
+          const priceA = (a.hasPromotion ? a.finalPrice : a.price) || a.price || 0;
+          const priceB = (b.hasPromotion ? b.finalPrice : b.price) || b.price || 0;
+          return priceA - priceB;
+        })
         break
       case 'price-desc':
-        result.sort((a, b) => (b.price ?? 0) - (a.price ?? 0))
+        result.sort((a, b) => {
+          const priceA = (a.hasPromotion ? a.finalPrice : a.price) || a.price || 0;
+          const priceB = (b.hasPromotion ? b.finalPrice : b.price) || b.price || 0;
+          return priceB - priceA;
+        })
         break
       case 'name-asc':
         result.sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''))

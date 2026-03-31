@@ -4,22 +4,21 @@
  */
 
 import { apiGet, apiPostForm, apiPutForm } from './apiClient'
-import type { ViewProductDto } from '../types/ProductDTO'
-import type { CreateProductDto, UpdateProductDto } from '../types/ProductDTO'
+import type { ProductDTO, CreateProductDto, UpdateProductDto } from '../types/ProductDTO'
 
 /**
  * Get active products for public/customer usage (NO auth required)
  * Uses the customer-filter endpoint which is open to all visitors
  */
-export const getActiveProducts = async (): Promise<ViewProductDto[]> => {
+export const getActiveProducts = async (): Promise<ProductDTO[]> => {
   return filterProductsPublic({})
 }
 
 /**
  * Get product by ID
  */
-export const getProductById = async (productId: number): Promise<ViewProductDto> => {
-  const response = await apiGet<ViewProductDto>(`/products/${productId}`)
+export const getProductById = async (productId: number): Promise<ProductDTO> => {
+  const response = await apiGet<ProductDTO>(`/products/${productId}`)
   return response.data
 }
 
@@ -33,7 +32,7 @@ export const filterProductsPublic = async (params?: {
   ageRange?: 'ZeroToSixMonths' | 'SixToTwelveMonths' | 'OneToThreeYears' | 'ThreeToSixYears' | 'AboveSixYears' | number
   categoryId?: number
   brandId?: number
-}): Promise<ViewProductDto[]> => {
+}): Promise<ProductDTO[]> => {
   const queryParams = new URLSearchParams()
   if (params?.searchTerm) queryParams.append('searchTerm', params.searchTerm)
   if (params?.genderTarget !== undefined) queryParams.append('genderTarget', String(params.genderTarget))
@@ -42,7 +41,7 @@ export const filterProductsPublic = async (params?: {
   if (params?.brandId !== undefined) queryParams.append('brandId', String(params.brandId))
 
   const endpoint = `/products/customer-filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
-  const response = await apiGet<ViewProductDto[]>(endpoint)
+  const response = await apiGet<ProductDTO[]>(endpoint)
   return response.data
 }
 
@@ -58,7 +57,7 @@ export const filterProducts = async (params?: {
   brandId?: number
   status?: 'Active' | 'Inactive' | 'OutOfStock'
   promotionId?: number
-}): Promise<ViewProductDto[]> => {
+}): Promise<ProductDTO[]> => {
   const queryParams = new URLSearchParams()
   if (params?.searchTerm) queryParams.append('searchTerm', params.searchTerm)
   if (params?.genderTarget) queryParams.append('genderTarget', params.genderTarget)
@@ -83,21 +82,21 @@ export const getCustomerFilterProducts = filterProductsPublic
 /**
  * Get products by category ID (public - no auth required)
  */
-export const getProductsByCategoryId = async (categoryId: number): Promise<ViewProductDto[]> => {
+export const getProductsByCategoryId = async (categoryId: number): Promise<ProductDTO[]> => {
   return filterProductsPublic({ categoryId })
 }
 
 /**
  * Get products by brand ID (public - no auth required)
  */
-export const getProductsByBrandId = async (brandId: number): Promise<ViewProductDto[]> => {
+export const getProductsByBrandId = async (brandId: number): Promise<ProductDTO[]> => {
   return filterProductsPublic({ brandId })
 }
 
 /**
  * Search products by name (public - no auth required)
  */
-export const searchProducts = async (searchTerm: string): Promise<ViewProductDto[]> => {
+export const searchProducts = async (searchTerm: string): Promise<ProductDTO[]> => {
   return filterProductsPublic({ searchTerm })
 }
 

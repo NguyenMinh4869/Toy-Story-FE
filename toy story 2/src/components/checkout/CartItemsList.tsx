@@ -1,12 +1,15 @@
 // components/checkout/CartItemsList.tsx
 import React from "react";
-import type { CartItem } from "@/context/CartContext";
+import { useCart, type CartItem } from "@/context/CartContext";
+import { Minus, Plus, Trash2 } from "lucide-react";
 
 interface CartItemsListProps {
   items: CartItem[];
 }
 
 const CartItemsList: React.FC<CartItemsListProps> = ({ items }) => {
+  const { updateQuantity, removeFromCart } = useCart();
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -21,9 +24,9 @@ const CartItemsList: React.FC<CartItemsListProps> = ({ items }) => {
       </h2>
       
       <div className="space-y-4">
-        {items.map((item, index) => (
+        {items.map((item) => (
           <div
-            key={index}
+            key={"productId" in item.product ? item.product.productId : item.product.setId}
             className="flex gap-4 py-4 border-b border-gray-100 last:border-0"
           >
             {/* Product Image */}
@@ -56,21 +59,50 @@ const CartItemsList: React.FC<CartItemsListProps> = ({ items }) => {
             {/* Product Info */}
             <div className="flex-1">
               <h3 className="font-semibold text-gray-900">{item.product.name}</h3>
-              <p className="text-sm text-gray-500 mt-1">
-                Số lượng: {item.quantity}
-              </p>
+              
               <div className="flex justify-between items-start mt-2">
-                <div className="flex flex-col">
-                  <span className="text-red-600 font-semibold">
-                    {formatPrice(item.product.price)}
-                  </span>
-                  {item.originalUnitPrice && item.originalUnitPrice > item.product.price ? (
-                    <span className="text-gray-400 text-xs line-through mt-0.5">
-                      {formatPrice(item.originalUnitPrice)}
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden h-8 bg-gray-50">
+                      <button
+                        onClick={() => updateQuantity(item, item.quantity - 1)}
+                        className="w-8 h-full flex items-center justify-center hover:bg-gray-200 transition-colors text-gray-600"
+                      >
+                        <Minus size={14} />
+                      </button>
+                      <span className="w-10 h-full flex items-center justify-center font-bold text-gray-900 text-sm border-x border-gray-200">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => updateQuantity(item, item.quantity + 1)}
+                        className="w-8 h-full flex items-center justify-center hover:bg-gray-200 transition-colors text-gray-600"
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
+                    
+                    <button
+                      onClick={() => removeFromCart(item)}
+                      className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                      title="Xóa khỏi giỏ hàng"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+
+                  <div className="flex flex-col mt-1">
+                    <span className="text-red-600 font-semibold">
+                      {formatPrice(item.product.price)}
                     </span>
-                  ) : null}
+                    {item.originalUnitPrice && item.originalUnitPrice > item.product.price ? (
+                      <span className="text-gray-400 text-xs line-through mt-0.5">
+                        {formatPrice(item.originalUnitPrice)}
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
-                <div className="flex flex-col text-right">
+                
+                <div className="flex flex-col text-right h-full justify-between">
                   <span className="text-gray-500 text-sm">
                     Thành tiền: <span className="text-gray-900 font-medium">{formatPrice(item.serverTotalPrice ?? (item.product.price * item.quantity))}</span>
                   </span>
