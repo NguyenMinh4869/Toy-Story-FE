@@ -8,7 +8,8 @@ import {
   RotateCcw,
   Minus,
   Plus,
-  Star
+  Star,
+  Tag,
 } from "lucide-react";
 import type { ProductDTO } from "../types/ProductDTO";
 import { formatPrice } from "../utils/formatPrice";
@@ -21,6 +22,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { getPromotionsCustomerFilter } from "../services/promotionService";
 import { findBestPromotion } from "../utils/promotionUtils";
 import { useToast } from "../hooks/useToast";
+
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<ProductDTO | null>(null);
@@ -28,9 +30,11 @@ const ProductDetail: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
+  const [bestPromoName, setBestPromoName] = useState<string | null>(null);
   const { addToCart } = useCart();
   const { user } = useAuth();
   const { toast } = useToast();
+
   useEffect(() => {
     if (!id) return;
     const productId = Number(id);
@@ -43,27 +47,22 @@ const ProductDetail: React.FC = () => {
       try {
         setIsLoading(true);
         setError(null);
+
         const [productData, promos] = await Promise.all([
           getProductById(productId),
           getPromotionsCustomerFilter({ discountType: 0 })
         ]);
 
         const promoInfo = findBestPromotion(productData, promos);
-        
-        // Final Price choice: 
-        // 1. prefer API finalPrice
-        // 2. fallback to manual calculation from matching promotion
-        // 3. fallback to current price
+
         const originalPrice = productData.price ?? 0;
         let finalPrice = productData.hasPromotion ? (productData.finalPrice ?? originalPrice) : originalPrice;
         let promotionName = productData.promotionName || '';
         let hasPromotion = productData.hasPromotion ?? false;
 
-        // Ensure we show the best label (brand/category) if it's a targeted promotion
         if (promoInfo.hasPromotion) {
           hasPromotion = true;
           promotionName = promoInfo.label;
-          // Apply discount if not already applied by API
           if (finalPrice === originalPrice && promoInfo.discountValue > 0) {
             finalPrice = originalPrice * (1 - promoInfo.discountValue / 100);
           }
@@ -78,6 +77,7 @@ const ProductDetail: React.FC = () => {
           hasPromotion,
           promotionName
         };
+        setBestPromoName(promotionName || null);
         setProduct(mapped);
       } catch (err) {
         console.error("Error fetching product:", err);
@@ -253,9 +253,17 @@ const ProductDetail: React.FC = () => {
                 )}
               </div>
               {hasDiscount && (
-                <div className="flex items-center gap-2 text-red-600 font-bold text-sm">
-                  <ShieldCheck className="w-4 h-4" />
-                  <span>Tiết kiệm: {formatPrice(((product.originalPrice ?? 0) - (product.price ?? 0)) * quantity)}</span>
+                <div className="flex flex-col gap-2 mt-2">
+                  <div className="flex items-center gap-2 text-red-600 font-bold text-sm">
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>Tiết kiệm: {formatPrice(((product.originalPrice ?? 0) - (product.price ?? 0)) * quantity)}</span>
+                  </div>
+                  {bestPromoName && (
+                    <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-1.5">
+                      <Tag className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                      <span className="text-red-600 text-xs font-bold tracking-wide">{bestPromoName}</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -282,7 +290,7 @@ const ProductDetail: React.FC = () => {
               </div>
             </div>
 
-            < div className="flex flex-col gap-6 mb-12">
+            <div className="flex flex-col gap-6 mb-12">
               <div className="flex items-center justify-between px-2">
                 <span className="font-tilt-warp text-gray-900 uppercase tracking-wide">Số lượng</span>
                 <div className="flex items-center bg-gray-100 rounded-2xl p-1 shadow-inner">
@@ -314,6 +322,7 @@ const ProductDetail: React.FC = () => {
                 </motion.button>
               </div>
             </div>
+
             {/* Product Meta Stats */}
             <div className="border-t border-gray-100 pt-8 flex items-center justify-around text-gray-400 text-xs font-medium">
               <div className="flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> Chính hãng 100%</div>
@@ -362,7 +371,7 @@ const ProductDetail: React.FC = () => {
               ))}
             </div>
 
-            {/* Description Graphic Placeholder */}
+            {/* Description Graphic */}
             <div className="mt-12 w-full aspect-[21/9] bg-gradient-to-br from-red-50 to-orange-50 rounded-[3rem] border border-red-100 flex items-center justify-center relative overflow-hidden group">
               <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_20%_20%,#a70001_0%,transparent_50%)]" />
               <motion.div
@@ -379,8 +388,8 @@ const ProductDetail: React.FC = () => {
           </div>
 
         </div>
-      </main >
-    </div >
+      </main>
+    </div>
   );
 };
 

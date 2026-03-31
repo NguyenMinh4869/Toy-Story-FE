@@ -2,16 +2,17 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getBrandById } from "../services/brandService";
 import { getProductsByBrandId } from "../services/productService";
+import { getPromotionsCustomerFilter } from "../services/promotionService";
 import { ProductCard } from "../components/ProductCard";
 import { BreadcrumbHeader } from "../components/BreadcrumbHeader";
 import type { ViewBrandDto } from "../types/BrandDTO";
-import type { ViewProductDto } from "../types/ProductDTO";
+import type { ProductDTO } from "../types/ProductDTO";
 import { motion } from "framer-motion";
 
 const BrandDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [brand, setBrand] = useState<ViewBrandDto | null>(null);
-  const [products, setProducts] = useState<ViewProductDto[]>([]);
+  const [products, setProducts] = useState<ProductDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,12 +21,42 @@ const BrandDetailPage: React.FC = () => {
       if (!id) return;
       try {
         setIsLoading(true);
-        const [brandData, productsData] = await Promise.all([
+        const [brandData, productsData, promos] = await Promise.all([
           getBrandById(Number(id)),
           getProductsByBrandId(Number(id)),
+          getPromotionsCustomerFilter().catch(() => []),
         ]);
         setBrand(brandData);
-        setProducts(productsData);
+
+        // Áp promotion tốt nhất cho mỗi sản phẩm
+        const enriched: ProductDTO[] = productsData.map((product) => {
+          const applicable = promos.filter((p) => {
+            if (!p.isActive) return false;
+            const hasProductScope = p.productId != null;
+            const hasCategoryScope = p.categoryId != null;
+            const hasBrandScope = p.brandId != null;
+            if (hasProductScope) return p.productId === product.productId;
+            if (hasCategoryScope) return p.categoryId === product.categoryId;
+            if (hasBrandScope) return p.brandId === product.brandId;
+            return true; // promotion toàn bộ
+          });
+          const bestPromo = applicable
+            .filter((p) => p.discountType === 0)
+            .sort((a, b) => (b.discountValue ?? 0) - (a.discountValue ?? 0))[0];
+
+          const discount = bestPromo?.discountValue ?? 0;
+          const originalPrice = product.price ?? 0;
+          const finalPrice = discount > 0 ? originalPrice * (1 - discount / 100) : originalPrice;
+
+          return {
+            ...product,
+            hasPromotion: discount > 0,
+            promotionName: bestPromo?.name ?? undefined,
+            finalPrice: finalPrice,
+            originalPrice: originalPrice,
+          };
+        });
+        setProducts(enriched);
       } catch (err) {
         console.error("Error fetching brand details:", err);
         setError("Không thể tải thông tin nhãn hàng. Vui lòng thử lại sau.");

@@ -6,7 +6,16 @@ import path from 'path'
 export default defineConfig({
   server: {
     port: 5173, 
-    strictPort: true 
+    strictPort: true,
+    proxy: {
+      // Dev-only CORS bypass: call /api/... from the browser
+      // and Vite will proxy to the real backend.
+      "/api": {
+        target: "https://toy-story-xwni.onrender.com",
+        changeOrigin: true,
+        secure: true,
+      },
+    },
   },
   plugins: [react()],
   resolve: {

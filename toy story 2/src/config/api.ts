@@ -3,17 +3,17 @@
  * Centralized configuration for API endpoints
  */
 
-const baseURL = import.meta.env.VITE_API_BASE_URL
+const baseURL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? '/api' : '')
 
 if (!baseURL) {
   throw new Error(
     'VITE_API_BASE_URL is not defined. ' +
-    'Check your .env file and restart Vite.'
+    'Set it in your .env (production), or rely on /api proxy in dev.'
   )
 }
 
-// Allow both http and https for local development
-if (!/^https?:\/\//.test(baseURL)) {
+// Allow absolute URLs (prod) or relative "/api" (dev via Vite proxy)
+if (!(baseURL.startsWith('/') || /^https?:\/\//.test(baseURL))) {
   throw new Error(`Invalid VITE_API_BASE_URL: ${baseURL}`)
 }
 

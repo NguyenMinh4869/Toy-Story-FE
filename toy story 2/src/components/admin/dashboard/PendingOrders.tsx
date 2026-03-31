@@ -49,44 +49,44 @@ const PendingOrders = () => {
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <Truck className="w-5 h-5" />
-                    <h2 className="text-sm font-black uppercase tracking-[0.2em] text-slate-800">
+                    <span className="text-sm font-black uppercase tracking-[0.2em] text-slate-800">
                         Đơn hàng chờ xử lý
-                    </h2>
+                    </span>
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="space-y-4">
-                    {data.map((order) => (
-                        <div
-                            key={order.orderId}
-                            className="flex items-center justify-between p-4 shadow-lg border rounded-3xl hover:bg-gray-50 transition-colors"
-                        >
-                            <div className="space-y-1">
-                                <div className="flex items-center gap-2">
-                                    <span className="font-medium">#{order.orderId}</span>
-
+                {data.length === 0 ? (
+                    <div className="text-center text-gray-500 py-8">
+                        Không có đơn hàng chờ xử lý
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {data.map((order) => (
+                            <div
+                                key={order.orderId}
+                                className="flex items-center justify-between p-4 shadow-lg border rounded-3xl hover:bg-gray-50 transition-colors"
+                            >
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-medium">#{order.orderId}</span>
+                                    </div>
+                                    <div className="text-sm text-gray-600">
+                                        <p>Khách hàng: {order.accountName}</p>
+                                        <p>Ngày đặt: {order.orderDate}</p>
+                                        {order.warehouseName && (
+                                            <p>Kho: {order.warehouseName}</p>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="text-sm text-gray-600">
-                                    <p>Khách hàng: {order.accountName}</p>
-                                    <p>Ngày đặt: {order.orderDate}</p>
-                                    {order.warehouseName && (
-                                        <p>Kho: {order.warehouseName}</p>
-                                    )}
+                                <div className="text-right">
+                                    <p className="text-lg font-semibold text-primary">
+                                        {order.totalAmount.toLocaleString('vi-VN')}₫
+                                    </p>
                                 </div>
                             </div>
-                            <div className="text-right">
-                                <p className="text-lg font-semibold text-primary">
-                                    {(order.finalAmount ?? order.totalAmount ?? 0).toLocaleString('vi-VN')}₫
-                                </p>
-                            </div>
-                        </div>
-                    ))}
-                    {data.length === 0 && (
-                        <div className="text-center text-gray-500 py-8">
-                            Không có đơn hàng chờ xử lý
-                        </div>
-                    )}
-                </div>
+                        ))}
+                    </div>
+                )}
             </CardContent>
         </Card>
     );
