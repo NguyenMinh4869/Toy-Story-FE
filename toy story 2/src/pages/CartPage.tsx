@@ -60,9 +60,20 @@ const CartPage: React.FC = () => {
                                 <h3 className="font-bold text-lg text-gray-900 line-clamp-1">
                                     {item.product.name}
                                 </h3>
-                                <p className="text-red-600 font-bold mb-2">
-                                    {formatPrice(item.product.price ?? 0)}
-                                </p>
+                                {item.serverTotalPrice !== undefined && item.serverTotalPrice < ((item.product.price ?? 0) * item.quantity) ? (
+                                    <div className="mb-2">
+                                        <p className="text-red-600 font-bold">
+                                            {formatPrice(item.serverTotalPrice)}
+                                        </p>
+                                        <p className="text-gray-400 text-xs line-through mt-0.5">
+                                            {formatPrice((item.product.price ?? 0) * item.quantity)}
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <p className="text-red-600 font-bold mb-2">
+                                        {formatPrice(item.serverTotalPrice ?? ((item.product.price ?? 0) * item.quantity))}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="flex items-center gap-4">

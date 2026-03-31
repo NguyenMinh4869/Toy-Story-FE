@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth'
 export interface CartItem {
   product: CartProduct
   quantity: number
+  serverTotalPrice?: number
 }
 
 interface CartContextType {
@@ -49,6 +50,7 @@ const mapDtoToCartItem = (dto: CartItemDto): CartItem => {
         price: dto.unitPrice,
       },
       quantity: dto.quantity,
+      serverTotalPrice: dto.totalPrice,
     }
   } else {
     return {
@@ -59,6 +61,7 @@ const mapDtoToCartItem = (dto: CartItemDto): CartItem => {
         price: dto.unitPrice,
       },
       quantity: dto.quantity,
+      serverTotalPrice: dto.totalPrice,
     }
   }
 }
@@ -113,7 +116,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   }
 
   const getTotalPrice = (): number =>
-    cartItems.reduce((total, item) => total + ((item.product.price ?? 0) * item.quantity), 0)
+    cartItems.reduce((total, item) => total + (item.serverTotalPrice ?? ((item.product.price ?? 0) * item.quantity)), 0)
 
   const getTotalItems = (): number =>
     cartItems.reduce((total, item) => total + item.quantity, 0)

@@ -64,7 +64,7 @@ const CartItemsList: React.FC<CartItemsListProps> = ({ items }) => {
                   {formatPrice(item.product.price)}
                 </span>
                 <span className="text-gray-500 text-sm">
-                  Thành tiền: {formatPrice(item.product.price * item.quantity)}
+                  Thành tiền: {formatPrice(item.serverTotalPrice ?? (item.product.price * item.quantity))}
                 </span>
               </div>
             </div>
