@@ -88,18 +88,20 @@ const TransferFilter: React.FC<TransferFilterProps> = ({
     }
 
     const handleStatusChange = (value: string) => {
+        const nextStatus = value ? parseInt(value, 10) as unknown as TransferStatus : undefined
         const newFilter = {
             ...filter,
-            status: (value || undefined) as unknown as TransferStatus
+            status: nextStatus
         }
         setFilter(newFilter)
         onFilter(newFilter)
     }
 
     const handleTypeChange = (value: string) => {
+        const nextType = value ? parseInt(value, 10) as unknown as TransferType : undefined
         const newFilter = {
             ...filter,
-            type: (value || undefined) as unknown as TransferType
+            type: nextType
         }
         setFilter(newFilter)
         onFilter(newFilter)
@@ -154,11 +156,13 @@ const TransferFilter: React.FC<TransferFilterProps> = ({
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                     >
                         <option value="">Tất cả</option>
-                        {Object.values(TransferStatus).map((s) => (
-                            <option key={s} value={s}>
-                                {TransferStatusLabels[s as TransferStatus]}
-                            </option>
-                        ))}
+                        {Object.values(TransferStatus)
+                            .filter((v): v is number => typeof v === 'number')
+                            .map((s) => (
+                                <option key={s} value={s}>
+                                    {TransferStatusLabels[s as TransferStatus]}
+                                </option>
+                            ))}
                     </select>
                 </div>
 
@@ -172,11 +176,13 @@ const TransferFilter: React.FC<TransferFilterProps> = ({
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                     >
                         <option value="">Tất cả</option>
-                        {Object.values(TransferType).map((t) => (
-                            <option key={t} value={t}>
-                                {TransferTypeLabels[t as TransferType]}
-                            </option>
-                        ))}
+                        {Object.values(TransferType)
+                            .filter((v): v is number => typeof v === 'number')
+                            .map((t) => (
+                                <option key={t} value={t}>
+                                    {TransferTypeLabels[t as TransferType]}
+                                </option>
+                            ))}
                     </select>
                 </div>
 
