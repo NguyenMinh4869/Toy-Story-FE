@@ -33,11 +33,7 @@ export const syncCartToServer = async (
  * Calculate order price (preview)
  * POST /api/checkout/calculate
  */
-export const calculateCheckout = async (): Promise<CalculatePriceResponse> => {
-  const response = await apiPost<CalculatePriceResponse>(
-    "/checkout/calculate-checkout");
-  return response.data;
-};
+
 
 export const calculatePrice = async (): Promise<CalculatePriceResponse> => {
   const response = await apiPost<CalculatePriceResponse>(
