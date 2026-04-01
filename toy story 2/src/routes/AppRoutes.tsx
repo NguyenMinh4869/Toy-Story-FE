@@ -46,6 +46,7 @@ import RegisterPage from "../pages/RegisterPage";
 import PaymentCancelPage from "@/pages/payment/CancelPage";
 import PaymentSuccessPage from "@/pages/payment/SuccessPage";
 import OrderPage from "@/pages/OrderPage";
+import OrderDetailPage from "@/pages/OrderDetailPage";
 import InvoiceManagementPage from "@/pages/admin/InvoiceManagementPage";
 import OrderManagementPage from "@/pages/admin/OrderManagementPage";
 import StaffOrderManagementPage from "@/pages/staff/StaffOrderManagementPage";
@@ -122,6 +123,14 @@ const AppRoutes: React.FC = () => {
           element={
             <DashboardLayout mode="admin">
               <OrderManagementPage />
+            </DashboardLayout>
+          }
+        />
+        <Route
+          path={ROUTES.ADMIN_ORDER_DETAIL}
+          element={
+            <DashboardLayout mode="admin">
+              <OrderDetailPage />
             </DashboardLayout>
           }
         />
@@ -237,6 +246,14 @@ const AppRoutes: React.FC = () => {
             </DashboardLayout>
           }
         />
+        <Route
+          path={ROUTES.STAFF_ORDER_DETAIL}
+          element={
+            <DashboardLayout mode="staff">
+              <OrderDetailPage />
+            </DashboardLayout>
+          }
+        />
 
         <Route
           path={ROUTES.STAFF_EVENT}
@@ -264,6 +281,7 @@ const AppRoutes: React.FC = () => {
         <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
         <Route path={ROUTES.PROFILE_INVOICES} element={<InvoicePage />} />
         <Route path={ROUTES.PROFILE_ORDERS} element={<OrderPage />} />
+        <Route path={ROUTES.PROFILE_ORDER_DETAIL} element={<OrderDetailPage />} />
 
         <Route path={ROUTES.PROFILE_WISHLIST} element={<WishlistPage />} />
         <Route
