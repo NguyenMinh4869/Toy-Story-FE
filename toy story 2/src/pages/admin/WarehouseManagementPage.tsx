@@ -93,21 +93,21 @@ const WarehouseManagementPage: React.FC = () => {
   };
 
   const handleDeleteWarehouse = async (id: number) => {
-    await confirmAction(
-      "Are you sure you want to delete this warehouse?",
-      async () => {
-        await runAsync(
-          async () => {
-            setError(null);
-            await deleteWarehouse(id);
-            await fetchData();
-          },
-          setError,
-          "Failed to delete warehouse",
-        );
-      },
-    );
-  };
+  const confirmed = await confirmAction(
+    "Are you sure you want to delete this warehouse?"
+  );
+
+  if (!confirmed) return;
+
+  try {
+    setError(null);
+    await deleteWarehouse(id);
+    await fetchData();
+  } catch (err) {
+    console.error(err);
+    setError("Failed to delete warehouse");
+  }
+};
 
   const openCreateModal = () => {
     setCurrentWarehouse(null);
@@ -134,12 +134,12 @@ const WarehouseManagementPage: React.FC = () => {
         </button>
       </div>
 
-      {error && (
+      {/* {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
         </div>
-      )}
-
+      )} */}
+      
       {loading && !isModalOpen ? (
         <div className="text-center py-10">Loading...</div>
       ) : (

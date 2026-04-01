@@ -64,12 +64,20 @@ const ArticleCategoryManagementPage: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    await confirmAction('Bạn có chắc chắn muốn xóa danh mục này?', async () => {
-      await runAsync(async () => {
-        await deleteArticleCategory(id);
-        await fetchCategories();
-      }, setError, 'Failed to delete category');
-    });
+    const confirmed = await confirmAction(
+      'Bạn có chắc chắn muốn xóa danh mục này?'
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setError(null);
+      await deleteArticleCategory(id);
+      await fetchCategories();
+    } catch (err) {
+      console.error(err);
+      setError('Failed to delete category');
+    }
   };
 
   const openCreateModal = () => {
@@ -99,11 +107,11 @@ const ArticleCategoryManagementPage: React.FC = () => {
         </button>
       </div>
 
-      {error && (
+      {/* {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
           {error}
         </div>
-      )}
+      )} */}
 
       {loading && categories.length === 0 ? (
         <div className="text-center py-10">
