@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
-// import { toast } from 'react-toastify';
 import BrandListTable from '../../components/admin/BrandListTable';
 import Modal from '../../components/ui/Modal';
 import {
@@ -96,29 +95,15 @@ const BrandManagementPage: React.FC = () => {
   };
 
   const handleStatusChange = async (id: number) => {
-  try {
-    setError(null);
-
-    const result = await changeBrandStatus(id);
-
-    if (!result.success) {
-      throw new Error(result.message);
+    try {
+      setError(null);
+      await changeBrandStatus(id);
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      setError('Failed to change brand status');
     }
-
-    // ✅ show affected products
-    if (result.affectedProducts?.length > 0) {
-      alert(
-        `Đã vô hiệu hóa ${result.affectedProducts.length} sản phẩm:\n` +
-        result.affectedProducts.join(', ')
-      );
-    }
-
-    await fetchData();
-  } catch (err: any) {
-    console.error(err);
-    setError(err.message || 'Failed to change brand status');
-  }
-};
+  };
 
   const openCreateModal = () => {
     setCurrentBrand(null);

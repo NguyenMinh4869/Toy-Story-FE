@@ -67,8 +67,7 @@ export const filterProducts = async (params?: {
   if (params?.status) queryParams.append('status', params.status)
   if (params?.promotionId) queryParams.append('promotionId', params.promotionId.toString())
 
-  // const endpoint = `/products/customer-filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
-  const endpoint = `/products/admin-filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+  const endpoint = `/products/customer-filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
   const response = await apiGet<ViewProductDto[]>(endpoint)
   return response.data
 }
@@ -133,18 +132,8 @@ export const updateProduct = async (productId: number, data: UpdateProductDto, i
  * Change product status (Admin only)
  * PUT /api/products/status/{productId}
  */
-// export const changeProductStatus = async (productId: number): Promise<{ message: string }> => {
-//   const form = new FormData()
-//   const response = await apiPutForm<{ message: string }>(`/products/status/${productId}`, form)
-//   return response.data
-// }
-export const changeProductStatus = async (
-  productId: number
-): Promise<{ success: boolean; message: string }> => {
+export const changeProductStatus = async (productId: number): Promise<{ message: string }> => {
   const form = new FormData()
-  const response = await apiPutForm<{ success: boolean; message: string }>(
-    `/products/status/${productId}`,
-    form
-  )
+  const response = await apiPutForm<{ message: string }>(`/products/status/${productId}`, form)
   return response.data
 }
