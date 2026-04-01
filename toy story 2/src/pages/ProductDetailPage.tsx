@@ -56,23 +56,24 @@ const ProductDetail: React.FC = () => {
         const promoInfo = findBestPromotion(productData, promos);
 
         const originalPrice = productData.price ?? 0;
-        let finalPrice = productData.hasPromotion ? (productData.finalPrice ?? originalPrice) : originalPrice;
-        let promotionName = productData.promotionName || '';
-        let hasPromotion = productData.hasPromotion ?? false;
+        let finalPrice = originalPrice;
+        let promotionName = '';
+        let hasPromotion = false;
 
-        if (promoInfo.hasPromotion) {
+        // Always compute finalPrice from the best promotion (max discount value),
+        // instead of trusting API-provided finalPrice which may reflect a smaller promo.
+        if (promoInfo.hasPromotion && promoInfo.discountValue > 0 && originalPrice > 0) {
           hasPromotion = true;
           promotionName = promoInfo.label;
-          if (finalPrice === originalPrice && promoInfo.discountValue > 0) {
-            finalPrice = originalPrice * (1 - promoInfo.discountValue / 100);
-          }
+          finalPrice = originalPrice * (1 - promoInfo.discountValue / 100);
         }
 
         const mapped: ProductDTO = {
           ...productData,
           id: String(productData.productId ?? id),
           images: productData.imageUrl ? [productData.imageUrl] : [],
-          price: finalPrice,
+          price: originalPrice,
+          finalPrice: finalPrice,
           originalPrice: originalPrice,
           hasPromotion,
           promotionName
@@ -142,9 +143,12 @@ const ProductDetail: React.FC = () => {
     product.images?.length ? product.images : [product.imageUrl].filter(Boolean)
   ) as string[];
 
-  const hasDiscount = product.originalPrice && product.originalPrice > (product.price ?? 0);
+  const currentDisplayPrice = product.hasPromotion ? (product.finalPrice ?? product.price ?? 0) : (product.price ?? 0);
+  const currentOriginalPrice = product.originalPrice ?? product.price ?? 0;
+
+  const hasDiscount = product.hasPromotion && currentOriginalPrice > currentDisplayPrice;
   const discountPercent = hasDiscount
-    ? Math.round(((product.originalPrice! - product.price!) / product.originalPrice!) * 100)
+    ? Math.round(((currentOriginalPrice - currentDisplayPrice) / currentOriginalPrice) * 100)
     : 0;
 
   return (
@@ -244,11 +248,11 @@ const ProductDetail: React.FC = () => {
             <div className="bg-gray-50/50 rounded-[2.5rem] p-8 mb-8 border border-gray-100">
               <div className="flex items-baseline gap-4 mb-2">
                 <span className="text-4xl font-tilt-warp text-red-600 tracking-tight">
-                  {formatPrice((product.price ?? 0) * quantity)}
+                  {formatPrice(currentDisplayPrice * quantity)}
                 </span>
                 {hasDiscount && (
                   <span className="text-xl text-gray-400 line-through font-medium">
-                    {formatPrice((product.originalPrice ?? 0) * quantity)}
+                    {formatPrice(currentOriginalPrice * quantity)}
                   </span>
                 )}
               </div>
@@ -256,7 +260,7 @@ const ProductDetail: React.FC = () => {
                 <div className="flex flex-col gap-2 mt-2">
                   <div className="flex items-center gap-2 text-red-600 font-bold text-sm">
                     <ShieldCheck className="w-4 h-4" />
-                    <span>Tiết kiệm: {formatPrice(((product.originalPrice ?? 0) - (product.price ?? 0)) * quantity)}</span>
+                    <span>Tiết kiệm: {formatPrice((currentOriginalPrice - currentDisplayPrice) * quantity)}</span>
                   </div>
                   {bestPromoName && (
                     <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-1.5">

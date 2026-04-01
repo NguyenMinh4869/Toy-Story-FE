@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getPromotionsCustomerFilter } from "../services/promotionService";
 import { filterProducts, getProductById } from "../services/productService";
 import { BreadcrumbHeader } from "../components/BreadcrumbHeader";
-
+import { ProductCard } from "../components/ProductCard";
 import type { ViewPromotionDto } from "../types/PromotionDTO";
 import type { ProductDTO } from "../types/ProductDTO";
+import { findBestPromotion } from "../utils/promotionUtils";
 import { motion } from "framer-motion";
 import {
   Gift,
@@ -14,9 +15,10 @@ import {
   ArrowLeft,
   Percent,
   ShoppingBag,
-  ShoppingCart,
   Clock,
   Layers,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { formatPrice } from "../utils/formatPrice";
 
@@ -27,6 +29,14 @@ const PromotionDetailPage: React.FC = () => {
   const [products, setProducts] = useState<ProductDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: "left" | "right") => {
+    if (scrollRef.current) {
+      const scrollAmount = direction === "left" ? -300 : 300;
+      scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -65,19 +75,57 @@ const PromotionDetailPage: React.FC = () => {
           productList = [];
         }
 
-        // Enrich products with promotion discount
-        const discount = promo.discountType === 0 ? (promo.discountValue ?? 0) : 0;
-        const enriched: ProductDTO[] = productList.map((p) => {
-          const originalPrice = p.price ?? 0;
-          const finalPrice = discount > 0 ? originalPrice * (1 - discount / 100) : originalPrice;
-          return {
-            ...p,
-            hasPromotion: discount > 0,
-            promotionName: promo.name ?? undefined,
-            finalPrice,
-            originalPrice,
-          };
-        });
+        // Cập nhật: Chỉ hiển thị sản phẩm ở trang promotion mà nó được giảm giá sâu nhất.
+        // Điều này giúp tránh việc một sản phẩm xuất hiện ở nhiều trang khuyến mãi với các mức giá khác nhau.
+        const currentPromoId = Number(id);
+        const enriched: ProductDTO[] = productList
+          .map((p) => {
+            const originalPrice = p.price ?? 0;
+            const promoInfo = findBestPromotion(p, allPromos);
+
+            // Nếu sản phẩm có khuyến mãi tốt hơn ở trang khác, ta sẽ ẩn nó khỏi trang hiện tại
+            if (promoInfo.hasPromotion && promoInfo.promotionId && promoInfo.promotionId !== currentPromoId) {
+              return null;
+            }
+
+            // Nếu utility không tìm thấy nhưng chúng ta đang ở trang của chính promotion đó,
+            // thì tối thiểu phải áp dụng được promotion hiện tại (promo).
+            let finalPrice = originalPrice;
+            let hasPromotion = false;
+            let promotionName = undefined;
+            let discount = 0;
+
+            if (promoInfo.hasPromotion && promoInfo.promotionId === currentPromoId) {
+              hasPromotion = true;
+              promotionName = promoInfo.label;
+              discount = promoInfo.discountValue;
+              finalPrice = originalPrice * (1 - discount / 100);
+            } else {
+              // Fallback to current page promo if it matches or if findBestPromotion somehow missed it
+              const isPercent = promo.discountType === 0;
+              const reduction = isPercent 
+                ? (promo.discountValue ?? 0) / 100 * originalPrice 
+                : (promo.discountValue ?? 0);
+              
+              if (reduction > 0) {
+                hasPromotion = true;
+                promotionName = promo.name ?? undefined;
+                finalPrice = originalPrice - reduction;
+                discount = Math.round((reduction / originalPrice) * 100);
+              }
+            }
+
+            return {
+              ...p,
+              hasPromotion,
+              promotionName,
+              finalPrice,
+              originalPrice,
+              discount
+            } as ProductDTO;
+          })
+          .filter((p): p is ProductDTO => p !== null);
+
         setProducts(enriched);
       } catch {
         setError("Không thể tải thông tin khuyến mãi. Vui lòng thử lại.");
@@ -137,7 +185,10 @@ const PromotionDetailPage: React.FC = () => {
     );
   }
 
-  const discountValue = promotion.discountType === 0 ? (promotion.discountValue ?? 0) : 0;
+  const isPercent = promotion.discountType === 0;
+  const discountLabel = isPercent 
+    ? `-${promotion.discountValue}%` 
+    : `-${formatPrice(promotion.discountValue ?? 0)}`;
 
   return (
     <div className="bg-slate-50 min-h-screen pb-20">
@@ -178,9 +229,9 @@ const PromotionDetailPage: React.FC = () => {
               </div>
             )}
             {/* Big discount badge */}
-            {discountValue > 0 && (
+            {(promotion.discountValue ?? 0) > 0 && (
               <div className="absolute top-6 right-6 bg-[#a70001] text-white font-['Tilt_Warp',sans-serif] text-3xl px-6 py-3 rounded-3xl shadow-2xl ring-4 ring-red-100 italic">
-                -{discountValue}%
+                {discountLabel}
               </div>
             )}
           </motion.div>
@@ -212,14 +263,14 @@ const PromotionDetailPage: React.FC = () => {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-2 gap-4 mb-8">
-              {discountValue > 0 && (
+              {(promotion.discountValue ?? 0) > 0 && (
                 <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
                   <div className="flex items-center gap-2 text-red-500 mb-2">
                     <Percent className="w-5 h-5" />
                     <span className="text-xs font-bold uppercase tracking-wide text-gray-500">Giảm giá</span>
                   </div>
-                  <p className="text-3xl font-['Tilt_Warp',sans-serif] text-[#a70001]">
-                    {discountValue}%
+                  <p className={isPercent ? "text-3xl font-['Tilt_Warp',sans-serif] text-[#a70001]" : "text-xl font-bold text-[#a70001]"}>
+                    {discountLabel}
                   </p>
                 </div>
               )}
@@ -281,69 +332,44 @@ const PromotionDetailPage: React.FC = () => {
               <p className="text-gray-400 font-medium text-lg">Sản phẩm đang được cập nhật...</p>
             </div>
           ) : (
-            <div className="flex flex-col gap-4">
-              {products.map((product, idx) => {
-                const price = product.price ?? 0;
-                const finalPrice = discountValue > 0 ? price * (1 - discountValue / 100) : price;
+            <div className="relative bg-[#a70001] rounded-[2rem] p-6 sm:p-10 shadow-2xl">
+              {/* Left Arrow */}
+              <button
+                onClick={() => scroll("left")}
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 md:translate-x-1/2 xl:-translate-x-1/2 z-10 w-12 h-12 bg-white rounded-full shadow-lg text-[#a70001] flex items-center justify-center hover:scale-110 hover:bg-red-50 transition-all duration-300 hidden sm:flex"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
 
-                return (
+              {/* Scroll Container */}
+              <div 
+                ref={scrollRef}
+                className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-6 px-4 -mx-4 no-scrollbar scroll-smooth"
+              >
+                {products.map((product, idx) => (
                   <motion.div
                     key={product.productId}
-                    initial={{ opacity: 0, x: -20 }}
+                    initial={{ opacity: 0, x: 20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.3, delay: idx * 0.05 }}
-                    onClick={() => navigate(`/product/${product.productId}`)}
-                    className="group bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all flex items-center gap-4 sm:gap-6 cursor-pointer"
+                    transition={{ duration: 0.35, delay: idx * 0.05 }}
+                    className="snap-center shrink-0"
                   >
-                    {/* Image */}
-                    <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gray-50 rounded-xl flex items-center justify-center p-2 relative overflow-hidden flex-shrink-0">
-                      {product.imageUrl ? (
-                        <img 
-                          src={product.imageUrl} 
-                          alt={product.name || "Product image"} 
-                          className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
-                        />
-                      ) : (
-                        <ShoppingBag className="w-8 h-8 text-gray-300" />
-                      )}
-                      {discountValue > 0 && (
-                        <div className="absolute top-2 left-2 bg-[#a70001] text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-sm">
-                          -{discountValue}%
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Info */}
-                    <div className="flex-1 flex flex-col justify-center min-w-0">
-                      <div className="text-[10px] sm:text-xs text-gray-400 font-bold mb-1 uppercase tracking-wider">
-                        {product.brandName || "Thương hiệu nổi bật"}
-                      </div>
-                      <h3 className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-[#a70001] transition-colors mb-2 truncate">
-                        {product.name}
-                      </h3>
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-                        <span className="text-lg sm:text-xl font-['Tilt_Warp',sans-serif] text-red-600">
-                          {formatPrice(finalPrice)}
-                        </span>
-                        {discountValue > 0 && (
-                          <span className="text-xs sm:text-sm text-gray-400 line-through font-medium">
-                            {formatPrice(price)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Action Button */}
-                    <div className="pr-2 sm:pr-4">
-                      <button className="flex items-center justify-center w-10 h-10 sm:w-auto sm:h-auto sm:px-6 sm:py-3 bg-red-50 text-[#a70001] rounded-full sm:rounded-xl font-bold group-hover:bg-[#a70001] group-hover:text-white transition-colors duration-300">
-                        <ShoppingCart className="w-5 h-5 sm:mr-2" />
-                        <span className="hidden sm:inline">Mua ngay</span>
-                      </button>
-                    </div>
+                    <ProductCard
+                      product={product}
+                      discount={product.discount}
+                    />
                   </motion.div>
-                );
-              })}
+                ))}
+              </div>
+
+              {/* Right Arrow */}
+              <button
+                onClick={() => scroll("right")}
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 md:-translate-x-1/2 xl:translate-x-1/2 z-10 w-12 h-12 bg-white rounded-full shadow-lg text-[#a70001] flex items-center justify-center hover:scale-110 hover:bg-red-50 transition-all duration-300 hidden sm:flex"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
             </div>
           )}
         </div>

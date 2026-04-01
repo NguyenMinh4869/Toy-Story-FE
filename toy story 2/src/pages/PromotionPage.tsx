@@ -90,7 +90,10 @@ const PromotionPage: React.FC = () => {
     );
   }
 
-  const globalPromotions = promotions.filter((p) => !p.productId && !p.categoryId && !p.brandId);
+  const globalPromotions = promotions
+    .filter((p) => !p.productId && !p.categoryId && !p.brandId)
+    .sort((a, b) => (b.discountValue ?? 0) - (a.discountValue ?? 0))
+    .slice(0, 1);
   const brandPromotions = promotions.filter((p) => p.brandId);
   const categoryPromotions = promotions.filter((p) => p.categoryId);
   const productPromotions = promotions.filter((p) => p.productId);
