@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import StaffListTable from "../../components/admin/StaffListTable";
 import {
-  getAllStaff,
+  filterStaff,
   createStaff,
   updateStaff,
   changeStaffStatus,
@@ -26,6 +26,7 @@ const StaffManagementPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const [statusFilter, setStatusFilter] = useState<0 | 1 | undefined>(undefined);
 
   const searchParams = useMemo(
     () => new URLSearchParams(location.search),
@@ -56,13 +57,13 @@ const StaffManagementPage: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [statusFilter]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
       const [staffData, warehouseData] = await Promise.all([
-        getAllStaff(),
+        filterStaff({ status: statusFilter }),
         getWarehouses(),
       ]);
       setStaffList(staffData);
@@ -124,6 +125,26 @@ const StaffManagementPage: React.FC = () => {
           <Plus size={20} />
           Thêm nhân viên
         </button>
+      </div>
+
+      <div className="flex gap-2 mb-4">
+        {([
+          { label: 'Tất cả', value: undefined },
+          { label: 'Đang hoạt động', value: 0 },
+          { label: 'Ngừng hoạt động', value: 1 },
+        ] as { label: string; value: typeof statusFilter }[]).map(tab => (
+          <button
+            key={tab.label}
+            onClick={() => { setStatusFilter(tab.value); navigate(location.pathname); }}
+            className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
+              statusFilter === tab.value
+                ? 'bg-red-400 text-white border-red-400'
+                : 'bg-white text-gray-600 border-gray-300 hover:border-red-300'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {error && (

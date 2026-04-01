@@ -47,7 +47,7 @@ export const filterProductsPublic = async (params?: {
 
 /**
  * Admin filter — hits /products/admin-filter (requires Admin auth)
- * Can filter by status (Active/Inactive/OutOfStock). Use in admin panels only.
+ * status: 0 = Active, 1 = Inactive, 2 = OutOfStock (C# enum $int32)
  */
 export const filterProducts = async (params?: {
   searchTerm?: string
@@ -55,7 +55,7 @@ export const filterProducts = async (params?: {
   ageRange?: 'ZeroToSixMonths' | 'SixToTwelveMonths' | 'OneToThreeYears' | 'ThreeToSixYears' | 'AboveSixYears'
   categoryId?: number
   brandId?: number
-  status?: 'Active' | 'Inactive' | 'OutOfStock'
+  status?: 0 | 1 | 2
   promotionId?: number
 }): Promise<ProductDTO[]> => {
   const queryParams = new URLSearchParams()
@@ -64,12 +64,11 @@ export const filterProducts = async (params?: {
   if (params?.ageRange) queryParams.append('ageRange', params.ageRange)
   if (params?.categoryId) queryParams.append('categoryId', params.categoryId.toString())
   if (params?.brandId) queryParams.append('brandId', params.brandId.toString())
-  if (params?.status) queryParams.append('status', params.status)
+  if (params?.status !== undefined) queryParams.append('status', params.status.toString())
   if (params?.promotionId) queryParams.append('promotionId', params.promotionId.toString())
 
-  // const endpoint = `/products/customer-filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
   const endpoint = `/products/admin-filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
-  const response = await apiGet<ViewProductDto[]>(endpoint)
+  const response = await apiGet<ProductDTO[]>(endpoint)
   return response.data
 }
 
@@ -133,18 +132,8 @@ export const updateProduct = async (productId: number, data: UpdateProductDto, i
  * Change product status (Admin only)
  * PUT /api/products/status/{productId}
  */
-// export const changeProductStatus = async (productId: number): Promise<{ message: string }> => {
-//   const form = new FormData()
-//   const response = await apiPutForm<{ message: string }>(`/products/status/${productId}`, form)
-//   return response.data
-// }
-export const changeProductStatus = async (
-  productId: number
-): Promise<{ success: boolean; message: string }> => {
+export const changeProductStatus = async (productId: number): Promise<{ message: string }> => {
   const form = new FormData()
-  const response = await apiPutForm<{ success: boolean; message: string }>(
-    `/products/status/${productId}`,
-    form
-  )
+  const response = await apiPutForm<{ message: string }>(`/products/status/${productId}`, form)
   return response.data
 }

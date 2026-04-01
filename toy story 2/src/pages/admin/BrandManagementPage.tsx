@@ -21,6 +21,7 @@ const BrandManagementPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const [statusFilter, setStatusFilter] = useState<0 | 1 | undefined>(undefined);
 
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const page = Math.max(1, Number(searchParams.get('page') || '1'));
@@ -44,15 +45,16 @@ const BrandManagementPage: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, [location.search]);
+  }, [location.search, statusFilter]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
       const q = new URLSearchParams(location.search).get('q') || '';
-      const allBrands = q.trim()
-        ? await filterBrands({ name: q.trim() })
-        : await filterBrands({});
+      const allBrands = await filterBrands({
+        ...(q.trim() ? { name: q.trim() } : {}),
+        ...(statusFilter !== undefined ? { status: statusFilter } : {}),
+      });
       setBrands(allBrands);
     } catch (err) {
       console.error(err);
@@ -147,6 +149,26 @@ const BrandManagementPage: React.FC = () => {
           <Plus size={20} />
           Thêm thương hiệu
         </button>
+      </div>
+
+      <div className="flex gap-2 mb-4">
+        {([
+          { label: 'Tất cả', value: undefined },
+          { label: 'Đang hoạt động', value: 0 },
+          { label: 'Ngừng hoạt động', value: 1 },
+        ] as { label: string; value: typeof statusFilter }[]).map(tab => (
+          <button
+            key={tab.label}
+            onClick={() => { setStatusFilter(tab.value); navigate(location.pathname); }}
+            className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
+              statusFilter === tab.value
+                ? 'bg-red-400 text-white border-red-400'
+                : 'bg-white text-gray-600 border-gray-300 hover:border-red-300'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {error && (

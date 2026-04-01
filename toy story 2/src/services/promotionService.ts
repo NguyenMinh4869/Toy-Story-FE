@@ -102,3 +102,33 @@ export const changePromotionStatus = async (promotionId: number): Promise<{ mess
 export const deletePromotion = async (promotionId: number): Promise<{ message: string }> => {
   return changePromotionStatus(promotionId)
 }
+
+/**
+ * Admin filter — returns ALL promotions (active + inactive) by default.
+ * Pass isActive=true/false to filter by status.
+ * GET /api/promotions/admin-filter
+ */
+export const adminFilterPromotions = async (params?: {
+  name?: string
+  discountType?: number
+  productId?: number
+  categoryId?: number
+  brandId?: number
+  startDate?: string
+  endDate?: string
+  isActive?: boolean
+}): Promise<ViewPromotionSummaryDto[]> => {
+  const queryParams = new URLSearchParams()
+  if (params?.name) queryParams.append('name', params.name)
+  if (params?.discountType !== undefined) queryParams.append('discountType', String(params.discountType))
+  if (params?.productId !== undefined) queryParams.append('productId', String(params.productId))
+  if (params?.categoryId !== undefined) queryParams.append('categoryId', String(params.categoryId))
+  if (params?.brandId !== undefined) queryParams.append('brandId', String(params.brandId))
+  if (params?.startDate) queryParams.append('startDate', params.startDate)
+  if (params?.endDate) queryParams.append('endDate', params.endDate)
+  if (params?.isActive !== undefined) queryParams.append('isActive', String(params.isActive))
+
+  const endpoint = `/promotions/admin-filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+  const response = await apiGet<ViewPromotionSummaryDto[]>(endpoint)
+  return response.data
+}

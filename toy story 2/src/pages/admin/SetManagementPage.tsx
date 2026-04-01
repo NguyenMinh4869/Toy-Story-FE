@@ -4,7 +4,7 @@ import { Plus } from 'lucide-react';
 import SetListTable from '../../components/admin/SetListTable';
 import Modal from '../../components/ui/Modal';
 import {
-  getSets,
+  adminFilterSets,
   getSetById,
   createSet,
   updateSet,
@@ -26,6 +26,7 @@ const SetManagementPage: React.FC = () => {
   const [sets, setSets] = useState<ViewSetDetailDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<0 | 1 | 2 | undefined>(undefined);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentSet, setCurrentSet] = useState<ViewSetDetailDto | null>(null);
@@ -71,9 +72,11 @@ const SetManagementPage: React.FC = () => {
 
   useEffect(() => {
     fetchData();
+  }, [statusFilter]);
 
+  useEffect(() => {
     // Fetch all products for the dropdown in the modal
-    filterProducts({ status: 'Active' })
+    filterProducts({ status: 0 })
       .then(setProducts)
       .catch(() => setError('Failed to load products for selection'));
 
@@ -108,7 +111,7 @@ const SetManagementPage: React.FC = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const data = await getSets();
+      const data = await adminFilterSets({ status: statusFilter });
       setSets(data);
     } catch (err) {
       console.error(err);
@@ -263,6 +266,27 @@ const SetManagementPage: React.FC = () => {
           <Plus size={20} />
           Thêm bộ sưu tập
         </button>
+      </div>
+
+      <div className="flex gap-2 mb-4">
+        {([
+          { label: 'Tất cả', value: undefined },
+          { label: 'Đang bán', value: 0 },
+          { label: 'Ngừng bán', value: 1 },
+          { label: 'Hết hàng', value: 2 },
+        ] as { label: string; value: typeof statusFilter }[]).map(tab => (
+          <button
+            key={tab.label}
+            onClick={() => { setStatusFilter(tab.value); navigate(location.pathname); }}
+            className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
+              statusFilter === tab.value
+                ? 'bg-red-400 text-white border-red-400'
+                : 'bg-white text-gray-600 border-gray-300 hover:border-red-300'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {error && (

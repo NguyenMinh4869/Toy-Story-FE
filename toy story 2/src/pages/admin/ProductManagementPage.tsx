@@ -52,10 +52,12 @@ const ProductManagementPage: React.FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   const [allProducts, setAllProducts] = useState<ViewProductDto[]>([]);
+  // 0 = Active, 1 = Inactive, 2 = OutOfStock (matches C# ProductStatus enum $int32)
+  const [statusFilter, setStatusFilter] = useState<0 | 1 | 2 | undefined>(undefined);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [statusFilter]);
 
   const fetchData = async () => {
     try {
@@ -63,7 +65,7 @@ const ProductManagementPage: React.FC = () => {
       const [brandsData, categoriesData, productsData] = await Promise.all([
         getActiveBrands(),
         getCategories(),
-        filterProducts({})
+        filterProducts({ status: statusFilter })
       ]);
       setAllProducts(productsData);
       setBrands(brandsData);
@@ -215,6 +217,27 @@ const ProductManagementPage: React.FC = () => {
         >
           <Plus size={20} /> Thêm sản phẩm
         </button>
+      </div>
+
+      <div className="flex gap-2 mb-4">
+        {([
+          { label: 'Tất cả', value: undefined },
+          { label: 'Đang bán', value: 0 },
+          { label: 'Ngừng bán', value: 1 },
+          { label: 'Hết hàng', value: 2 },
+        ] as { label: string; value: typeof statusFilter }[]).map(tab => (
+          <button
+            key={tab.label}
+            onClick={() => { setStatusFilter(tab.value); navigate(location.pathname); }}
+            className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
+              statusFilter === tab.value
+                ? 'bg-red-400 text-white border-red-400'
+                : 'bg-white text-gray-600 border-gray-300 hover:border-red-300'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {loading && <div className="text-center py-4">Loading...</div>}

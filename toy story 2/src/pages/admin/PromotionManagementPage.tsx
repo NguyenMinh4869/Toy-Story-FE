@@ -4,7 +4,7 @@ import { PlusIcon } from '@heroicons/react/24/outline';
 import PromotionListTable from '../../components/admin/PromotionListTable';
 import Modal from '../../components/ui/Modal';
 import {
-  getPromotions,
+  adminFilterPromotions,
   getPromotionById,
   createPromotion,
   updatePromotion,
@@ -32,6 +32,7 @@ const PromotionManagementPage: React.FC = () => {
   const [brands, setBrands] = useState<ViewBrandDto[]>([]);
   const [categories, setCategories] = useState<ViewCategoryDto[]>([]);
   const [products, setProducts] = useState<ViewProductDto[]>([]);
+  const [isActiveFilter, setIsActiveFilter] = useState<boolean | undefined>(undefined);
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -92,7 +93,7 @@ const PromotionManagementPage: React.FC = () => {
     try {
       setLoading(true);
       const [promotionsData, brandsData, categoriesData, productsData] = await Promise.all([
-        getPromotions(),
+        adminFilterPromotions({ isActive: isActiveFilter }),
         getActiveBrands(),
         getCategories(),
         getActiveProducts(),
@@ -111,7 +112,7 @@ const PromotionManagementPage: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [isActiveFilter]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -236,6 +237,26 @@ const PromotionManagementPage: React.FC = () => {
           <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
           Thêm khuyến mãi
         </button>
+      </div>
+
+      <div className="flex gap-2 mb-4">
+        {([
+          { label: 'Tất cả', value: undefined },
+          { label: 'Đang hoạt động', value: true },
+          { label: 'Ngừng hoạt động', value: false },
+        ] as { label: string; value: typeof isActiveFilter }[]).map(tab => (
+          <button
+            key={tab.label}
+            onClick={() => { setIsActiveFilter(tab.value); navigate(location.pathname); }}
+            className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
+              isActiveFilter === tab.value
+                ? 'bg-red-400 text-white border-red-400'
+                : 'bg-white text-gray-600 border-gray-300 hover:border-red-300'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {error && (

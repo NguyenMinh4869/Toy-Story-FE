@@ -64,3 +64,21 @@ export const deleteSet = async (id: number): Promise<{ message: string }> => {
   const response = await apiDelete<{ message: string }>(`/sets/${id}`)
   return response.data
 }
+
+/**
+ * Admin filter — returns ALL sets (active + inactive) by default.
+ * Pass status=0 (Active), 1 (Inactive), or 2 (OutOfStock) to filter.
+ * GET /api/sets/admin-filter
+ */
+export const adminFilterSets = async (params?: {
+  name?: string
+  status?: 0 | 1 | 2
+}): Promise<ViewSetDetailDto[]> => {
+  const queryParams = new URLSearchParams()
+  if (params?.name) queryParams.append('name', params.name)
+  if (params?.status !== undefined) queryParams.append('status', String(params.status))
+
+  const endpoint = `/sets/admin-filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+  const response = await apiGet<ViewSetDetailDto[]>(endpoint)
+  return response.data
+}

@@ -46,3 +46,21 @@ export const getCurrentStaffWarehouseId = async (accountId: number): Promise<num
   const staff = await getStaffByAccountId(accountId)
   return staff.warehouseId
 }
+
+/**
+ * Filter staff — returns ALL staff by default.
+ * Pass status=0 (Active) or 1 (Inactive) to filter.
+ * GET /api/staffs/filter
+ */
+export const filterStaff = async (params?: {
+  searchTerm?: string
+  status?: 0 | 1
+}): Promise<ViewStaffDto[]> => {
+  const queryParams = new URLSearchParams()
+  if (params?.searchTerm) queryParams.append('searchTerm', params.searchTerm)
+  if (params?.status !== undefined) queryParams.append('status', String(params.status))
+
+  const endpoint = `/staffs/filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+  const response = await apiGet<ViewStaffDto[]>(endpoint)
+  return response.data
+}
