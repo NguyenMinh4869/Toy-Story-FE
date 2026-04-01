@@ -3,7 +3,7 @@
  * API service for product-related operations matching .NET backend
  */
 
-import { apiGet, apiPostForm, apiPutForm } from './apiClient'
+import { apiGet, apiPostForm, apiPut, apiPutForm } from './apiClient'
 import type { ProductDTO, CreateProductDto, UpdateProductDto } from '../types/ProductDTO'
 
 /**
@@ -132,9 +132,9 @@ export const updateProduct = async (productId: number, data: UpdateProductDto, i
  * Change product status (Admin only)
  * PUT /api/products/status/{productId}
  */
+// productService.ts
 export const changeProductStatus = async (productId: number): Promise<{ message: string }> => {
-  const form = new FormData()
-  const response = await apiPutForm<{ message: string }>(`/products/status/${productId}`, form)
+  const response = await apiPut<{ message: string }>(`/products/status/${productId}`)
   return response.data
 }
 

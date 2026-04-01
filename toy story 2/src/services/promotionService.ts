@@ -6,7 +6,7 @@
  * customer-filter is public.
  */
 
-import { apiGet, apiPostForm, apiPutForm } from './apiClient'
+import { apiGet, apiPostForm, apiPut, apiPutForm } from './apiClient'
 import type { ViewPromotionDto, ViewPromotionSummaryDto } from '../types/PromotionDTO'
 import type { CreatePromotionDto, UpdatePromotionDto } from '../types/PromotionDTO'
 
@@ -91,8 +91,7 @@ export const updatePromotion = async (promotionId: number, data: UpdatePromotion
  * PUT /api/promotions/status/{promotionId}
  */
 export const changePromotionStatus = async (promotionId: number): Promise<{ message: string }> => {
-  const form = new FormData()
-  const response = await apiPutForm<{ message: string }>(`/promotions/status/${promotionId}`, form)
+  const response = await apiPut<{ message: string }>(`/promotions/status/${promotionId}`)
   return response.data
 }
 

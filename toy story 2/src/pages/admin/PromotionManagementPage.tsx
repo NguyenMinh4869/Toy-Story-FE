@@ -1,8 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import { Search } from 'lucide-react';
-import { useDebounce } from '../../hooks/useDebounce';
 import PromotionListTable from '../../components/admin/PromotionListTable';
 import Modal from '../../components/ui/Modal';
 import {
@@ -35,8 +33,6 @@ const PromotionManagementPage: React.FC = () => {
   const [categories, setCategories] = useState<ViewCategoryDto[]>([]);
   const [products, setProducts] = useState<ViewProductDto[]>([]);
   const [isActiveFilter, setIsActiveFilter] = useState<boolean | undefined>(undefined);
-  const [searchTerm, setSearchTerm] = useState(() => new URLSearchParams(window.location.search).get('q') || '');
-  const debouncedSearch = useDebounce(searchTerm, 400);
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,19 +42,6 @@ const PromotionManagementPage: React.FC = () => {
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const page = Math.max(1, Number(searchParams.get('page') || '1'));
   const q = searchParams.get('q') || '';
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const current = params.get('q') || '';
-    if (debouncedSearch === current) return;
-    if (debouncedSearch) {
-      params.set('q', debouncedSearch);
-    } else {
-      params.delete('q');
-    }
-    params.delete('page');
-    navigate(`${location.pathname}?${params.toString()}`, { replace: true });
-  }, [debouncedSearch]);
 
   const filteredPromotions = useMemo(() => {
     if (!q) return promotions;
@@ -256,7 +239,7 @@ const PromotionManagementPage: React.FC = () => {
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-4 items-center">
+      <div className="flex gap-2 mb-4">
         {([
           { label: 'Tất cả', value: undefined },
           { label: 'Đang hoạt động', value: true },
@@ -274,16 +257,6 @@ const PromotionManagementPage: React.FC = () => {
             {tab.label}
           </button>
         ))}
-        <div className="relative">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-          <input
-            type="text"
-            placeholder="Tìm kiếm khuyến mãi..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="pl-9 pr-4 py-1.5 border border-gray-300 rounded-full text-sm focus:outline-none focus:border-red-400 w-56"
-          />
-        </div>
       </div>
 
       {error && (

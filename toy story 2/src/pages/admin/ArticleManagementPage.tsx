@@ -115,12 +115,13 @@ const ArticleManagementPage: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    await confirmAction('Bạn có chắc muốn xóa bài viết này?', async () => {
-      await runAsync(async () => {
-        await deleteArticle(id);
-        await fetchData();
-      }, setError, 'Failed to delete article');
-    });
+    const confirmed = await confirmAction('Bạn có chắc muốn xóa bài viết này?');
+    if (!confirmed) return;
+
+    await runAsync(async () => {
+      await deleteArticle(id);
+      await fetchData();
+    }, setError, 'Failed to delete article');
   };
 
   const insertMarkdown = (prefix: string, suffix: string = '', placeholder: string = '') => {

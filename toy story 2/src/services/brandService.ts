@@ -3,7 +3,7 @@
  * API service for brand-related operations matching .NET backend
  */
 
-import { apiGet, apiPost, apiPostForm, apiPutForm } from './apiClient'
+import { apiGet, apiPostForm, apiPutForm, apiPut } from './apiClient'
 import type { ViewBrandDto, CreateBrandDto, UpdateBrandDto } from '../types/BrandDTO'
 
 // ── Cascading Reactivation types ──────────────────────────────────────────────
@@ -108,19 +108,11 @@ export const updateBrand = async (brandId: number, data: UpdateBrandDto, imageFi
  * Change brand status (toggle Active/Inactive) (Admin only)
  * PUT /api/brand/change-status/{brandId}
  */
-export const changeBrandStatus = async (
-  brandId: number
-): Promise<{
+export const changeBrandStatus = async (brandId: number): Promise<{
   success: boolean
   message: string
-  affectedProducts: string[]
 }> => {
-  const form = new FormData()
-  const response = await apiPutForm<{
-    success: boolean
-    message: string
-    affectedProducts: string[]
-  }>(`/brands/status/${brandId}`, form)
+  const response = await apiPut<{ success: boolean; message: string }>(`/brands/status/${brandId}`)
   return response.data
 }
 

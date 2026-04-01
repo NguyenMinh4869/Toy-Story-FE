@@ -93,6 +93,7 @@ const StaffManagementPage: React.FC = () => {
   };
 
   const handleStatusChange = async (id: number) => {
+  if (!window.confirm('Bạn có chắc chắn muốn thay đổi trạng thái nhân viên này?')) return;
     try {
       await changeStaffStatus(id);
       fetchData();

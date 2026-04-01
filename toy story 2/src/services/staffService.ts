@@ -17,9 +17,8 @@ export const updateStaff = async (accountId: number, data: UpdateStaffDto): Prom
 }
 
 export const changeStaffStatus = async (accountId: number): Promise<{ message: string }> => {
-  const form = new FormData();
-  const response = await apiPutForm<{ message: string }>(`/staffs/status/${accountId}`, form);
-  return response.data;
+  const response = await apiPut<{ message: string }>(`/staffs/status/${accountId}`)
+  return response.data
 }
 
 /**
