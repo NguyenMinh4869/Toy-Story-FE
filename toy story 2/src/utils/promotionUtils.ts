@@ -7,6 +7,7 @@ export interface PromotionInfo {
   label: string;
   hasPromotion: boolean;
   promotionType: 'api' | 'brand' | 'category' | 'product' | 'none';
+  promotionId?: number;
 }
 
 /**
@@ -49,16 +50,32 @@ export const findBestPromotion = (
     return !p.productId && !p.categoryId && !p.brandId;
   });
 
-  // Find the highest percentage discount
-  const bestPromo = applicablePromos
-    .filter(p => p.discountType === 0) // type 0 is percentage
-    .sort((a, b) => (b.discountValue ?? 0) - (a.discountValue ?? 0))[0];
+  // Find the highest reduction
+  let bestReduction = 0;
+  let bestPromo = applicablePromos.length > 0 ? applicablePromos[0] : null;
 
-  if (!bestPromo) {
+  for (const p of applicablePromos) {
+    let reduction = 0;
+    if (p.discountType === 0) { // Percentage
+      reduction = (p.discountValue ?? 0) / 100 * (product.price ?? 0);
+    } else if (p.discountType === 1) { // Fixed Amount
+      reduction = p.discountValue ?? 0;
+    }
+    
+    if (reduction > bestReduction) {
+      bestReduction = reduction;
+      bestPromo = p;
+    }
+  }
+
+  if (!bestPromo || bestReduction <= 0) {
     // Ưu tiên sử dụng giá đã được tính sẵn từ backend nếu frontend không tự map được
     if (product.hasPromotion && (product.finalPrice || product.promotionName)) {
-      const discountValue = product.price && product.finalPrice 
-        ? Math.round((1 - product.finalPrice / product.price) * 100)
+      const reductionFromApi = product.price && product.finalPrice 
+        ? Math.max(0, product.price - product.finalPrice)
+        : 0;
+      const discountValue = product.price && reductionFromApi > 0
+        ? Math.round((reductionFromApi / product.price) * 100)
         : 0;
       
       return {
@@ -85,11 +102,16 @@ export const findBestPromotion = (
     promotionType = 'category';
   }
 
+  const calculatedDiscountValue = product.price && product.price > 0
+    ? Math.round((bestReduction / product.price) * 100)
+    : (bestPromo.discountType === 0 ? bestPromo.discountValue ?? 0 : 0);
+
   return {
-    discountValue: bestPromo.discountValue ?? 0,
+    discountValue: calculatedDiscountValue,
     promotionName: bestPromo.name || 'Khuyến Mãi',
     label,
     hasPromotion: true,
-    promotionType
+    promotionType,
+    promotionId: bestPromo.promotionId
   };
 };

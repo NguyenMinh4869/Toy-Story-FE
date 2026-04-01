@@ -6,6 +6,7 @@ import { BreadcrumbHeader } from "../components/BreadcrumbHeader";
 import { ProductCard } from "../components/ProductCard";
 import type { ViewPromotionDto } from "../types/PromotionDTO";
 import type { ProductDTO } from "../types/ProductDTO";
+import { findBestPromotion } from "../utils/promotionUtils";
 import { motion } from "framer-motion";
 import {
   Gift,
@@ -74,59 +75,56 @@ const PromotionDetailPage: React.FC = () => {
           productList = [];
         }
 
-        // Cập nhật: Sản phẩm nào có nhiều promotion thì lấy promotion lớn nhất.
-        // Dùng allPromos để tính promotion tốt nhất cho từng sản phẩm.
-        // Lọc và tính giá cho danh sách sản phẩm
-        const enriched: ProductDTO[] = [];
-        const currentDiscount = promo.discountType === 0 ? (promo.discountValue ?? 0) : 0;
+        // Cập nhật: Chỉ hiển thị sản phẩm ở trang promotion mà nó được giảm giá sâu nhất.
+        // Điều này giúp tránh việc một sản phẩm xuất hiện ở nhiều trang khuyến mãi với các mức giá khác nhau.
+        const currentPromoId = Number(id);
+        const enriched: ProductDTO[] = productList
+          .map((p) => {
+            const originalPrice = p.price ?? 0;
+            const promoInfo = findBestPromotion(p, allPromos);
 
-        for (const p of productList) {
-          // Các promotion áp dụng được cho sản phẩm
-          const applicablePromos = allPromos.filter(activePromo => {
-            if (!activePromo.isActive || activePromo.discountType !== 0) return false;
-            if (activePromo.productId && activePromo.productId === p.productId) return true;
-            if (activePromo.categoryId && activePromo.categoryId === p.categoryId) return true;
-            if (activePromo.brandId && activePromo.brandId === p.brandId) return true;
-            return !activePromo.productId && !activePromo.categoryId && !activePromo.brandId;
-          });
+            // Nếu sản phẩm có khuyến mãi tốt hơn ở trang khác, ta sẽ ẩn nó khỏi trang hiện tại
+            if (promoInfo.hasPromotion && promoInfo.promotionId && promoInfo.promotionId !== currentPromoId) {
+              return null;
+            }
 
-          if (applicablePromos.length === 0) {
-            enriched.push({
-               ...p,
-               hasPromotion: false,
-               originalPrice: p.price ?? 0,
-               finalPrice: p.price ?? 0,
-               discount: 0
-            } as ProductDTO);
-            continue;
-          }
+            // Nếu utility không tìm thấy nhưng chúng ta đang ở trang của chính promotion đó,
+            // thì tối thiểu phải áp dụng được promotion hiện tại (promo).
+            let finalPrice = originalPrice;
+            let hasPromotion = false;
+            let promotionName = undefined;
+            let discount = 0;
 
-          // Promotion có discount to nhất
-          const highestPromo = applicablePromos.sort(
-            (a, b) => (b.discountValue ?? 0) - (a.discountValue ?? 0)
-          )[0];
+            if (promoInfo.hasPromotion && promoInfo.promotionId === currentPromoId) {
+              hasPromotion = true;
+              promotionName = promoInfo.label;
+              discount = promoInfo.discountValue;
+              finalPrice = originalPrice * (1 - discount / 100);
+            } else {
+              // Fallback to current page promo if it matches or if findBestPromotion somehow missed it
+              const isPercent = promo.discountType === 0;
+              const reduction = isPercent 
+                ? (promo.discountValue ?? 0) / 100 * originalPrice 
+                : (promo.discountValue ?? 0);
+              
+              if (reduction > 0) {
+                hasPromotion = true;
+                promotionName = promo.name ?? undefined;
+                finalPrice = originalPrice - reduction;
+                discount = Math.round((reduction / originalPrice) * 100);
+              }
+            }
 
-          // =========================
-          // ĐÃ GỠ BỎ LUẬT ẨN SẢN PHẨM: 
-          // Do việc ẩn sản phẩm khiến các trang có % thấp hơn (như 20%) bị trắng trơn 
-          // vì bị các trang % cao (30%, 50%) giật mất hình.
-          // => Quyết định: Vẫn hiển thị bình thường ở mọi trang nó thuộc về, nhưng giá sẽ là giá TỐT NHẤT!
-          // =========================
-
-          // Lấy % tốt nhất (ưu tiên highestPromo)
-          const bestDiscount = highestPromo?.discountValue ?? currentDiscount;
-          const originalPrice = p.price ?? 0;
-          const finalPrice = bestDiscount > 0 ? originalPrice * (1 - bestDiscount / 100) : originalPrice;
-
-          enriched.push({
-            ...p,
-            hasPromotion: bestDiscount > 0,
-            promotionName: highestPromo?.name ?? promo.name ?? undefined,
-            finalPrice,
-            originalPrice,
-            discount: bestDiscount // lưu field ảo 'discount' để map lúc render UI
-          } as ProductDTO);
-        }
+            return {
+              ...p,
+              hasPromotion,
+              promotionName,
+              finalPrice,
+              originalPrice,
+              discount
+            } as ProductDTO;
+          })
+          .filter((p): p is ProductDTO => p !== null);
 
         setProducts(enriched);
       } catch {
@@ -187,7 +185,10 @@ const PromotionDetailPage: React.FC = () => {
     );
   }
 
-  const discountValue = promotion.discountType === 0 ? (promotion.discountValue ?? 0) : 0;
+  const isPercent = promotion.discountType === 0;
+  const discountLabel = isPercent 
+    ? `-${promotion.discountValue}%` 
+    : `-${formatPrice(promotion.discountValue ?? 0)}`;
 
   return (
     <div className="bg-slate-50 min-h-screen pb-20">
@@ -228,9 +229,9 @@ const PromotionDetailPage: React.FC = () => {
               </div>
             )}
             {/* Big discount badge */}
-            {discountValue > 0 && (
+            {(promotion.discountValue ?? 0) > 0 && (
               <div className="absolute top-6 right-6 bg-[#a70001] text-white font-['Tilt_Warp',sans-serif] text-3xl px-6 py-3 rounded-3xl shadow-2xl ring-4 ring-red-100 italic">
-                -{discountValue}%
+                {discountLabel}
               </div>
             )}
           </motion.div>
@@ -262,14 +263,14 @@ const PromotionDetailPage: React.FC = () => {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-2 gap-4 mb-8">
-              {discountValue > 0 && (
+              {(promotion.discountValue ?? 0) > 0 && (
                 <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
                   <div className="flex items-center gap-2 text-red-500 mb-2">
                     <Percent className="w-5 h-5" />
                     <span className="text-xs font-bold uppercase tracking-wide text-gray-500">Giảm giá</span>
                   </div>
-                  <p className="text-3xl font-['Tilt_Warp',sans-serif] text-[#a70001]">
-                    {discountValue}%
+                  <p className={isPercent ? "text-3xl font-['Tilt_Warp',sans-serif] text-[#a70001]" : "text-xl font-bold text-[#a70001]"}>
+                    {discountLabel}
                   </p>
                 </div>
               )}
