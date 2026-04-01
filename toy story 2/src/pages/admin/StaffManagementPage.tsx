@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
+import { useDebounce } from "../../hooks/useDebounce";
 import StaffListTable from "../../components/admin/StaffListTable";
 import {
   filterStaff,
@@ -27,6 +28,8 @@ const StaffManagementPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<0 | 1 | undefined>(undefined);
+  const [searchTerm, setSearchTerm] = useState(() => new URLSearchParams(window.location.search).get('q') || '');
+  const debouncedSearch = useDebounce(searchTerm, 400);
 
   const searchParams = useMemo(
     () => new URLSearchParams(location.search),
@@ -34,6 +37,19 @@ const StaffManagementPage: React.FC = () => {
   );
   const page = Math.max(1, Number(searchParams.get("page") || "1"));
   const q = searchParams.get("q") || "";
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const current = params.get('q') || '';
+    if (debouncedSearch === current) return;
+    if (debouncedSearch) {
+      params.set('q', debouncedSearch);
+    } else {
+      params.delete('q');
+    }
+    params.delete('page');
+    navigate(`${location.pathname}?${params.toString()}`, { replace: true });
+  }, [debouncedSearch]);
 
   const filteredStaff = useMemo(() => {
     if (!q) return staffList;
@@ -127,7 +143,7 @@ const StaffManagementPage: React.FC = () => {
         </button>
       </div>
 
-      <div className="flex gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-4 items-center">
         {([
           { label: 'Tất cả', value: undefined },
           { label: 'Đang hoạt động', value: 0 },
@@ -145,6 +161,16 @@ const StaffManagementPage: React.FC = () => {
             {tab.label}
           </button>
         ))}
+        <div className="relative">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Tìm kiếm nhân viên..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="pl-9 pr-4 py-1.5 border border-gray-300 rounded-full text-sm focus:outline-none focus:border-red-400 w-56"
+          />
+        </div>
       </div>
 
       {error && (

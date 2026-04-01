@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Plus } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
+import { useDebounce } from '../../hooks/useDebounce';
 import SetListTable from '../../components/admin/SetListTable';
 import Modal from '../../components/ui/Modal';
 import {
@@ -12,7 +13,10 @@ import {
   removeProductFromSet,
   updateSetProductQuantity,
   deleteSet,
+  getSetReactivatePreview,
+  reactivateSetBulk,
 } from '../../services/setService';
+import type { SetReactivatePreviewDto, SetAffectedProductDto } from '../../services/setService';
 import { filterProducts } from '../../services/productService';
 import { getWarehouses, getWarehouseById } from '../../services/warehouseService';
 import type { ViewSetDetailDto, CreateSetDto, UpdateSetDto, CreateSetProductDto } from '../../types/SetDTO';
@@ -26,9 +30,19 @@ const SetManagementPage: React.FC = () => {
   const [sets, setSets] = useState<ViewSetDetailDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<0 | 1 | 2 | undefined>(undefined);
+  const [statusFilter, setStatusFilter] = useState<0 | 1 | undefined>(undefined);
 
+  const [confirmSet, setConfirmSet] = useState<ViewSetDetailDto | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Reactivate modal state
+  const [reactivateSet, setReactivateSet] = useState<ViewSetDetailDto | null>(null);
+  const [reactivatePreview, setReactivatePreview] = useState<SetReactivatePreviewDto | null>(null);
+  const [selectedProductIds, setSelectedProductIds] = useState<Set<number>>(new Set());
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [reactivateLoading, setReactivateLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+
   const [currentSet, setCurrentSet] = useState<ViewSetDetailDto | null>(null);
   const [currentSetDetail, setCurrentSetDetail] = useState<ViewSetDetailDto | null>(null);
 
@@ -44,6 +58,22 @@ const SetManagementPage: React.FC = () => {
   const [totalStockByProductId, setTotalStockByProductId] = useState<Record<number, number>>({});
   const location = useLocation();
   const navigate = useNavigate();
+
+  const [searchTerm, setSearchTerm] = useState(() => new URLSearchParams(window.location.search).get('q') || '');
+  const debouncedSearch = useDebounce(searchTerm, 400);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const current = params.get('q') || '';
+    if (debouncedSearch === current) return;
+    if (debouncedSearch) {
+      params.set('q', debouncedSearch);
+    } else {
+      params.delete('q');
+    }
+    params.delete('page');
+    navigate(`${location.pathname}?${params.toString()}`, { replace: true });
+  }, [debouncedSearch]);
 
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const page = Math.max(1, Number(searchParams.get('page') || '1'));
@@ -66,9 +96,9 @@ const SetManagementPage: React.FC = () => {
   // Because ViewSetDto does not contain set items, we can only manage items added/removed during this modal session.
   // Existing items cannot be listed without a dedicated endpoint.
   const [selectedItems, setSelectedItems] = useState<Array<{ productId: number; quantity: number }>>([]);
-  const [pendingAddProductId, setPendingAddProductId] = useState<number>(0);
-  const [pendingAddQuantity, setPendingAddQuantity] = useState<number>(1);
-  const [setItemError, setSetItemError] = useState<string | null>(null);
+  const [isProductTableModalOpen, setIsProductTableModalOpen] = useState(false);
+  const [productTableSearch, setProductTableSearch] = useState('');
+  const [pendingSelectionQtys, setPendingSelectionQtys] = useState<Record<number, number>>({});
 
   useEffect(() => {
     fetchData();
@@ -141,16 +171,8 @@ const SetManagementPage: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      // Final validation before submit
-      for (const item of selectedItems) {
-        const available = totalStockByProductId[item.productId] ?? 0;
-        if (available > 0 && item.quantity > available) {
-          const product = products.find(p => p.productId === item.productId);
-          setError(`Cannot save: quantity for "${product?.name || 'a product'}" (${item.quantity}) exceeds total stock (${available}).`);
-          setLoading(false);
-          return;
-        }
-      }
+      // Final validation before submit — stock check intentionally removed.
+      // Sets are catalog definitions; stock constraints apply at purchase time, not set creation.
 
       if (currentSet?.setId) {
         await updateSet(currentSet.setId, formData as UpdateSetDto, imageFile || undefined);
@@ -206,6 +228,59 @@ const SetManagementPage: React.FC = () => {
     }
   };
 
+  // --- Reactivate modal helpers ---
+  const openReactivateModal = async (set: ViewSetDetailDto) => {
+    setReactivateSet(set);
+    setReactivatePreview(null);
+    setSelectedProductIds(new Set());
+    setPreviewError(null);
+    setPreviewLoading(true);
+    try {
+      const preview = await getSetReactivatePreview(set.setId!);
+      setReactivatePreview(preview);
+      // Pre-select all inactive products by default
+      setSelectedProductIds(new Set(preview.inactiveProducts.map(p => p.productId)));
+    } catch (err) {
+      console.error(err);
+      setPreviewError('Không thể tải danh sách sản phẩm bị ảnh hưởng.');
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const toggleProduct = (productId: number) => {
+    setSelectedProductIds(prev => {
+      const next = new Set(prev);
+      next.has(productId) ? next.delete(productId) : next.add(productId);
+      return next;
+    });
+  };
+
+  const toggleAllProducts = (products: SetAffectedProductDto[]) => {
+    setSelectedProductIds(prev =>
+      prev.size === products.length ? new Set() : new Set(products.map(p => p.productId))
+    );
+  };
+
+  const handleReactivateBulk = async () => {
+    if (!reactivateSet?.setId) return;
+    setReactivateLoading(true);
+    try {
+      await reactivateSetBulk({
+        setId: reactivateSet.setId,
+        productIdsToReactivate: Array.from(selectedProductIds),
+      });
+      setReactivateSet(null);
+      setReactivatePreview(null);
+      await fetchData();
+    } catch (err) {
+      console.error(err);
+      setPreviewError('Không thể kích hoạt lại bộ sưu tập.');
+    } finally {
+      setReactivateLoading(false);
+    }
+  };
+
   const openCreateModal = () => {
     setCurrentSet(null);
     setCurrentSetDetail(null);
@@ -216,8 +291,6 @@ const SetManagementPage: React.FC = () => {
     });
     setImageFile(null);
     setSelectedItems([]);
-    setPendingAddProductId(0);
-    setPendingAddQuantity(1);
     setError(null);
     setIsModalOpen(true);
   };
@@ -232,8 +305,6 @@ const SetManagementPage: React.FC = () => {
     });
     setImageFile(null);
     setSelectedItems([]);
-    setPendingAddProductId(0);
-    setPendingAddQuantity(1);
     setError(null);
     setIsModalOpen(true);
 
@@ -268,12 +339,11 @@ const SetManagementPage: React.FC = () => {
         </button>
       </div>
 
-      <div className="flex gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-4 items-center">
         {([
           { label: 'Tất cả', value: undefined },
           { label: 'Đang bán', value: 0 },
           { label: 'Ngừng bán', value: 1 },
-          { label: 'Hết hàng', value: 2 },
         ] as { label: string; value: typeof statusFilter }[]).map(tab => (
           <button
             key={tab.label}
@@ -287,6 +357,16 @@ const SetManagementPage: React.FC = () => {
             {tab.label}
           </button>
         ))}
+        <div className="relative">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Tìm kiếm bộ sưu tập..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="pl-9 pr-4 py-1.5 border border-gray-300 rounded-full text-sm focus:outline-none focus:border-red-400 w-56"
+          />
+        </div>
       </div>
 
       {error && (
@@ -303,19 +383,14 @@ const SetManagementPage: React.FC = () => {
             <SetListTable
               sets={paginatedSets}
               onEdit={openEditModal}
-              onDelete={async (set) => {
-                if (!set.setId) return;
-                if (!confirm(`Delete set "${set.name || set.setId}"?`)) return;
-                try {
-                  setLoading(true);
-                  setError(null);
-                  await deleteSet(set.setId);
-                  await fetchData();
-                } catch (err) {
-                  console.error(err);
-                  setError('Failed to delete set');
-                } finally {
-                  setLoading(false);
+              onDelete={(set) => {
+                // Inactive sets use the reactivate modal; active sets use the simple deactivate confirm
+                const rawStatus = (set as any).Status ?? (set as any).status;
+                const isActive = rawStatus === 'Đang bán' || rawStatus === 'Active' || rawStatus === 0 || Number(rawStatus) === 0;
+                if (!isActive) {
+                  openReactivateModal(set);
+                } else {
+                  setConfirmSet(set);
                 }
               }}
             />
@@ -400,98 +475,19 @@ const SetManagementPage: React.FC = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-12 gap-2 items-end">
-              <div className="col-span-7">
-                <label className="block text-xs text-gray-600 mb-1">Sản phẩm</label>
-                <select
-                  value={pendingAddProductId}
-                  onChange={(e) => {
-                    setPendingAddProductId(Number(e.target.value));
-                    setSetItemError(null);
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value={0}>Chọn sản phẩm</option>
-                  {products
-                    .filter(p => {
-                      const pid = p.productId || 0;
-                      if (pid <= 0) return false;
-                      return (totalStockByProductId[pid] ?? 0) > 0;
-                    })
-                    .map(p => (
-                      <option key={p.productId} value={p.productId || 0}>
-                        {p.name} (Stock: {totalStockByProductId[p.productId || 0] ?? 0})
-                      </option>
-                    ))}
-                </select>
-              </div>
-
-              <div className="col-span-3">
-                <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs text-gray-600">Số lượng</label>
-                  {pendingAddProductId ? (
-                    <span className="text-[11px] text-gray-500">
-                      Max: {totalStockByProductId[pendingAddProductId] ?? 0}
-                    </span>
-                  ) : null}
-                </div>
-                <input
-                  type="number"
-                  min={1}
-                  max={pendingAddProductId ? (totalStockByProductId[pendingAddProductId] ?? undefined) : undefined}
-                  value={pendingAddQuantity}
-                  onChange={(e) => {
-                    setPendingAddQuantity(Number(e.target.value));
-                    setSetItemError(null);
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div className="col-span-2">
-                <button
-                  type="button"
-                  disabled={!pendingAddProductId || (totalStockByProductId[pendingAddProductId] ?? 0) <= 0}
-                  onClick={() => {
-                    if (!pendingAddProductId) return;
-                    if (pendingAddQuantity < 1) return;
-
-                    const available = totalStockByProductId[pendingAddProductId] ?? 0;
-                    const existingQty = selectedItems.find(i => i.productId === pendingAddProductId)?.quantity ?? 0;
-                    const desiredQty = existingQty + pendingAddQuantity;
-
-                    if (available <= 0) {
-                      setSetItemError('This product has no stock available.');
-                      return;
-                    }
-
-                    if (desiredQty > available) {
-                      setSetItemError(`Quantity cannot exceed total stock (${available}).`);
-                      return;
-                    }
-
-                    setSelectedItems(prev => {
-                      const existing = prev.find(i => i.productId === pendingAddProductId);
-                      if (existing) {
-                        return prev.map(i => i.productId === pendingAddProductId ? { ...i, quantity: i.quantity + pendingAddQuantity } : i);
-                      }
-                      return [...prev, { productId: pendingAddProductId, quantity: pendingAddQuantity }];
-                    });
-
-                    setPendingAddProductId(0);
-                    setPendingAddQuantity(1);
-                    setSetItemError(null);
-                  }}
-                  className="w-full px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Thêm
-                </button>
-              </div>
-            </div>
-
-            {setItemError && (
-              <div className="mt-2 text-sm text-red-600">{setItemError}</div>
-            )}
+            <button
+              type="button"
+              onClick={() => {
+                const init: Record<number, number> = {};
+                selectedItems.forEach(i => { init[i.productId] = i.quantity; });
+                setPendingSelectionQtys(init);
+                setProductTableSearch('');
+                setIsProductTableModalOpen(true);
+              }}
+              className="w-full px-4 py-2.5 border-2 border-dashed border-blue-400 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-medium text-sm"
+            >
+              + Chọn sản phẩm từ danh sách {selectedItems.length > 0 && `(${selectedItems.length} đã chọn)`}
+            </button>
 
             {selectedItems.length > 0 && (
               <div className="mt-3 space-y-2">
@@ -535,6 +531,301 @@ const SetManagementPage: React.FC = () => {
             </button>
           </div>
         </form>
+      </Modal>
+
+      {/* Product Selection Table Modal */}
+      <Modal
+        isOpen={isProductTableModalOpen}
+        onClose={() => setIsProductTableModalOpen(false)}
+        title="Chọn sản phẩm cho bộ sưu tập"
+        size="xl"
+      >
+        {/* Search bar */}
+        <div className="relative mb-3">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Tìm kiếm sản phẩm..."
+            value={productTableSearch}
+            onChange={e => setProductTableSearch(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            autoFocus
+          />
+        </div>
+
+        {/* Product table */}
+        <div className="overflow-y-auto max-h-[420px] border border-gray-200 rounded-lg">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 sticky top-0 z-10">
+              <tr className="border-b border-gray-200">
+                <th className="w-10 px-3 py-2 text-center">
+                  <input
+                    type="checkbox"
+                    className="rounded"
+                    checked={
+                      products.filter(p => (p.productId || 0) > 0).length > 0 &&
+                      products
+                        .filter(p => (p.productId || 0) > 0)
+                        .filter(p => !productTableSearch.trim() || p.name?.toLowerCase().includes(productTableSearch.toLowerCase()))
+                        .every(p => !!pendingSelectionQtys[p.productId!])
+                    }
+                    onChange={e => {
+                      const visible = products
+                        .filter(p => (p.productId || 0) > 0)
+                        .filter(p => !productTableSearch.trim() || p.name?.toLowerCase().includes(productTableSearch.toLowerCase()));
+                      if (e.target.checked) {
+                        setPendingSelectionQtys(prev => {
+                          const next = { ...prev };
+                          visible.forEach(p => { if (!next[p.productId!]) next[p.productId!] = 1; });
+                          return next;
+                        });
+                      } else {
+                        setPendingSelectionQtys(prev => {
+                          const next = { ...prev };
+                          visible.forEach(p => { delete next[p.productId!]; });
+                          return next;
+                        });
+                      }
+                    }}
+                  />
+                </th>
+                <th className="w-14 px-2 py-2"></th>
+                <th className="px-3 py-2 text-left font-semibold text-gray-700">Tên sản phẩm</th>
+                <th className="px-3 py-2 text-right font-semibold text-gray-700">Giá</th>
+                <th className="px-3 py-2 text-center font-semibold text-gray-700 w-24">Số lượng</th>
+              </tr>
+            </thead>
+            <tbody>
+              {products
+                .filter(p => (p.productId || 0) > 0)
+                .filter(p => !productTableSearch.trim() || p.name?.toLowerCase().includes(productTableSearch.toLowerCase()))
+                .map(p => {
+                  const pid = p.productId!;
+                  const stock = totalStockByProductId[pid] ?? 0;
+                  const isChecked = !!pendingSelectionQtys[pid];
+                  const qty = pendingSelectionQtys[pid] ?? 1;
+                  return (
+                    <tr
+                      key={pid}
+                      className={`border-b border-gray-100 transition-colors cursor-pointer ${isChecked ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                      onClick={() => {
+                        if (isChecked) {
+                          setPendingSelectionQtys(prev => { const n = { ...prev }; delete n[pid]; return n; });
+                        } else {
+                          setPendingSelectionQtys(prev => ({ ...prev, [pid]: 1 }));
+                        }
+                      }}
+                    >
+                      <td className="px-3 py-2 text-center" onClick={e => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          className="rounded"
+                          checked={isChecked}
+                          onChange={() => {
+                            if (isChecked) {
+                              setPendingSelectionQtys(prev => { const n = { ...prev }; delete n[pid]; return n; });
+                            } else {
+                              setPendingSelectionQtys(prev => ({ ...prev, [pid]: 1 }));
+                            }
+                          }}
+                        />
+                      </td>
+                      <td className="px-2 py-1.5">
+                        {p.imageUrl
+                          ? <img src={p.imageUrl} alt={p.name || ''} className="h-10 w-10 object-cover rounded" />
+                          : <div className="h-10 w-10 bg-gray-100 rounded flex items-center justify-center text-gray-300 text-xs">N/A</div>
+                        }
+                      </td>
+                      <td className="px-3 py-2">
+                        <div className="font-medium text-gray-800">{p.name}</div>
+                        {p.brandName && <div className="text-xs text-gray-400">{p.brandName}</div>}
+                      </td>
+                      <td className="px-3 py-2 text-right text-gray-700 whitespace-nowrap">
+                        {p.price?.toLocaleString('vi-VN')}đ
+                      </td>
+                      <td className="px-3 py-2 text-center" onClick={e => e.stopPropagation()}>
+                        {isChecked ? (
+                          <input
+                            type="number"
+                            min={1}
+                            value={qty}
+                            onClick={e => e.stopPropagation()}
+                            onChange={e => {
+                              const val = Math.max(1, Number(e.target.value));
+                              setPendingSelectionQtys(prev => ({ ...prev, [pid]: val }));
+                            }}
+                            className="w-16 px-2 py-1 border border-blue-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          />
+                        ) : (
+                          <span className="text-gray-300">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              {products.filter(p =>
+                (p.productId || 0) > 0 &&
+                (!productTableSearch.trim() || p.name?.toLowerCase().includes(productTableSearch.toLowerCase()))
+              ).length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-3 py-8 text-center text-gray-400">Không tìm thấy sản phẩm</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Footer */}
+        <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-200">
+          <span className="text-sm text-gray-600">
+            Đã chọn: <span className="font-semibold text-blue-600">{Object.keys(pendingSelectionQtys).length}</span> sản phẩm
+          </span>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setIsProductTableModalOpen(false)}
+              className="px-4 py-2 text-gray-700 hover:bg-gray-100 border border-gray-300 rounded-lg transition-colors text-sm"
+            >
+              Hủy
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const newItems = Object.entries(pendingSelectionQtys)
+                  .filter(([, qty]) => qty > 0)
+                  .map(([pid, qty]) => ({ productId: Number(pid), quantity: qty }));
+                setSelectedItems(newItems);
+                setIsProductTableModalOpen(false);
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold text-sm"
+            >
+              Xác nhận ({Object.keys(pendingSelectionQtys).length})
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Vietnamese confirmation modal for status toggle */}
+      <Modal
+        isOpen={confirmSet !== null}
+        onClose={() => setConfirmSet(null)}
+        title="Bạn có chắc chắn muốn ngừng bán bộ sưu tập này không?"
+        size="sm"
+      >
+        <div className="flex justify-end gap-3 mt-2">
+          <button
+            type="button"
+            onClick={() => setConfirmSet(null)}
+            className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg border border-gray-300 transition-colors"
+          >
+            Hủy
+          </button>
+          <button
+            type="button"
+            onClick={async () => {
+              if (!confirmSet?.setId) return;
+              const target = confirmSet;
+              setConfirmSet(null);
+              try {
+                setLoading(true);
+                setError(null);
+                await deleteSet(target.setId!);
+                await fetchData();
+              } catch (err) {
+                console.error(err);
+                setError('Không thể thay đổi trạng thái bộ sưu tập');
+              } finally {
+                setLoading(false);
+              }
+            }}
+            className="px-4 py-2 text-white rounded-lg transition-colors font-semibold bg-red-500 hover:bg-red-600"
+          >
+            Đồng ý
+          </button>
+        </div>
+      </Modal>
+
+      {/* Reactivate Set Modal — shows inactive products with checkboxes */}
+      <Modal
+        isOpen={reactivateSet !== null}
+        onClose={() => { setReactivateSet(null); setReactivatePreview(null); }}
+        title={`Kích hoạt bộ sưu tập: ${reactivateSet?.name || ''}`}
+        size="lg"
+      >
+        {previewLoading ? (
+          <div className="text-center py-8 text-gray-500">Đang tải danh sách sản phẩm...</div>
+        ) : previewError ? (
+          <div className="text-red-600 text-sm py-4">{previewError}</div>
+        ) : (
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              Bộ sưu tập này sẽ được kích hoạt lại. Chọn các sản phẩm bạn muốn kích hoạt đồng thời:
+            </p>
+
+            {reactivatePreview && reactivatePreview.inactiveProducts.length > 0 ? (
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-semibold text-gray-700">
+                    Sản phẩm đang ngừng bán ({reactivatePreview.inactiveProducts.length})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => toggleAllProducts(reactivatePreview.inactiveProducts)}
+                    className="text-xs text-blue-600 hover:underline"
+                  >
+                    {selectedProductIds.size === reactivatePreview.inactiveProducts.length
+                      ? 'Bỏ chọn tất cả'
+                      : 'Chọn tất cả'}
+                  </button>
+                </div>
+                <ul className="border border-gray-200 rounded-lg divide-y divide-gray-100 max-h-64 overflow-y-auto">
+                  {reactivatePreview.inactiveProducts.map(p => (
+                    <li
+                      key={p.productId}
+                      onClick={() => toggleProduct(p.productId)}
+                      className={`flex items-center gap-3 px-4 py-2 cursor-pointer transition-colors border-l-4 ${
+                        selectedProductIds.has(p.productId)
+                          ? 'bg-green-50 border-green-500'
+                          : 'bg-white border-transparent hover:bg-gray-50'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedProductIds.has(p.productId)}
+                        onChange={() => toggleProduct(p.productId)}
+                        onClick={e => e.stopPropagation()}
+                        className="accent-green-500"
+                      />
+                      <span className="text-sm text-gray-800">{p.name}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 italic">
+                Không có sản phẩm nào đang ngừng bán trong bộ sưu tập này.
+              </p>
+            )}
+
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                type="button"
+                onClick={() => { setReactivateSet(null); setReactivatePreview(null); }}
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg border border-gray-300 transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                disabled={reactivateLoading}
+                onClick={handleReactivateBulk}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors disabled:opacity-50"
+              >
+                {reactivateLoading ? 'Đang xử lý...' : 'Kích hoạt'}
+              </button>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );

@@ -19,16 +19,16 @@ const PromotionListTable: React.FC<PromotionListTableProps> = ({
         <thead className="bg-gray-50">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Name
+              Tên
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Date Range
+              Thời gian
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Status
+              Trạng thái
             </th>
             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Actions
+              Hành động
             </th>
           </tr>
         </thead>
@@ -54,16 +54,15 @@ const PromotionListTable: React.FC<PromotionListTableProps> = ({
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <button
-                  onClick={() => promotion.promotionId && onStatusChange(promotion.promotionId)}
+                <span
                   className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                     promotion.isActive
                       ? 'bg-green-100 text-green-800'
                       : 'bg-red-100 text-red-800'
                   }`}
                 >
-                  {promotion.isActive ? 'Active' : 'Inactive'}
-                </button>
+                  {promotion.isActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}
+                </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <div className="flex justify-end space-x-2">
@@ -71,7 +70,7 @@ const PromotionListTable: React.FC<PromotionListTableProps> = ({
                     onClick={() => onEdit(promotion)}
                     className="text-blue-600 hover:text-blue-900 text-xs font-medium flex items-center gap-1"
                   >
-                    <Edit size={14} /> EDIT
+                    <Edit size={14} /> Chỉnh sửa
                   </button>
                   <button
                     onClick={() => promotion.promotionId && onStatusChange(promotion.promotionId)}
@@ -82,9 +81,9 @@ const PromotionListTable: React.FC<PromotionListTableProps> = ({
                     }`}
                   >
                     {promotion.isActive ? (
-                      <><PowerOff size={14} /> DISABLE</>
+                      <><PowerOff size={14} /> Ngừng hoạt động</>
                     ) : (
-                      <><Power size={14} /> ENABLE</>
+                      <><Power size={14} /> Kích hoạt</>
                     )}
                   </button>
                 </div>

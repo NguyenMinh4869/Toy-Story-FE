@@ -1,6 +1,21 @@
 import { apiGet, apiPostForm, apiPutForm, apiPost, apiDelete, apiPut } from './apiClient'
 import type { ViewSetDetailDto, CreateSetDto, UpdateSetDto, CreateSetProductDto, CreateSetResponseDto } from '../types/SetDTO'
 
+export interface SetAffectedProductDto {
+  productId: number
+  name: string
+  status: string
+}
+
+export interface SetReactivatePreviewDto {
+  inactiveProducts: SetAffectedProductDto[]
+}
+
+export interface SetReactivateBulkDto {
+  setId: number
+  productIdsToReactivate: number[]
+}
+
 export const getSets = async (): Promise<ViewSetDetailDto[]> => {
   const response = await apiGet<ViewSetDetailDto[]>('/sets')
   return response.data
@@ -67,12 +82,12 @@ export const deleteSet = async (id: number): Promise<{ message: string }> => {
 
 /**
  * Admin filter — returns ALL sets (active + inactive) by default.
- * Pass status=0 (Active), 1 (Inactive), or 2 (OutOfStock) to filter.
+ * Pass status=0 (Active) or 1 (Inactive) to filter.
  * GET /api/sets/admin-filter
  */
 export const adminFilterSets = async (params?: {
   name?: string
-  status?: 0 | 1 | 2
+  status?: 0 | 1
 }): Promise<ViewSetDetailDto[]> => {
   const queryParams = new URLSearchParams()
   if (params?.name) queryParams.append('name', params.name)
@@ -81,4 +96,15 @@ export const adminFilterSets = async (params?: {
   const endpoint = `/sets/admin-filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
   const response = await apiGet<ViewSetDetailDto[]>(endpoint)
   return response.data
+}
+
+export const getSetReactivatePreview = async (id: number): Promise<SetReactivatePreviewDto> => {
+  const response = await apiGet<{ statusCode: number; message: string; data: SetReactivatePreviewDto }>(
+    `/sets/${id}/reactivate-preview`
+  )
+  return response.data.data
+}
+
+export const reactivateSetBulk = async (dto: SetReactivateBulkDto): Promise<void> => {
+  await apiPost('/sets/reactivate-bulk', dto)
 }

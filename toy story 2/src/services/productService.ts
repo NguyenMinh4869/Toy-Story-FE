@@ -137,3 +137,20 @@ export const changeProductStatus = async (productId: number): Promise<{ message:
   const response = await apiPutForm<{ message: string }>(`/products/status/${productId}`, form)
   return response.data
 }
+
+export interface ProductAffectedSetDto {
+  setId: number
+  name: string
+  status: string
+}
+
+export interface ProductDeactivatePreviewDto {
+  affectedSets: ProductAffectedSetDto[]
+}
+
+export const getProductDeactivatePreview = async (productId: number): Promise<ProductDeactivatePreviewDto> => {
+  const response = await apiGet<{ statusCode: number; message: string; data: ProductDeactivatePreviewDto }>(
+    `/products/${productId}/deactivate-preview`
+  )
+  return response.data.data
+}

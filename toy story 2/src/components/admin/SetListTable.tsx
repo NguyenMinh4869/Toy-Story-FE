@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Power, PowerOff } from 'lucide-react';
 import type { ViewSetDetailDto } from '../../types/SetDTO';
 
 interface SetListTableProps {
@@ -23,7 +23,17 @@ const SetListTable: React.FC<SetListTableProps> = ({ sets, onEdit, onDelete }) =
           </tr>
         </thead>
         <tbody>
-          {sets.map((set) => (
+          {sets.map((set) => {
+            console.log("SET DATA ROW:", set);
+            // Backend returns status as Vietnamese display string via EnumHelper.GetDisplayName
+            // "Đang bán" = Active (0), "Ngừng bán" = Inactive (1)
+            const rawStatus = (set as any).Status ?? (set as any).status;
+            const isActive =
+              rawStatus === 'Đang bán' ||
+              rawStatus === 'Active' ||
+              rawStatus === 0 ||
+              Number(rawStatus) === 0;
+            return (
             <tr key={set.setId} className="bg-white border-b hover:bg-gray-50">
               <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                 <div className="flex items-center">
@@ -53,12 +63,12 @@ const SetListTable: React.FC<SetListTableProps> = ({ sets, onEdit, onDelete }) =
               <td className="px-6 py-4">
                 <span
                   className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    set.status === 0
+                    isActive
                       ? 'bg-green-100 text-green-800'
-                      : 'bg-gray-100 text-gray-800'
+                      : 'bg-red-100 text-red-800'
                   }`}
                 >
-                  {set.status === 0 ? 'Đang hoạt động' : set.status === 1 ? 'Hết hàng' : 'Vô hiệu hóa'}
+                  {isActive ? 'Đang bán' : 'Ngừng bán'}
                 </span>
               </td>
               <td className="px-6 py-4">
@@ -71,14 +81,23 @@ const SetListTable: React.FC<SetListTableProps> = ({ sets, onEdit, onDelete }) =
                   </button>
                   <button
                     onClick={() => onDelete(set)}
-                    className="text-red-600 hover:text-red-900 text-xs font-medium flex items-center gap-1"
+                    className={`text-xs font-medium flex items-center gap-1 ${
+                      isActive
+                        ? 'text-yellow-600 hover:text-yellow-900'
+                        : 'text-green-600 hover:text-green-900'
+                    }`}
                   >
-                    <Trash2 size={14} /> Xóa
+                    {isActive ? (
+                      <><PowerOff size={14} /> Ngừng bán</>
+                    ) : (
+                      <><Power size={14} /> Kích hoạt</>
+                    )}
                   </button>
                 </div>
               </td>
             </tr>
-          ))}
+          );
+          })}
           {sets.length === 0 && (
             <tr>
               <td colSpan={6} className="px-6 py-4 text-center text-gray-500">

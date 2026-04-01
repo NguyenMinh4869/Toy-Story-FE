@@ -3,8 +3,43 @@
  * API service for brand-related operations matching .NET backend
  */
 
-import { apiGet, apiPostForm, apiPutForm } from './apiClient'
+import { apiGet, apiPost, apiPostForm, apiPutForm } from './apiClient'
 import type { ViewBrandDto, CreateBrandDto, UpdateBrandDto } from '../types/BrandDTO'
+
+// ── Cascading Reactivation types ──────────────────────────────────────────────
+
+export interface AffectedProductDto {
+  productId: number
+  name: string
+  status: string
+}
+
+export interface AffectedPromotionDto {
+  promotionId: number
+  name: string
+  isActive: boolean
+}
+
+export interface AffectedSetDto {
+  setId: number
+  name: string
+  status: string
+}
+
+export interface BrandActionPreviewDto {
+  brandId: number
+  brandName: string
+  affectedProducts: AffectedProductDto[]
+  affectedPromotions: AffectedPromotionDto[]
+  affectedSets: AffectedSetDto[]
+}
+
+export interface BrandReactivateBulkDto {
+  brandId: number
+  productIds: number[]
+  promotionIds: number[]
+  setIds: number[]
+}
 
 /**
  * Get active brands (public endpoint)
@@ -86,5 +121,38 @@ export const changeBrandStatus = async (
     message: string
     affectedProducts: string[]
   }>(`/brands/status/${brandId}`, form)
+  return response.data
+}
+
+// ── Cascading Reactivation Endpoints ─────────────────────────────────────────
+
+/**
+ * Get preview of what will be deactivated (Active products + Active promotions)
+ * GET /api/brands/{id}/deactivate-preview
+ */
+export const getDeactivatePreview = async (brandId: number): Promise<BrandActionPreviewDto> => {
+  const response = await apiGet<{ statusCode: number; message: string; data: BrandActionPreviewDto }>(
+    `/brands/${brandId}/deactivate-preview`
+  )
+  return response.data.data
+}
+
+/**
+ * Get preview of what can be selectively reactivated (Inactive products + Inactive promotions)
+ * GET /api/brands/{id}/reactivate-preview
+ */
+export const getReactivatePreview = async (brandId: number): Promise<BrandActionPreviewDto> => {
+  const response = await apiGet<{ statusCode: number; message: string; data: BrandActionPreviewDto }>(
+    `/brands/${brandId}/reactivate-preview`
+  )
+  return response.data.data
+}
+
+/**
+ * Selectively reactivate brand + chosen products + chosen promotions in one transaction
+ * POST /api/brands/reactivate-bulk
+ */
+export const reactivateBulk = async (payload: BrandReactivateBulkDto): Promise<{ statusCode: number; message: string }> => {
+  const response = await apiPost<{ statusCode: number; message: string }>('/brands/reactivate-bulk', payload)
   return response.data
 }

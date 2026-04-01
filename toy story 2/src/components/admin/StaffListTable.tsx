@@ -14,12 +14,12 @@ const StaffListTable: React.FC<StaffListTableProps> = ({ staffList, onEdit, onSt
       <table className="w-full text-sm text-left text-gray-500">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50">
           <tr>
-            <th scope="col" className="px-6 py-3">Staff Info</th>
-            <th scope="col" className="px-6 py-3">Contact</th>
-            <th scope="col" className="px-6 py-3">Warehouse</th>
-            <th scope="col" className="px-6 py-3">Role</th>
-            <th scope="col" className="px-6 py-3">Status</th>
-            <th scope="col" className="px-6 py-3">Action</th>
+            <th scope="col" className="px-6 py-3">Thông tin nhân viên</th>
+            <th scope="col" className="px-6 py-3">Liên hệ</th>
+            <th scope="col" className="px-6 py-3">Kho</th>
+            <th scope="col" className="px-6 py-3">Vai trò</th>
+            <th scope="col" className="px-6 py-3">Trạng thái</th>
+            <th scope="col" className="px-6 py-3">Hành động</th>
           </tr>
         </thead>
         <tbody>
@@ -40,16 +40,15 @@ const StaffListTable: React.FC<StaffListTableProps> = ({ staffList, onEdit, onSt
                 {staff.role}
               </td>
               <td className="px-6 py-4">
-                <button
-                  onClick={() => staff.accountId && onStatusChange(staff.accountId)}
-                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full cursor-pointer ${
+                <span
+                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                     (staff.status?.toLowerCase() === 'active' || staff.status?.toLowerCase() === 'đang hoạt động')
                       ? 'bg-green-100 text-green-800'
                       : 'bg-red-100 text-red-800'
                   }`}
                 >
                   {staff.status}
-                </button>
+                </span>
               </td>
               <td className="px-6 py-4">
                 <div className="flex items-center gap-4">
@@ -57,7 +56,7 @@ const StaffListTable: React.FC<StaffListTableProps> = ({ staffList, onEdit, onSt
                     onClick={() => onEdit(staff)}
                     className="text-blue-600 hover:text-blue-900 text-xs font-medium flex items-center gap-1"
                   >
-                    <Edit size={14} /> EDIT
+                    <Edit size={14} /> Chỉnh sửa
                   </button>
                   <button
                     onClick={() => staff.accountId && onStatusChange(staff.accountId)}
@@ -68,9 +67,9 @@ const StaffListTable: React.FC<StaffListTableProps> = ({ staffList, onEdit, onSt
                     }`}
                   >
                     {(staff.status?.toLowerCase() === 'active' || staff.status?.toLowerCase() === 'đang hoạt động') ? (
-                      <><PowerOff size={14} /> DISABLE</>
+                      <><PowerOff size={14} /> Ngừng hoạt động</>
                     ) : (
-                      <><Power size={14} /> ENABLE</>
+                      <><Power size={14} /> Kích hoạt</>
                     )}
                   </button>
                 </div>

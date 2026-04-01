@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Pagination from '../../components/ui/Pagination';
-import { Plus } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
+import { useDebounce } from '../../hooks/useDebounce';
 import ProductListTable from '../../components/admin/ProductListTable';
 import Modal from '../../components/ui/Modal';
 import {
@@ -9,7 +10,9 @@ import {
   updateProduct,
   changeProductStatus,
   filterProducts,
-  getProductById
+  getProductById,
+  getProductDeactivatePreview,
+  type ProductDeactivatePreviewDto
 } from '../../services/productService';
 import { getActiveBrands } from '../../services/brandService';
 import { getCategories } from '../../services/categoryService';
@@ -17,7 +20,6 @@ import type { ViewProductDto, CreateProductDto, UpdateProductDto, GenderTarget, 
 import type { ViewBrandDto } from '../../types/BrandDTO';
 import type { ViewCategoryDto } from '../../types/CategoryDTO';
 import { confirmAction } from '../../utils/confirmAction';
-import { runAsync } from '../../utils/runAsync';
 import { useClientPagination } from '../../hooks/useClientPagination';
 
 const PAGE_SIZE = 5;
@@ -37,6 +39,11 @@ const ProductManagementPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<ViewProductDto | null>(null);
 
+  // Deactivate preview state
+  const [deactivatePreview, setDeactivatePreview] = useState<ProductDeactivatePreviewDto | null>(null);
+  const [deactivatingProductId, setDeactivatingProductId] = useState<number | null>(null);
+  const [_previewLoading, setPreviewLoading] = useState(false);
+
   // Form State
   const [formData, setFormData] = useState<Partial<CreateProductDto>>({
     Name: '',
@@ -54,10 +61,13 @@ const ProductManagementPage: React.FC = () => {
   const [allProducts, setAllProducts] = useState<ViewProductDto[]>([]);
   // 0 = Active, 1 = Inactive, 2 = OutOfStock (matches C# ProductStatus enum $int32)
   const [statusFilter, setStatusFilter] = useState<0 | 1 | 2 | undefined>(undefined);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [brandFilter, setBrandFilter] = useState<number | undefined>(undefined);
+  const debouncedSearch = useDebounce(searchTerm, 400);
 
   useEffect(() => {
     fetchData();
-  }, [statusFilter]);
+  }, [statusFilter, debouncedSearch, brandFilter]);
 
   const fetchData = async () => {
     try {
@@ -65,7 +75,11 @@ const ProductManagementPage: React.FC = () => {
       const [brandsData, categoriesData, productsData] = await Promise.all([
         getActiveBrands(),
         getCategories(),
-        filterProducts({ status: statusFilter })
+        filterProducts({
+          status: statusFilter,
+          ...(debouncedSearch.trim() ? { searchTerm: debouncedSearch.trim() } : {}),
+          ...(brandFilter !== undefined ? { brandId: brandFilter } : {}),
+        })
       ]);
       setAllProducts(productsData);
       setBrands(brandsData);
@@ -114,54 +128,59 @@ const ProductManagementPage: React.FC = () => {
     }
   };
 
-  const filteredProducts = useMemo(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const q = searchParams.get('q') || '';
-
-    return allProducts.filter(p => {
-      if (!q) return true;
-      const lowerCaseQuery = q.toLowerCase();
-      return p.name?.toLowerCase().includes(lowerCaseQuery) ||
-        p.brandName?.toLowerCase().includes(lowerCaseQuery) ||
-        p.categoryName?.toLowerCase().includes(lowerCaseQuery);
-    });
-  }, [allProducts, location.search]);
-
   const {
     paginatedItems: paginatedProducts,
     totalPages,
     currentPage: safePage
-  } = useClientPagination(filteredProducts, page, PAGE_SIZE)
-
-  // const handleStatusChange = async (id: number) => {
-  //   await confirmAction('Are you sure you want to change status of this product?', async () => {
-  //     await runAsync(async () => {
-  //       setError(null)
-  //       await changeProductStatus(id)
-  //       await fetchData()
-  //     }, setError, 'Failed to change product status')
-  //   })
-  // };
+  } = useClientPagination(allProducts, page, PAGE_SIZE)
 
   const handleStatusChange = async (id: number) => {
-  const confirmed = await confirmAction(
-    'Are you sure you want to change status of this product?'
-  );
+    const product = allProducts.find(p => p.productId === id);
+    const isActive = product?.status?.toLowerCase() === 'đang bán' || product?.status?.toLowerCase() === 'active';
 
-  if (!confirmed) return;
+    if (isActive && product?.productId) {
+      try {
+        setPreviewLoading(true);
+        const preview = await getProductDeactivatePreview(product.productId);
+        if (preview.affectedSets.length > 0) {
+          setDeactivatePreview(preview);
+          setDeactivatingProductId(id);
+          return;
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setPreviewLoading(false);
+      }
+    }
 
-  try {
-    setError(null);
+    const confirmed = await confirmAction(
+      'Bạn có chắc chắn muốn thay đổi trạng thái sản phẩm này?'
+    );
+    if (!confirmed) return;
 
-    await changeProductStatus(id);
+    try {
+      setError(null);
+      await changeProductStatus(id);
+      await fetchData();
+    } catch (err: any) {
+      console.error(err);
+    }
+  };
 
-    await fetchData(); 
-
-  } catch (err: any) {
-    console.error(err);
-    // toast.error(err.message || 'Failed to change product status');
-  }
-};
+  const handleConfirmDeactivate = async () => {
+    if (!deactivatingProductId) return;
+    try {
+      setError(null);
+      await changeProductStatus(deactivatingProductId);
+      await fetchData();
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setDeactivatePreview(null);
+      setDeactivatingProductId(null);
+    }
+  };
 
   const openCreateModal = () => {
     setCurrentProduct(null);
@@ -219,12 +238,11 @@ const ProductManagementPage: React.FC = () => {
         </button>
       </div>
 
-      <div className="flex gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-4 items-center">
         {([
           { label: 'Tất cả', value: undefined },
           { label: 'Đang bán', value: 0 },
           { label: 'Ngừng bán', value: 1 },
-          { label: 'Hết hàng', value: 2 },
         ] as { label: string; value: typeof statusFilter }[]).map(tab => (
           <button
             key={tab.label}
@@ -238,6 +256,24 @@ const ProductManagementPage: React.FC = () => {
             {tab.label}
           </button>
         ))}
+        <div className="relative">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Tìm kiếm sản phẩm..."
+            value={searchTerm}
+            onChange={e => { setSearchTerm(e.target.value); navigate(location.pathname); }}
+            className="pl-9 pr-4 py-1.5 border border-gray-300 rounded-full text-sm focus:outline-none focus:border-red-400 w-56"
+          />
+        </div>
+        <select
+          value={brandFilter ?? ''}
+          onChange={e => { setBrandFilter(e.target.value ? Number(e.target.value) : undefined); navigate(location.pathname); }}
+          className="px-3 py-1.5 border border-gray-300 rounded-full text-sm focus:outline-none focus:border-red-400"
+        >
+          <option value="">Tất cả thương hiệu</option>
+          {brands.map(b => <option key={b.brandId} value={b.brandId}>{b.name}</option>)}
+        </select>
       </div>
 
       {loading && <div className="text-center py-4">Loading...</div>}
@@ -444,6 +480,44 @@ const ProductManagementPage: React.FC = () => {
             </button>
           </div>
         </form>
+      </Modal>
+
+      {/* Deactivate preview modal */}
+      <Modal
+        isOpen={!!deactivatePreview}
+        onClose={() => { setDeactivatePreview(null); setDeactivatingProductId(null); }}
+        title="Xác nhận vô hiệu hóa sản phẩm"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-gray-700">
+            Vô hiệu hóa sản phẩm này sẽ đồng thời vô hiệu hóa các bộ sưu tập sau:
+          </p>
+          <ul className="max-h-48 overflow-y-auto space-y-1">
+            {deactivatePreview?.affectedSets.map(s => (
+              <li key={s.setId} className="flex items-center gap-2 text-sm text-gray-800">
+                <span className="h-2 w-2 rounded-full bg-yellow-400 flex-shrink-0" />
+                {s.name}
+              </li>
+            ))}
+          </ul>
+          <div className="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => { setDeactivatePreview(null); setDeactivatingProductId(null); }}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-2xl hover:bg-gray-200"
+            >
+              Hủy
+            </button>
+            <button
+              type="button"
+              onClick={handleConfirmDeactivate}
+              className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-2xl hover:bg-red-600"
+            >
+              Đồng ý
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
