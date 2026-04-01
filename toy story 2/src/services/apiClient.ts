@@ -127,6 +127,16 @@ async function apiRequest<T>(
     const data = await response.json()
 
      if (!response.ok) {
+      // Token expired or invalid on a protected endpoint — clear session and redirect
+      if (response.status === 401 && !url.includes('/auth/login')) {
+        localStorage.removeItem('token')
+        localStorage.removeItem('role')
+        localStorage.removeItem('user')
+        localStorage.removeItem('accountId')
+        window.location.href = '/login'
+        throw { message: 'Session expired. Redirecting to login...', status: 401 } as ApiError
+      }
+
     const errorMsg = extractApiErrorMessage(response.status, data)
     if (!silent && response.status !== 404) {
       showToast(errorMsg, "destructive")
