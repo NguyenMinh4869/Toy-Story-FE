@@ -4,13 +4,13 @@ import { useAdminDashboard } from "@/hooks/useDashboard";
 import { Loader2 } from "lucide-react";
 
 const ORDER_STATUS_LABEL_MAP: Record<string, string> = {
-    'đang chờ thanh toán': 'Cho thanh toan',
-    'đã thanh toán': 'Da thanh toan',
-    'đang xử lý': 'Dang xu ly',
-    'đang giao hàng': 'Dang giao hang',
-    'đã giao hàng': 'Da giao hang',
-    'đã nhận hàng': 'Da nhan hang',
-    'đã hủy': 'Da huy',
+    'đang chờ thanh toán': 'Chờ thanh toán',
+    'đã thanh toán': 'Đã thanh toán',
+    'đang xử lý': 'Đang xử lý',
+    'đang giao hàng': 'Đang giao hàng',
+    'đã giao hàng': 'Đã giao hàng',
+    'đã nhận hàng': 'Đã nhận hàng',
+    'đã hủy': 'Đã hủy',
 };
 
 const toVietnameseOrderStatus = (label: string) => {
@@ -39,14 +39,14 @@ const OrderStatusChart = () => {
 
     return (
         <ChartWidget
-            title="Phân bố trạng thái ngân hàng"
+            title="Phân bố trạng thái đơn hàng"
             data={data.orderStatusDistribution.map((item) => ({
                 ...item,
                 label: toVietnameseOrderStatus(item.label),
             }))}
             type="pie"
             horizontal={false}
-            description="Tỷ lệ ngân hàng theo trạng thái"
+            description="Tỷ lệ đơn hàng theo trạng thái"
         />
     );
 };

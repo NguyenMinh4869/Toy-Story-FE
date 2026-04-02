@@ -3,8 +3,8 @@
  * Reuses Admin Product Management logic
  */
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Plus } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
+import { useDebounce } from '../../hooks/useDebounce';
 import ProductListTable from '../../components/admin/ProductListTable';
 import Modal from '../../components/ui/Modal';
 import { 
@@ -25,8 +25,12 @@ const StaffProductManagementPage: React.FC = () => {
   const [categories, setCategories] = useState<ViewCategoryDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const location = useLocation();
-  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm, 400);
+  const [statusFilter, setStatusFilter] = useState<0 | 1 | 2 | null>(null);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<ViewProductDto | null>(null);
   
@@ -46,7 +50,7 @@ const StaffProductManagementPage: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, [location.search]);
+  }, [debouncedSearch, statusFilter]);
 
   const fetchData = async () => {
     try {
@@ -55,16 +59,17 @@ const StaffProductManagementPage: React.FC = () => {
         getActiveBrands(),
         getCategories()
       ]);
-      const q = new URLSearchParams(location.search).get('q') || '';
-      const allProducts = q.trim()
-        ? await filterProducts({ searchTerm: q.trim() })
-        : await filterProducts({}); 
+      const query = debouncedSearch.trim();
+      const allProducts = await filterProducts({
+        ...(query ? { searchTerm: query } : {}),
+        ...(statusFilter !== null ? { status: statusFilter } : {})
+      });
       setProducts(allProducts);
       setBrands(brandsData);
       setCategories(categoriesData);
     } catch (err) {
       console.error(err);
-      setError('Failed to load data');
+      setError('Không thể tải dữ liệu');
     } finally {
       setLoading(false);
     }
@@ -94,11 +99,12 @@ const StaffProductManagementPage: React.FC = () => {
     if (!formData.CategoryId || formData.CategoryId <= 0) missing.push('Phân loại');
     if (!formData.BrandId || formData.BrandId <= 0) missing.push('Thương hiệu');
     if (missing.length > 0) {
-      setError(`Vui lòng điền đầy đủ: ${missing.join(', ')}`);
+      setFormError(`Vui lòng điền đầy đủ: ${missing.join(', ')}`);
       return;
     }
     try {
-      setLoading(true);
+      setIsSubmitting(true);
+      setFormError(null);
       if (currentProduct && currentProduct.productId) {
         await updateProduct(currentProduct.productId, formData as UpdateProductDto, imageFile || undefined);
       } else {
@@ -109,9 +115,9 @@ const StaffProductManagementPage: React.FC = () => {
       fetchData();
     } catch (err) {
       console.error(err);
-      setError('Failed to save product');
+      setFormError('Failed to save product');
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -162,19 +168,58 @@ const StaffProductManagementPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  if (loading && products.length === 0) return <div className="text-center py-8">Loading products...</div>;
+  if (loading && products.length === 0) return (
+    <div className="flex flex-col items-center justify-center py-20">
+      <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+      <p className="text-gray-500">Đang tải sản phẩm...</p>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-800">Product Management</h2>
+        <h2 className="text-2xl font-bold text-gray-800">Quản lý sản phẩm</h2>
         <button
           onClick={openAddModal}
           className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors flex items-center gap-2"
         >
           <Plus size={20} />
-          Add Product
+          Thêm sản phẩm
         </button>
+      </div>
+
+      {/* Search & Filter */}
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+        <div className="relative max-w-sm w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Tìm kiếm sản phẩm..."
+            className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
+          />
+        </div>
+        <div className="flex gap-1 p-1 bg-gray-100 rounded-lg">
+          {([
+            { label: 'Tất cả', value: null },
+            { label: 'Đang bán', value: 0 },
+            { label: 'Ngừng bán', value: 1 },
+            { label: 'Hết hàng', value: 2 },
+          ] as { label: string; value: 0 | 1 | 2 | null }[]).map((tab) => (
+            <button
+              key={String(tab.value)}
+              onClick={() => setStatusFilter(tab.value)}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                statusFilter === tab.value
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {error && (
@@ -196,10 +241,16 @@ const StaffProductManagementPage: React.FC = () => {
         onClose={() => {
           setIsModalOpen(false);
           resetForm();
+          setFormError(null);
         }}
         title={currentProduct ? 'Edit Product' : 'Add Product'}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
+          {formError && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-sm">
+              {formError}
+            </div>
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
             <input
@@ -348,16 +399,16 @@ const StaffProductManagementPage: React.FC = () => {
             </button>
             <button
               type="submit"
-              disabled={loading}
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
+              disabled={isSubmitting}
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              {loading && (
+              {isSubmitting && (
                 <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
               )}
-              {loading ? 'Đang xử lý...' : currentProduct ? 'Cập nhật' : 'Thêm mới'}
+              {isSubmitting ? 'Đang xử lý...' : currentProduct ? 'Cập nhật' : 'Thêm mới'}
             </button>
           </div>
         </form>

@@ -33,6 +33,8 @@ interface NotificationContextType {
   unreadCount: number
   notifications: NotificationDto[]
   lastTransferUpdate: number
+  lastNotificationUpdate: number
+  lastPaymentUpdate: number
   markOneAsRead: (id: number) => Promise<void>
   markAllRead: () => Promise<void>
   refetch: () => Promise<void>
@@ -48,11 +50,12 @@ export const useNotifications = (): NotificationContextType => {
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isLoading } = useAuth()
   const { toast } = useToast()
   const [unreadCount, setUnreadCount] = useState(0)
   const [notifications, setNotifications] = useState<NotificationDto[]>([])
   const [lastTransferUpdate, setLastTransferUpdate] = useState(0)
+  const [lastPaymentUpdate, setLastPaymentUpdate] = useState(0)
   const connectionRef = useRef<signalR.HubConnection | null>(null)
 
   const refetch = async () => {
@@ -66,6 +69,11 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
   }
 
   useEffect(() => {
+    // Wait for AuthProvider to finish reading localStorage before acting.
+    // Without this guard the effect fires with isAuthenticated=false on every
+    // cold mount and the connection is never started.
+    if (isLoading) return
+
     if (!isAuthenticated) {
       setUnreadCount(0)
       setNotifications([])
@@ -88,21 +96,51 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
 
     connection.on(
       'ReceiveNotification',
-      (payload: { title: string; body: string; transferId: number; createdAt: string }) => {
-        // Optimistic: increment badge immediately, then fetch real data from server
-        setUnreadCount((prev) => prev + 1)
+      (payload: {
+        type?: string
+        orderId?: number
+        warehouseId?: number | null
+        title?: string
+        body?: string
+        transferId?: number
+        createdAt?: string
+      }) => {
+        console.log('[SignalR] received notification:', payload)
+
+        // Always bump the unified timestamp so Dashboard & Orders re-fetch
         setLastTransferUpdate(Date.now())
-        // Refetch to populate the list with real DB IDs (avoids fake negative IDs)
-        refetch()
-        toast({
-          title: payload.title,
-          description: payload.body,
-          variant: 'default',
-          duration: 5000,
-        })
+
+        if (payload.type === 'NEW_ORDER') {
+          // Increment the red badge only when the order still needs warehouse assignment
+          if (payload.warehouseId === null || payload.warehouseId === undefined) {
+            setUnreadCount((prev) => prev + 1)
+            refetch() // populate notification list with real DB records
+            toast({
+              title: payload.title ?? 'Đơn hàng mới',
+              description: payload.body,
+              variant: 'default',
+              duration: 5000,
+            })
+          }
+        } else {
+          // Legacy / transfer notifications — always badge + toast
+          setUnreadCount((prev) => prev + 1)
+          refetch()
+          toast({
+            title: payload.title ?? 'Thông báo mới',
+            description: payload.body,
+            variant: 'default',
+            duration: 5000,
+          })
+        }
       }
     )
 
+    connection.on('PaymentConfirmed', () => {
+      setLastPaymentUpdate(Date.now())
+    })
+
+    console.log('[SignalR] attempting to connect...')
     connection.start().catch((err: unknown) => {
       console.warn('[SignalR] connection failed:', err)
     })
@@ -112,7 +150,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       connectionRef.current = null
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated])
+  }, [isAuthenticated, isLoading])
 
   const markOneAsRead = async (id: number) => {
     await markAsRead(id)
@@ -130,7 +168,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   return (
     <NotificationContext.Provider
-      value={{ unreadCount, notifications, lastTransferUpdate, markOneAsRead, markAllRead, refetch }}
+      value={{ unreadCount, notifications, lastTransferUpdate, lastNotificationUpdate: lastTransferUpdate, lastPaymentUpdate, markOneAsRead, markAllRead, refetch }}
     >
       {children}
     </NotificationContext.Provider>

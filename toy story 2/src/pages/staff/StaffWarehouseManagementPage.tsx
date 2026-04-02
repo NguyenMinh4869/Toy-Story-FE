@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { Edit, AlertCircle, Trash2, Plus, Search } from 'lucide-react';
 import Modal from '../../components/ui/Modal';
 import {
-  getWarehouseProductsWithDetails,
+  getWarehouseProductsForStaff,
   updateWarehouseProduct,
   addWarehouseProduct,
   removeWarehouseProduct
@@ -14,8 +14,7 @@ import {
 import type { components } from '../../types/generated';
 
 type CreateWarehouseProductDto = components['schemas']['CreateWarehouseProductDto'];
-// Combine both warehouse product shapes since the page needs fields from both DTOs
-type WarehouseProductDto = components['schemas']['ProductStockDto'] & Pick<components['schemas']['ViewWarehouseProductDto'], 'brandName' | 'categoryName' | 'name' | 'totalQuantity'>;
+type WarehouseProductDto = components['schemas']['ViewWarehouseProductDto'];
 import { getStoredUserMetadata } from '../../services/authService';
 import { getCurrentStaffWarehouseId } from '../../services/staffService';
 import { filterProducts } from '../../services/productService';
@@ -26,6 +25,7 @@ const StaffWarehouseManagementPage: React.FC = () => {
   const [products, setProducts] = useState<WarehouseProductDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [warehouseId, setWarehouseId] = useState<number | null>(null);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -75,8 +75,8 @@ const StaffWarehouseManagementPage: React.FC = () => {
       const staffWarehouseId = await getCurrentStaffWarehouseId(metadata.accountId);
       setWarehouseId(staffWarehouseId);
 
-      // Fetch warehouse products with full details (brand/category)
-      const warehouseProducts = await getWarehouseProductsWithDetails(staffWarehouseId);
+      // Fetch via staff endpoint — returns ViewWarehouseProductDto[] with status field
+      const warehouseProducts = await getWarehouseProductsForStaff();
       setProducts(warehouseProducts);
     } catch (err) {
       console.error('Failed to initialize:', err);
@@ -94,7 +94,7 @@ const StaffWarehouseManagementPage: React.FC = () => {
         return;
       }
 
-      const warehouseProducts = await getWarehouseProductsWithDetails(warehouseId);
+      const warehouseProducts = await getWarehouseProductsForStaff();
       setProducts(warehouseProducts);
     } catch (err) {
       console.error('Failed to fetch products:', err);
@@ -103,19 +103,21 @@ const StaffWarehouseManagementPage: React.FC = () => {
     }
   };
 
-  const getStockStatus = (quantity: number | undefined) => {
-    const qty = quantity || 0;
-    if (qty === 0) {
-      return { label: 'Out of Stock', color: 'bg-red-100 text-red-800' };
-    } else if (qty <= 10) {
-      return { label: 'Low Stock', color: 'bg-orange-100 text-orange-800' };
-    }
-    return { label: 'Active', color: 'bg-green-100 text-green-800' };
+  // ── Status badge ─────────────────────────────────────────────────────────
+  // Task 3: if local quantity === 0, override global product status with red "Hết hàng".
+  // Task 2: otherwise map exact Vietnamese strings from EnumHelper.GetDisplayName().
+  const getWarehouseStatusBadge = (status?: string | null, quantity?: number | null) => {
+    if ((quantity ?? 0) === 0)
+      return { label: 'Hết hàng', className: 'bg-red-100 text-red-800' };
+    if (status === 'Đang bán') return { label: 'Đang bán', className: 'bg-green-100 text-green-800' };
+    if (status === 'Hết hàng') return { label: 'Hết hàng', className: 'bg-red-100 text-red-800' };
+    // Ngừng bán or unknown
+    return { label: status ?? '—', className: 'bg-orange-100 text-orange-800' };
   };
 
   const handleEdit = (product: WarehouseProductDto) => {
     setCurrentProduct(product);
-    setQuantity(product.quantity || 0);
+    setQuantity(product.totalQuantity || 0);
     setIsEditModalOpen(true);
   };
 
@@ -162,7 +164,7 @@ const StaffWarehouseManagementPage: React.FC = () => {
     }
 
     try {
-      setLoading(true);
+      setIsSubmitting(true);
       setError(null);
 
       // API expects just the quantity number, not an object
@@ -173,7 +175,7 @@ const StaffWarehouseManagementPage: React.FC = () => {
       console.error('Failed to update product:', err);
       setError(err.message || 'Failed to update product quantity');
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -186,7 +188,7 @@ const StaffWarehouseManagementPage: React.FC = () => {
     }
 
     try {
-      setLoading(true);
+      setIsSubmitting(true);
       setError(null);
 
       const addData: CreateWarehouseProductDto = {
@@ -202,7 +204,7 @@ const StaffWarehouseManagementPage: React.FC = () => {
       console.error('Failed to add product:', err);
       setError(err.message || 'Failed to add product to warehouse');
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -213,7 +215,7 @@ const StaffWarehouseManagementPage: React.FC = () => {
     }
 
     try {
-      setLoading(true);
+      setIsSubmitting(true);
       setError(null);
 
       await removeWarehouseProduct(currentProduct.productWarehouseId);
@@ -223,7 +225,7 @@ const StaffWarehouseManagementPage: React.FC = () => {
       console.error('Failed to remove product:', err);
       setError(err.message || 'Failed to remove product from warehouse');
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -283,7 +285,12 @@ const StaffWarehouseManagementPage: React.FC = () => {
   };
 
   if (loading && (!products || products.length === 0)) {
-    return <div className="text-center py-8">Loading warehouse products...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-gray-500">Đang tải sản phẩm trong kho...</p>
+      </div>
+    );
   }
 
   return (
@@ -333,7 +340,7 @@ const StaffWarehouseManagementPage: React.FC = () => {
                 </tr>
               ) : (
                 products.map((product) => {
-                  const status = getStockStatus(product.quantity);
+                  const badge = getWarehouseStatusBadge(product.status, product.totalQuantity);
                   return (
                     <tr key={product.productWarehouseId} className="bg-white border-b hover:bg-gray-50">
                       <td className="px-3 md:px-6 py-4 font-medium text-gray-900">
@@ -341,10 +348,10 @@ const StaffWarehouseManagementPage: React.FC = () => {
                           <img
                             className="w-8 h-8 md:w-10 md:h-10 rounded-md object-cover flex-shrink-0"
                             src={product.imageUrl || 'https://via.placeholder.com/40'}
-                            alt={product.productName || 'Product'}
+                          alt={product.name || 'Product'}
                           />
                           <div className="min-w-0">
-                            <div className="font-semibold truncate">{product.productName || 'N/A'}</div>
+                            <div className="font-semibold truncate">{product.name || 'N/A'}</div>
                             <div className="text-xs text-gray-500">ID: {product.productId}</div>
                           </div>
                         </div>
@@ -357,14 +364,11 @@ const StaffWarehouseManagementPage: React.FC = () => {
                         {product.price?.toLocaleString()} VND
                       </td>
                       <td className="px-3 md:px-6 py-4 text-center">
-                        <span className="font-semibold">{product.quantity || 0}</span>
+                        <span className="font-semibold">{product.totalQuantity ?? 0}</span>
                       </td>
                       <td className="px-3 md:px-6 py-4">
-                        <span
-                          className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${status.color
-                            }`}
-                        >
-                          {status.label ? "Hoạt động" : "Vô hiệu hóa"}
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${badge.className}`}>
+                          {badge.label}
                         </span>
                       </td>
 
@@ -404,9 +408,9 @@ const StaffWarehouseManagementPage: React.FC = () => {
         {currentProduct && (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-semibold text-gray-900">{currentProduct.productName || 'Product'}</h4>
+              <h4 className="font-semibold text-gray-900">{currentProduct.name || 'Product'}</h4>
               <p className="text-sm text-gray-600">
-                Số lượng hiện tại: {currentProduct.quantity || 0}
+                Số lượng hiện tại: {currentProduct.totalQuantity ?? 0}
               </p>
             </div>
 
@@ -437,16 +441,16 @@ const StaffWarehouseManagementPage: React.FC = () => {
               </button>
               <button
                 type="submit"
-                disabled={loading}
-                className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-2"
+                disabled={isSubmitting}
+                className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                {loading && (
+                {isSubmitting && (
                   <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                 )}
-                {loading ? 'Đang xử lý...' : 'Cập nhật'}
+                {isSubmitting ? 'Đang xử lý...' : 'Cập nhật'}
               </button>
             </div>
           </form>
@@ -625,10 +629,16 @@ const StaffWarehouseManagementPage: React.FC = () => {
             </button>
             <button
               onClick={handleAddSubmit}
-              disabled={loading || selectedProductId === 0}
-              className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isSubmitting || selectedProductId === 0}
+              className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              {loading ? 'Đang thêm ...' : 'Thêm sản phẩm'}
+              {isSubmitting && (
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              )}
+              {isSubmitting ? 'Đang thêm...' : 'Thêm sản phẩm'}
             </button>
           </div>
         </div>
@@ -661,10 +671,16 @@ const StaffWarehouseManagementPage: React.FC = () => {
               </button>
               <button
                 onClick={handleDeleteConfirm}
-                disabled={loading}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+                disabled={isSubmitting}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                {loading ? 'Đang xóa...' : 'Xóa sản phẩm'}
+                {isSubmitting && (
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                )}
+                {isSubmitting ? 'Đang xóa...' : 'Xóa sản phẩm'}
               </button>
             </div>
           </div>

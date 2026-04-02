@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Package } from 'lucide-react'
+import { useNotifications } from '@/context/NotificationContext'
 import { getOrderById, getOrders } from '@/services/orderService'
 import { ViewOrderDto, OrderDetailDto } from '@/types/OrderDTO'
 import OrderDetail from './order/OrderDetail'
@@ -13,6 +14,7 @@ import { useClientPagination } from '@/hooks/useClientPagination'
 const PAGE_SIZE = 6
 
 const OrderManagementPage: React.FC = () => {
+    const { lastNotificationUpdate, unreadCount, markAllRead } = useNotifications()
     const [orders, setOrders] = useState<ViewOrderDto[]>([])
     const [loading, setLoading] = useState(true)
     const [selectedOrder, setSelectedOrder] = useState<OrderDetailDto | null>(null)
@@ -35,6 +37,10 @@ const OrderManagementPage: React.FC = () => {
 
     useEffect(() => {
         fetchOrders()
+    }, [lastNotificationUpdate])
+
+    useEffect(() => {
+        if (unreadCount > 0) markAllRead()
     }, [])
 
     const handleSelectOrder = async (orderId: number) => {

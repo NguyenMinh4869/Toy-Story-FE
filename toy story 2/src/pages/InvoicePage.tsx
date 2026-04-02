@@ -4,11 +4,13 @@ import { ShoppingBag, Package, Search, Clock, CheckCircle, XCircle } from 'lucid
 import { getAccountInvoices } from '../services/invoiceService'
 import { formatPrice } from '../utils/formatPrice'
 import { Link } from 'react-router-dom'
+import { useNotifications } from '../context/NotificationContext'
 
 const InvoicePage: React.FC = () => {
   const [invoices, setInvoices] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const { lastPaymentUpdate } = useNotifications()
 
   useEffect(() => {
     const fetchInvoices = async () => {
@@ -22,7 +24,7 @@ const InvoicePage: React.FC = () => {
       }
     }
     fetchInvoices()
-  }, [])
+  }, [lastPaymentUpdate])
 
   const filteredInvoices = invoices.filter(inv =>
     inv.invoiceId?.toString().includes(searchTerm) ||

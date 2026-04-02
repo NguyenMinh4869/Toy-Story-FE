@@ -2,9 +2,9 @@
  * Staff Brand Management Page - READ ONLY (FR-1)
  * Staff can only view brands, no create/update/delete
  */
-import React, { useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Eye } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Eye, Search } from 'lucide-react';
+import { useDebounce } from '../../hooks/useDebounce';
 import { filterBrands } from '../../services/brandService';
 import type { ViewBrandDto } from '../../types/BrandDTO';
 import type { ViewProductDto } from '../../types/ProductDTO';
@@ -13,6 +13,23 @@ import Modal from '../../components/ui/Modal';
 import Pagination from '../../components/ui/Pagination';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { useClientPagination } from '../../hooks/useClientPagination';
+
+// ── Status helpers ──────────────────────────────────────────────────────────
+// Backend sends Vietnamese display strings via EnumHelper.GetDisplayName().
+// Label is passed through as-is so the backend stays the single source of truth.
+function getBrandStatusBadge(status?: string | null) {
+  const className = status === 'Đang hoạt động'
+    ? 'bg-green-100 text-green-800'
+    : 'bg-orange-100 text-orange-800';
+  return { label: status ?? '—', className };
+}
+
+function getProductStatusBadge(status?: string | null) {
+  let className = 'bg-orange-100 text-orange-800';
+  if (status === 'Đang bán') className = 'bg-green-100 text-green-800';
+  else if (status === 'Hết hàng') className = 'bg-red-100 text-red-800';
+  return { label: status ?? '—', className };
+}
 
 const PAGE_SIZE = 5;
 
@@ -26,8 +43,10 @@ const StaffBrandManagementPage: React.FC = () => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [brandPage, setBrandPage] = useState(1);
   const [productPage, setProductPage] = useState(1);
-  const location = useLocation();
-  const q = useMemo(() => new URLSearchParams(location.search).get('q') || '', [location.search]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm, 400);
+  const [brandStatusFilter, setBrandStatusFilter] = useState<'Active' | 'Inactive' | null>(null);
+  const [productStatusFilter, setProductStatusFilter] = useState<0 | 1 | 2 | null>(null);
 
   const {
     paginatedItems: paginatedBrands,
@@ -42,15 +61,21 @@ const StaffBrandManagementPage: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, [location.search]);
+  }, [debouncedSearch, brandStatusFilter, productStatusFilter]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const query = q.trim();
+      const query = debouncedSearch.trim();
       const [allBrands, allProducts] = await Promise.all([
-        query ? filterBrands({ name: query }) : filterBrands({}),
-        query ? filterProducts({ searchTerm: query }) : filterProducts({})
+        filterBrands({
+          ...(query ? { name: query } : {}),
+          ...(brandStatusFilter !== null ? { status: brandStatusFilter } : {})
+        }),
+        filterProducts({
+          ...(query ? { searchTerm: query } : {}),
+          ...(productStatusFilter !== null ? { status: productStatusFilter } : {})
+        })
       ]);
       setBrands(allBrands);
       setProducts(allProducts);
@@ -58,7 +83,7 @@ const StaffBrandManagementPage: React.FC = () => {
       setProductPage(1);
     } catch (err) {
       console.error(err);
-      setError('Failed to load brands');
+      setError('Không thể tải dữ liệu thương hiệu');
     } finally {
       setLoading(false);
     }
@@ -75,7 +100,12 @@ const StaffBrandManagementPage: React.FC = () => {
   };
 
   if (loading && brands.length === 0) {
-    return <div className="text-center py-8">Loading brands...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-gray-500">Đang tải thương hiệu...</p>
+      </div>
+    );
   }
 
   return (
@@ -85,6 +115,18 @@ const StaffBrandManagementPage: React.FC = () => {
           <h2 className="text-2xl font-bold text-gray-800">Thương hiệu & sản phẩm</h2>
           <p className="text-sm text-gray-600 mt-1">Chế độ quan sát - Không thể chỉnh sửa</p>
         </div>
+      </div>
+
+      {/* Search Bar */}
+      <div className="relative max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Tìm kiếm thương hiệu hoặc sản phẩm..."
+          className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
+        />
       </div>
 
       {error && (
@@ -104,6 +146,26 @@ const StaffBrandManagementPage: React.FC = () => {
         </TabsList>
 
         <TabsContent value="brands" className="space-y-4">
+          {/* Brand Status Filter */}
+          <div className="flex gap-1 p-1 bg-gray-100 rounded-lg w-fit">
+            {([
+              { label: 'Tất cả', value: null },
+              { label: 'Đang hoạt động', value: 'Active' },
+              { label: 'Ngừng hoạt động', value: 'Inactive' },
+            ] as { label: string; value: 'Active' | 'Inactive' | null }[]).map((tab) => (
+              <button
+                key={String(tab.value)}
+                onClick={() => { setBrandStatusFilter(tab.value); setBrandPage(1); }}
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                  brandStatusFilter === tab.value
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left text-gray-500">
@@ -135,13 +197,14 @@ const StaffBrandManagementPage: React.FC = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                            brand.status === 'Available'
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-gray-100 text-gray-800'
-                          }`}>
-                            {brand.status || 'Unknown'}
-                          </span>
+                          {(() => {
+                            const badge = getBrandStatusBadge(brand.status);
+                            return (
+                              <span className={`px-2 py-1 text-xs font-semibold rounded-full ${badge.className}`}>
+                                {badge.label}
+                              </span>
+                            );
+                          })()}
                         </td>
                         <td className="px-6 py-4">
                           <button
@@ -167,6 +230,27 @@ const StaffBrandManagementPage: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="products" className="space-y-4">
+          {/* Product Status Filter */}
+          <div className="flex gap-1 p-1 bg-gray-100 rounded-lg w-fit">
+            {([
+              { label: 'Tất cả', value: null },
+              { label: 'Đang bán', value: 0 },
+              { label: 'Ngừng bán', value: 1 },
+              { label: 'Hết hàng', value: 2 },
+            ] as { label: string; value: 0 | 1 | 2 | null }[]).map((tab) => (
+              <button
+                key={String(tab.value)}
+                onClick={() => { setProductStatusFilter(tab.value); setProductPage(1); }}
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                  productStatusFilter === tab.value
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left text-gray-500">
@@ -203,9 +287,14 @@ const StaffBrandManagementPage: React.FC = () => {
                         <td className="px-6 py-4">{product.brandName || '-'}</td>
                         <td className="px-6 py-4">{(product.price || 0).toLocaleString('vi-VN')} VND</td>
                         <td className="px-6 py-4">
-                          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
-                            {product.status || 'Unknown'}
-                          </span>
+                          {(() => {
+                            const badge = getProductStatusBadge(product.status);
+                            return (
+                              <span className={`px-2 py-1 text-xs font-semibold rounded-full ${badge.className}`}>
+                                {badge.label}
+                              </span>
+                            );
+                          })()}
                         </td>
                       </tr>
                     ))
@@ -248,13 +337,14 @@ const StaffBrandManagementPage: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Trạng thái</label>
-                <span className={`inline-block mt-1 px-3 py-1 text-sm font-semibold rounded-full ${
-                  selectedBrand.status === 'Available'
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-gray-100 text-gray-800'
-                }`}>
-                  {selectedBrand.status || 'Unknown'}
-                </span>
+                {(() => {
+                  const badge = getBrandStatusBadge(selectedBrand.status);
+                  return (
+                    <span className={`inline-block mt-1 px-3 py-1 text-sm font-semibold rounded-full ${badge.className}`}>
+                      {badge.label}
+                    </span>
+                  );
+                })()}
               </div>
             </div>
             <div className="flex justify-end pt-4 border-t">

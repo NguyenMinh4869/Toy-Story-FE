@@ -1,25 +1,23 @@
 // components/charts/ChartGrid.tsx
 import React from 'react'
-import RevenueOverviewChart from './RevenueOverviewChart'
+import OrdersTabCard from './OrdersTabCard'
+import CombinedGrowthChart from './CombinedGrowthChart'
+import CombinedTopSellersChart from './CombinedTopSellersChart'
 import OrderStatusChart from './OrderStatusChart'
-import TopSellingProductsChart from './TopSellingProductsChart'
-import TopSellingSetsChart from './TopSellingSetsChart'
-import WarehouseWorkloadChart from './WarehouseWorkloadChart'
-import OrderGrowthChart from './OrderGrowthChart'
-import PendingOrders from './PendingOrders'
-import DeliveryOrders from './DeliveryOrders'
 
 const ChartGrid: React.FC = () => {
     return (
-        <div className="grid grid-cols-2 gap-6">
-            <PendingOrders />
-            <DeliveryOrders />
-            <RevenueOverviewChart />
-            <OrderStatusChart />
-            <TopSellingProductsChart />
-            <TopSellingSetsChart />
-            <WarehouseWorkloadChart />
-            <OrderGrowthChart />
+        <div className="grid grid-cols-2 gap-4">
+            {/* LEFT COLUMN */}
+            <div className="flex flex-col gap-4">
+                <OrdersTabCard />
+                <OrderStatusChart />
+            </div>
+            {/* RIGHT COLUMN */}
+            <div className="flex flex-col gap-4">
+                <CombinedGrowthChart />
+                <CombinedTopSellersChart />
+            </div>
         </div>
     )
 }

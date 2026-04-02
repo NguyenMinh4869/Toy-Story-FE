@@ -57,7 +57,8 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
       {
         to: effectiveMode === 'admin' ? ROUTES.ADMIN_ORDERS : ROUTES.STAFF_ORDERS,
         icon: <List size={20} />,
-        label: 'Đơn hàng'
+        label: 'Đơn hàng',
+        badge: effectiveMode === 'admin' && unreadCount > 0 ? unreadCount : undefined
       }
     );
 
@@ -99,7 +100,7 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
       to: effectiveMode === 'admin' ? ROUTES.ADMIN_TRANSFER : ROUTES.STAFF_TRANSFER,
       icon: <Truck size={20} />,
       label: 'Lịch sử chuyển kho',
-      badge: unreadCount > 0 ? unreadCount : undefined
+      badge: effectiveMode !== 'admin' && unreadCount > 0 ? unreadCount : undefined
     });
 
     return baseLinks;

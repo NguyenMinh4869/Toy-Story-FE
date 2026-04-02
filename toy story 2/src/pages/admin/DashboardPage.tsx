@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import StatCard from '../../components/admin/StatCard'
+import { useNotifications } from '@/context/NotificationContext'
 import { DollarSign, Package, Users, ShoppingBag, Boxes } from 'lucide-react'
 import { getAdminDashboardSummary } from '../../services/dashboardService'
 import type { AdminWidgetDto } from '../../types/DashboardDTO'
 import ChartGrid from '@/components/admin/dashboard/ChartGrid'
 
 const DashboardPage: React.FC = () => {
+  const { lastNotificationUpdate } = useNotifications()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [summary, setSummary] = useState<AdminWidgetDto | null>(null)
@@ -26,7 +28,7 @@ const DashboardPage: React.FC = () => {
     }
 
     fetchDashboard()
-  }, [])
+  }, [lastNotificationUpdate])
 
   const stats = [
     {
@@ -65,14 +67,14 @@ const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
           {error}
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
         {stats.map((stat, index) => (
           <StatCard key={index} title={stat.title} value={stat.value} icon={stat.icon} />
         ))}

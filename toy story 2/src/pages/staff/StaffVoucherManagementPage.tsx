@@ -30,7 +30,12 @@ const StaffVoucherManagementPage: React.FC = () => {
   };
 
   if (loading && vouchers.length === 0) {
-    return <div className="text-center py-8">Loading vouchers...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-gray-500">Đang tải voucher...</p>
+      </div>
+    );
   }
 
   return (

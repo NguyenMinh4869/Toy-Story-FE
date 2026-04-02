@@ -81,13 +81,13 @@ export const deleteSet = async (id: number): Promise<{ message: string }> => {
 }
 
 /**
- * Admin filter — returns ALL sets (active + inactive) by default.
- * Pass status=0 (Active) or 1 (Inactive) to filter.
+ * Admin filter — returns ALL sets (active + inactive + out-of-stock) by default.
+ * Pass status=0 (Active), 1 (Inactive), or 2 (OutOfStock) to filter.
  * GET /api/sets/admin-filter
  */
 export const adminFilterSets = async (params?: {
   name?: string
-  status?: 0 | 1
+  status?: 0 | 1 | 2
 }): Promise<ViewSetDetailDto[]> => {
   const queryParams = new URLSearchParams()
   if (params?.name) queryParams.append('name', params.name)
