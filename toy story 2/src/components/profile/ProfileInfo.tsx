@@ -148,10 +148,6 @@ const ProfileInfo: React.FC = () => {
       </h2>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="flex flex-col items-center gap-3 pb-6 border-b text-center">
-          <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center shadow-sm" />
-        </div>
-
         <div className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">

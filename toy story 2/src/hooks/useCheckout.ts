@@ -8,7 +8,7 @@ import {
   createPayment,
 } from "../services/checkoutService";
 import { CalculatePriceResponse } from "../types/CheckoutDTO";
-
+import { useNavigate } from "react-router-dom";
 interface CheckoutFormData {
   name: string;
   phoneNumber: string;
@@ -20,7 +20,7 @@ interface CheckoutFormData {
 export const useCheckout = () => {
   const { cartItems, getTotalPrice } = useCart();
   const { user } = useAuth();
-
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
   const [calculation, setCalculation] = useState<CalculatePriceResponse | null>(null);
@@ -104,9 +104,13 @@ export const useCheckout = () => {
       }
 
       const paymentResult = await createPayment(invoiceId);
+
+      const isZeroAmount = paymentResult?.data?.isZeroAmount || paymentResult?.isZeroAmount;
       const checkoutUrl = paymentResult?.data?.paymentUrl || paymentResult?.paymentUrl;
 
-      if (checkoutUrl) {
+      if (isZeroAmount) {
+        navigate(`https://toystory.io.vn/payments/success?orderCode=${paymentResult?.data?.orderCode || paymentResult?.orderCode}&id=${invoiceId}`);
+      } else if (checkoutUrl) {
         setTimeout(() => {
           window.location.href = checkoutUrl;
         }, 1000);

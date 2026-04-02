@@ -10,7 +10,7 @@ import CheckoutForm from "@/components/checkout/CheckoutForm";
 import CartItemsList from "@/components/checkout/CartItemsList";
 import OrderSummary from "@/components/checkout/OrderSummary";
 import EmptyCart from "@/components/checkout/EmptyCart";
-
+import { useAuth } from "@/hooks/useAuth";
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
   const { cartItems, getTotalOriginalPrice } = useCart();
@@ -23,6 +23,12 @@ const CheckoutPage: React.FC = () => {
     error,
     handleCheckout,
   } = useCheckout();
+  const { user } = useAuth()
+
+  if (user?.role !== 'Member') {
+    navigate(ROUTES.HOME)
+    return null
+  }
 
   // Redirect if cart is empty
   useEffect(() => {

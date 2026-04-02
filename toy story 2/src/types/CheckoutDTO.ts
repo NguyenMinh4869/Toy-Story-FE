@@ -54,6 +54,7 @@ export interface CreatePaymentResponse {
         status: string;
         invoiceId: number;
         amount: number;
+        isZeroAmount: boolean;
     }
 }
 /**
@@ -125,6 +126,7 @@ export interface CreatePaymentResponse {
     status: string;
     invoiceId: number;
     amount: number;
+    isZeroAmount: boolean;
 }
 
 export interface VoucherData {
