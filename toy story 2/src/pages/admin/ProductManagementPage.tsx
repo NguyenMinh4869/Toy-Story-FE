@@ -28,7 +28,8 @@ const ProductManagementPage: React.FC = () => {
   const [brands, setBrands] = useState<ViewBrandDto[]>([]);
   const [categories, setCategories] = useState<ViewCategoryDto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -86,7 +87,7 @@ const ProductManagementPage: React.FC = () => {
       setCategories(categoriesData);
     } catch (err) {
       console.error(err);
-      setError('Failed to load data');
+      setFetchError('Không thể tải dữ liệu, vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
@@ -113,25 +114,27 @@ const ProductManagementPage: React.FC = () => {
     const missing: string[] = [];
     if (!formData.Name?.trim()) missing.push('Tên sản phẩm');
     if (!formData.Price || formData.Price <= 0) missing.push('Giá tiền');
+    if (!formData.Description?.trim()) missing.push('Mô tả');
+    if (!formData.Origin?.trim()) missing.push('Xuất xứ');
     if (!formData.CategoryId || formData.CategoryId <= 0) missing.push('Phân loại');
     if (!formData.BrandId || formData.BrandId <= 0) missing.push('Thương hiệu');
     if (missing.length > 0) {
-      setError(`Vui lòng điền đầy đủ: ${missing.join(', ')}`);
+      setFormError(`Vui lòng điền đầy đủ: ${missing.join(', ')}`);
       return;
     }
     try {
       setLoading(true);
-      setError(null);
+      setFormError(null);
       if (currentProduct && currentProduct.productId) {
-        await updateProduct(currentProduct.productId, formData as UpdateProductDto, imageFile || undefined);
+        await updateProduct(currentProduct.productId, formData as UpdateProductDto, imageFile || undefined, true);
       } else {
-        await createProduct(formData as CreateProductDto, imageFile || undefined);
+        await createProduct(formData as CreateProductDto, imageFile || undefined, true);
       }
       setIsModalOpen(false);
       fetchData();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError('Failed to save product');
+      setFormError(err?.message || 'Lưu sản phẩm thất bại, vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
@@ -169,7 +172,6 @@ const ProductManagementPage: React.FC = () => {
     if (!confirmed) return;
 
     try {
-      setError(null);
       await changeProductStatus(id);
       await fetchData();
     } catch (err: any) {
@@ -180,7 +182,6 @@ const ProductManagementPage: React.FC = () => {
   const handleConfirmDeactivate = async () => {
     if (!deactivatingProductId) return;
     try {
-      setError(null);
       await changeProductStatus(deactivatingProductId);
       await fetchData();
     } catch (err: any) {
@@ -205,11 +206,13 @@ const ProductManagementPage: React.FC = () => {
       BrandId: brands[0]?.brandId || 0
     });
     setImageFile(null);
+    setFormError(null);
     setIsModalOpen(true);
   };
 
   const openEditModal = async (product: ViewProductDto) => {
     setCurrentProduct(product);
+    setFormError(null);
     try {
       setLoading(true);
       const details = product.productId ? await getProductById(product.productId) : product;
@@ -228,7 +231,7 @@ const ProductManagementPage: React.FC = () => {
       setIsModalOpen(true);
     } catch (err) {
       console.error(err);
-      setError('Failed to load product details');
+      setFetchError('Không thể tải chi tiết sản phẩm, vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
@@ -286,9 +289,9 @@ const ProductManagementPage: React.FC = () => {
       </div>
 
       {loading && <div className="text-center py-4">Loading...</div>}
-      {error && <div className="text-center py-4 text-red-500">{error}</div>}
+      {fetchError && <div className="text-center py-4 text-red-500">{fetchError}</div>}
 
-      {!loading && !error && (
+      {!loading && !fetchError && (
         <>
           <ProductListTable
             products={paginatedProducts}
@@ -310,7 +313,7 @@ const ProductManagementPage: React.FC = () => {
 
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => { setIsModalOpen(false); setFormError(null); }}
         title={currentProduct ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm'}
         size="xxl"
       >
@@ -473,10 +476,16 @@ const ProductManagementPage: React.FC = () => {
             </div>
           </div>
 
+          {formError && (
+            <div className="rounded-lg bg-red-50 border border-red-300 px-4 py-3 text-sm text-red-700">
+              {formError}
+            </div>
+          )}
+
           <div className="flex justify-end gap-3 pt-2">
             <button
               type="button"
-              onClick={() => setIsModalOpen(false)}
+              onClick={() => { setIsModalOpen(false); setFormError(null); }}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-2xl hover:bg-gray-200"
             >
               Hủy

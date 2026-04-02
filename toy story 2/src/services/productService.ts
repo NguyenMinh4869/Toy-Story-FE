@@ -104,13 +104,13 @@ export const searchProducts = async (searchTerm: string): Promise<ProductDTO[]> 
  * POST /api/products
  * multipart/form-data with fields aligned to backend DTO
  */
-export const createProduct = async (data: CreateProductDto, imageFile?: File): Promise<{ message: string }> => {
+export const createProduct = async (data: CreateProductDto, imageFile?: File, silentError = false): Promise<{ message: string }> => {
   const form = new FormData()
   Object.entries(data).forEach(([key, value]) => {
     if (value !== undefined && value !== null) form.append(key, String(value))
   })
   if (imageFile) form.append('imageFile', imageFile)
-  const response = await apiPostForm<{ message: string }>('/products', form)
+  const response = await apiPostForm<{ message: string }>('/products', form, undefined, silentError)
   return response.data
 }
 
@@ -118,13 +118,13 @@ export const createProduct = async (data: CreateProductDto, imageFile?: File): P
  * Update product (Admin only)
  * PUT /api/products/{productId}
  */
-export const updateProduct = async (productId: number, data: UpdateProductDto, imageFile?: File): Promise<{ message: string }> => {
+export const updateProduct = async (productId: number, data: UpdateProductDto, imageFile?: File, silentError = false): Promise<{ message: string }> => {
   const form = new FormData()
   Object.entries(data).forEach(([key, value]) => {
     if (value !== undefined && value !== null) form.append(key, String(value))
   })
   if (imageFile) form.append('imageFile', imageFile)
-  const response = await apiPutForm<{ message: string }>(`/products/${productId}`, form)
+  const response = await apiPutForm<{ message: string }>(`/products/${productId}`, form, undefined, silentError)
   return response.data
 }
 

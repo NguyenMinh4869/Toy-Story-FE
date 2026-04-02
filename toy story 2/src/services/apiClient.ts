@@ -39,27 +39,30 @@ const isNonEmptyString = (value: unknown): value is string => {
 }
 
 const extractApiErrorMessage = (_status: number, payload: any): string => {
-  const nestedData = payload?.data
-  const nestedMessage = nestedData?.message
-  const message = payload?.message
-  const detail = payload?.detail
-  const title = payload?.title
+  console.error('RAW API ERROR:', payload)
 
-  if (isNonEmptyString(nestedMessage)) {
-    return nestedMessage
+  // 1. Nested data.message (custom wrapper shape)
+  const nestedMessage = payload?.data?.message
+  if (isNonEmptyString(nestedMessage)) return nestedMessage
+
+  // 2. .NET ValidationProblemDetails: { errors: { Field: ["msg"] } } — camelCase or PascalCase
+  const errors = payload?.errors ?? payload?.Errors
+  if (errors && typeof errors === 'object') {
+    const flat = (Object.values(errors) as unknown[]).flat().filter(v => typeof v === 'string').join(' | ')
+    if (isNonEmptyString(flat)) return flat
   }
 
-  if (isNonEmptyString(detail)) {
-    return detail
-  }
+  // 3. detail (RFC 7807)
+  const detail = payload?.detail ?? payload?.Detail
+  if (isNonEmptyString(detail)) return detail
 
-  if (isNonEmptyString(title)) {
-    return title
-  }
+  // 4. title (RFC 7807 / ASP.NET Core ProblemDetails)
+  const title = payload?.title ?? payload?.Title
+  if (isNonEmptyString(title)) return title
 
-  if (isNonEmptyString(message) && message.trim().toLowerCase() !== 'success') {
-    return message
-  }
+  // 5. Simple message field — camelCase or PascalCase
+  const message = payload?.message ?? payload?.Message
+  if (isNonEmptyString(message) && message.trim().toLowerCase() !== 'success') return message
 
   return 'Có lỗi xảy ra, vui lòng thử lại.'
 }
@@ -87,7 +90,8 @@ async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {},
   showSuccessToast: boolean = true,
-  silent: boolean = false
+  silent: boolean = false,
+  silentError: boolean = false
 ): Promise<ApiResponse<T>> {
   const url = getApiUrl(endpoint)
 
@@ -117,7 +121,7 @@ async function apiRequest<T>(
     if (!contentType?.includes('application/json')) {
       if (!response.ok) {
         const errorMsg = 'Có lỗi xảy ra, vui lòng thử lại.'
-        showToast(errorMsg, "destructive")
+        if (!silentError && !silent) showToast(errorMsg, "destructive")
         throw { message: errorMsg, status: response.status } as ApiError
       }
       const text = await response.text()
@@ -138,7 +142,7 @@ async function apiRequest<T>(
       }
 
     const errorMsg = extractApiErrorMessage(response.status, data)
-    if (!silent && response.status !== 404) {
+    if (!silent && !silentError && response.status !== 404) {
       showToast(errorMsg, "destructive")
     }
     const error: ApiError = {
@@ -173,7 +177,7 @@ async function apiRequest<T>(
         message: error.message,
         status: 0
       }
-      showToast(apiError.message, "destructive")
+      if (!silent && !silentError) showToast(apiError.message, "destructive")
       throw apiError
     }
 
@@ -198,13 +202,14 @@ export const apiGet = <T>(endpoint: string, options?: RequestInit, silent: boole
 export const apiPost = <T>(
   endpoint: string,
   body?: unknown,
-  options?: RequestInit
+  options?: RequestInit,
+  silentError: boolean = false
 ): Promise<ApiResponse<T>> => {
   return apiRequest<T>(endpoint, {
     ...options,
     method: 'POST',
     body: body ? JSON.stringify(body) : undefined
-  }, true) // Show toast for POST
+  }, true, false, silentError)
 }
 
 /**
@@ -213,13 +218,14 @@ export const apiPost = <T>(
 export const apiPostForm = <T>(
   endpoint: string,
   formData: FormData,
-  options?: RequestInit
+  options?: RequestInit,
+  silentError: boolean = false
 ): Promise<ApiResponse<T>> => {
   return apiRequest<T>(endpoint, {
     ...options,
     method: 'POST',
     body: formData
-  }, true) // Show toast for POST
+  }, true, false, silentError)
 }
 
 /**
@@ -228,13 +234,14 @@ export const apiPostForm = <T>(
 export const apiPutForm = <T>(
   endpoint: string,
   formData: FormData,
-  options?: RequestInit
+  options?: RequestInit,
+  silentError: boolean = false
 ): Promise<ApiResponse<T>> => {
   return apiRequest<T>(endpoint, {
     ...options,
     method: 'PUT',
     body: formData
-  }, true) // Show toast for PUT
+  }, true, false, silentError)
 }
 
 /**

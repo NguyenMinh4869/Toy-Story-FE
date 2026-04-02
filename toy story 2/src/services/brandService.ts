@@ -3,7 +3,7 @@
  * API service for brand-related operations matching .NET backend
  */
 
-import { apiGet, apiPostForm, apiPutForm, apiPut } from './apiClient'
+import { apiGet, apiPost, apiPostForm, apiPutForm, apiPut } from './apiClient'
 import type { ViewBrandDto, CreateBrandDto, UpdateBrandDto } from '../types/BrandDTO'
 
 // ── Cascading Reactivation types ──────────────────────────────────────────────
