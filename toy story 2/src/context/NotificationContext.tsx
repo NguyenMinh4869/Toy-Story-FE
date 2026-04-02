@@ -110,20 +110,22 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         // Always bump the unified timestamp so Dashboard & Orders re-fetch
         setLastTransferUpdate(Date.now())
 
-        if (payload.type === 'NEW_ORDER') {
-          // Increment the red badge only when the order still needs warehouse assignment
-          if (payload.warehouseId === null || payload.warehouseId === undefined) {
-            setUnreadCount((prev) => prev + 1)
-            refetch() // populate notification list with real DB records
-            toast({
-              title: payload.title ?? 'Đơn hàng mới',
-              description: payload.body,
-              variant: 'default',
-              duration: 5000,
-            })
-          }
-        } else {
-          // Legacy / transfer notifications — always badge + toast
+        // 1. Admin Order Notification — only badge when warehouse is unassigned
+        if (payload.type === 'NEW_ORDER' && payload.warehouseId === null) {
+          setUnreadCount((prev) => prev + 1)
+          refetch()
+          toast({
+            title: payload.title ?? 'Đơn hàng mới',
+            description: payload.body,
+            variant: 'default',
+            duration: 5000,
+          })
+        // 2. Staff Transfer Notification — legacy payload: {transferId, title, ...}
+        } else if (
+          payload.type === 'TRANSFER' ||
+          payload.transferId !== undefined ||
+          payload.title?.includes('chuyển kho')
+        ) {
           setUnreadCount((prev) => prev + 1)
           refetch()
           toast({
