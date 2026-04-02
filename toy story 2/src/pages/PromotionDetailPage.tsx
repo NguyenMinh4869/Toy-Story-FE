@@ -33,7 +33,7 @@ const PromotionDetailPage: React.FC = () => {
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
-      const scrollAmount = direction === "left" ? -300 : 300;
+      const scrollAmount = direction === "left" ? -200 : 200;
       scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
     }
   };
@@ -98,8 +98,16 @@ const PromotionDetailPage: React.FC = () => {
             if (promoInfo.hasPromotion && promoInfo.promotionId === currentPromoId) {
               hasPromotion = true;
               promotionName = promoInfo.label;
-              discount = promoInfo.discountValue;
-              finalPrice = originalPrice * (1 - discount / 100);
+              const isPct = promoInfo.discountType === 0;
+              if (isPct) {
+                discount = Math.min(100, promoInfo.discountValue);
+                finalPrice = originalPrice * (1 - discount / 100);
+              } else {
+                const reduction = Math.min(originalPrice, promoInfo.discountValue);
+                finalPrice = Math.max(0, originalPrice - reduction);
+                discount =
+                  originalPrice > 0 ? Math.round((reduction / originalPrice) * 100) : 0;
+              }
             } else {
               // Fallback to current page promo if it matches or if findBestPromotion somehow missed it
               const isPercent = promo.discountType === 0;
@@ -230,7 +238,7 @@ const PromotionDetailPage: React.FC = () => {
             )}
             {/* Big discount badge */}
             {(promotion.discountValue ?? 0) > 0 && (
-              <div className="absolute top-6 right-6 bg-[#a70001] text-white font-['Tilt_Warp',sans-serif] text-3xl px-6 py-3 rounded-3xl shadow-2xl ring-4 ring-red-100 italic">
+              <div className="absolute top-5 right-5 bg-[#a70001] text-white font-['Tilt_Warp',sans-serif] text-xl sm:text-2xl h-14 min-w-[7rem] max-w-[min(12rem,calc(100%-2rem))] px-4 inline-flex items-center justify-center rounded-2xl shadow-2xl ring-4 ring-red-100 italic whitespace-nowrap shrink-0">
                 {discountLabel}
               </div>
             )}
@@ -274,7 +282,7 @@ const PromotionDetailPage: React.FC = () => {
                   </p>
                 </div>
               )}
-              {promotion.minimumAmount && (
+              {promotion.minimumAmount != null && promotion.minimumAmount > 0 && (
                 <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
                   <div className="flex items-center gap-2 mb-2">
                     <Tag className="w-5 h-5 text-blue-500" />
@@ -314,12 +322,12 @@ const PromotionDetailPage: React.FC = () => {
 
         {/* Products Section */}
         <div>
-          <div className="flex items-center gap-3 mb-8">
-            <div className="h-8 w-1.5 bg-[#a70001] rounded-full" />
-            <h2 className="text-2xl font-['Tilt_Warp',sans-serif] text-gray-900 uppercase">
+          <div className="flex items-center gap-2 mb-4 md:mb-5">
+            <div className="h-6 w-1 bg-[#a70001] rounded-full" />
+            <h2 className="text-lg md:text-xl font-['Tilt_Warp',sans-serif] text-gray-900 uppercase tracking-tight">
               Sản phẩm áp dụng
               {products.length > 0 && (
-                <span className="ml-2 text-base font-medium text-gray-400 normal-case">
+                <span className="ml-2 text-sm font-medium text-gray-400 normal-case">
                   ({products.length} sản phẩm)
                 </span>
               )}
@@ -327,48 +335,54 @@ const PromotionDetailPage: React.FC = () => {
           </div>
 
           {products.length === 0 ? (
-            <div className="bg-white border border-gray-100 rounded-[2rem] py-20 flex flex-col items-center justify-center gap-4 shadow-sm">
-              <ShoppingBag className="w-14 h-14 text-gray-200" />
-              <p className="text-gray-400 font-medium text-lg">Sản phẩm đang được cập nhật...</p>
+            <div className="bg-white border border-gray-100 rounded-2xl py-12 flex flex-col items-center justify-center gap-3 shadow-sm">
+              <ShoppingBag className="w-10 h-10 text-gray-200" />
+              <p className="text-gray-400 font-medium">Sản phẩm đang được cập nhật...</p>
             </div>
           ) : (
-            <div className="relative bg-[#a70001] rounded-[2rem] p-6 sm:p-10 shadow-2xl">
-              {/* Left Arrow */}
-              <button
-                onClick={() => scroll("left")}
-                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 md:translate-x-1/2 xl:-translate-x-1/2 z-10 w-12 h-12 bg-white rounded-full shadow-lg text-[#a70001] flex items-center justify-center hover:scale-110 hover:bg-red-50 transition-all duration-300 hidden sm:flex"
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-
-              {/* Scroll Container */}
-              <div 
-                ref={scrollRef}
-                className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-6 px-4 -mx-4 no-scrollbar scroll-smooth"
-              >
-                {products.map((product, idx) => (
-                  <motion.div
-                    key={product.productId}
-                    initial={{ opacity: 0, x: 20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.35, delay: idx * 0.05 }}
-                    className="snap-center shrink-0"
+            <div className="relative w-full bg-[#a70001] rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-lg min-h-[11.5rem] sm:min-h-[12rem]">
+              {products.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    aria-label="Cuộn trái"
+                    onClick={() => scroll("left")}
+                    className="absolute left-1 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-white/95 rounded-full shadow-md text-[#a70001] inline-flex items-center justify-center hover:bg-white hover:scale-105 transition-all max-sm:hidden"
                   >
-                    <ProductCard
-                      product={product}
-                    />
-                  </motion.div>
-                ))}
-              </div>
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Cuộn phải"
+                    onClick={() => scroll("right")}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-white/95 rounded-full shadow-md text-[#a70001] inline-flex items-center justify-center hover:bg-white hover:scale-105 transition-all max-sm:hidden"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </>
+              )}
 
-              {/* Right Arrow */}
-              <button
-                onClick={() => scroll("right")}
-                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 md:-translate-x-1/2 xl:translate-x-1/2 z-10 w-12 h-12 bg-white rounded-full shadow-lg text-[#a70001] flex items-center justify-center hover:scale-110 hover:bg-red-50 transition-all duration-300 hidden sm:flex"
+              <div
+                ref={scrollRef}
+                className={
+                  products.length > 1
+                    ? "flex gap-3 overflow-x-auto snap-x snap-mandatory pb-1 pl-1 pr-1 sm:pl-10 sm:pr-10 no-scrollbar scroll-smooth justify-start items-start min-h-[10rem]"
+                    : "flex gap-3 justify-start items-start min-h-[10rem]"
+                }
               >
-                <ChevronRight className="w-6 h-6" />
-              </button>
+                  {products.map((product, idx) => (
+                    <motion.div
+                      key={product.productId}
+                      initial={{ opacity: 0, x: 12 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.3, delay: idx * 0.04 }}
+                      className="snap-center shrink-0"
+                    >
+                      <ProductCard product={product} compact />
+                    </motion.div>
+                  ))}
+              </div>
             </div>
           )}
         </div>

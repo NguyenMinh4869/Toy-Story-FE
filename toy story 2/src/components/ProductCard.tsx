@@ -9,18 +9,21 @@ import { useAuth } from "../hooks/useAuth";
 
 interface ProductCardProps {
   product: ProductDTO;
+  /** Tighter layout for carousels / promo detail */
+  compact?: boolean;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product, compact = false }) => {
   const navigate = useNavigate();
   const { user, role } = useAuth();
   const productPrice = product.price ?? 0;
   const productFinalPrice = product.finalPrice ?? productPrice;
   const hasPromotion = product.hasPromotion && productPrice > productFinalPrice;
   const promoInfo = (product as any).promoInfo as any;
-  const discountPercent = hasPromotion
+  const rawPercent = hasPromotion && productPrice > 0
     ? Math.round(((productPrice - productFinalPrice) / productPrice) * 100)
     : 0;
+  const discountPercent = Math.min(100, Math.max(0, rawPercent));
   const discountLabel = hasPromotion
     ? (promoInfo && promoInfo.discountType === 1
         ? `-${(promoInfo.discountValue / 1000).toFixed(0)}K`
@@ -36,17 +39,25 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      whileHover={{ y: -5 }}
+      whileHover={{ y: compact ? -2 : -5 }}
       onClick={handleCardClick}
-      className="group relative bg-white rounded-[2rem] p-4 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-gray-100/50 cursor-pointer overflow-hidden flex flex-col h-full"
+      className={
+        compact
+          ? "group relative bg-white rounded-xl p-2 sm:p-2.5 transition-all duration-300 hover:shadow-lg border border-gray-100/50 cursor-pointer overflow-hidden flex flex-col h-full w-[148px] sm:w-[164px]"
+          : "group relative bg-white rounded-[2rem] p-4 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-gray-100/50 cursor-pointer overflow-hidden flex flex-col h-full"
+      }
     >
       {/* Discount Badge */}
       {hasPromotion && (
-        <div className="absolute top-4 right-4 z-10">
+        <div className={compact ? "absolute top-2 right-2 z-10" : "absolute top-4 right-4 z-10"}>
           <motion.div 
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="bg-red-600 text-white text-[11px] font-black px-3 py-1.5 rounded-full shadow-lg shadow-red-200"
+            className={
+              compact
+                ? "bg-red-600 text-white text-[9px] font-black min-h-[1.5rem] min-w-[2.75rem] px-2 py-0.5 rounded-full shadow-md shadow-red-200 inline-flex items-center justify-center whitespace-nowrap max-w-[5rem] truncate"
+                : "bg-red-600 text-white text-[11px] font-black min-h-[1.75rem] min-w-[3rem] px-3 py-1.5 rounded-full shadow-lg shadow-red-200 inline-flex items-center justify-center whitespace-nowrap"
+            }
           >
             {discountLabel}
           </motion.div>
@@ -54,13 +65,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       )}
 
       {/* Image Container */}
-      <div className="relative aspect-square mb-6 rounded-[1.5rem] overflow-hidden bg-gray-50 group-hover:bg-white transition-colors duration-500">
+      <div
+        className={
+          compact
+            ? "relative aspect-square mb-2 rounded-lg overflow-hidden bg-gray-50 group-hover:bg-white transition-colors duration-300"
+            : "relative aspect-square mb-6 rounded-[1.5rem] overflow-hidden bg-gray-50 group-hover:bg-white transition-colors duration-500"
+        }
+      >
         <motion.img
           whileHover={{ scale: 1.1 }}
           transition={{ duration: 0.6, ease: [0.33, 1, 0.68, 1] }}
           src={product.imageUrl || PRODUCT_IMAGE_87}
           alt={product.name ?? ""}
-          className="w-full h-full object-contain p-4"
+          className={compact ? "w-full h-full object-contain p-1.5" : "w-full h-full object-contain p-4"}
         />
         
         {/* Quick View Overlay */}
@@ -68,32 +85,50 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </div>
 
       {/* Content */}
-      <div className="flex flex-col flex-grow space-y-3">
+      <div className={compact ? "flex flex-col flex-grow space-y-1.5" : "flex flex-col flex-grow space-y-3"}>
         {/* Category/Brand */}
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+        <div className={`flex items-center gap-1 ${compact ? "flex-wrap" : "gap-2"}`}>
+          <span
+            className={
+              compact
+                ? "text-[8px] font-black uppercase tracking-wide text-gray-400 truncate max-w-[45%]"
+                : "text-[10px] font-black uppercase tracking-widest text-gray-400"
+            }
+          >
             {product.brandName || "Toy Story"}
           </span>
-          <div className="h-1 w-1 rounded-full bg-gray-300" />
-          <span className="text-[10px] font-black uppercase tracking-widest text-red-500">
+          {!compact && <div className="h-1 w-1 rounded-full bg-gray-300" />}
+          <span
+            className={
+              compact
+                ? "text-[8px] font-black uppercase tracking-wide text-red-500 truncate max-w-[45%]"
+                : "text-[10px] font-black uppercase tracking-widest text-red-500"
+            }
+          >
             {product.categoryName || "Hot Deal"}
           </span>
         </div>
 
         {/* Title */}
-        <h3 className="text-[15px] font-black text-gray-800 line-clamp-2 leading-tight group-hover:text-red-600 transition-colors duration-300">
+        <h3
+          className={
+            compact
+              ? "text-[11px] font-bold text-gray-800 line-clamp-2 leading-snug group-hover:text-red-600 transition-colors min-h-[2.25rem]"
+              : "text-[15px] font-black text-gray-800 line-clamp-2 leading-tight group-hover:text-red-600 transition-colors duration-300"
+          }
+        >
           {product.name}
         </h3>
 
         {/* Pricing & Actions */}
-        <div className="pt-2 mt-auto space-y-4">
+        <div className={compact ? "pt-0.5 mt-auto space-y-2" : "pt-2 mt-auto space-y-4"}>
           <div className="flex flex-col">
-            <div className="flex items-baseline gap-2">
-              <span className="text-[18px] font-black text-red-600">
+            <div className="flex flex-wrap items-baseline gap-1">
+              <span className={compact ? "text-sm font-black text-red-600" : "text-[18px] font-black text-red-600"}>
                 {formatPrice(productFinalPrice)}
               </span>
               {hasPromotion && (
-                <span className="text-[12px] text-gray-400 line-through font-bold">
+                <span className={compact ? "text-[9px] text-gray-400 line-through font-semibold" : "text-[12px] text-gray-400 line-through font-bold"}>
                   {formatPrice(productPrice)}
                 </span>
               )}
@@ -106,9 +141,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <Link
                 to={`/product/${product.productId}`}
                 onClick={(e) => e.stopPropagation()}
-                className="flex-1 bg-red-600 text-white py-3 rounded-[1rem] text-[12px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-black transition-colors duration-300 shadow-sm"
+                className={
+                  compact
+                    ? "flex-1 bg-red-600 text-white py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wide flex items-center justify-center gap-1 hover:bg-black transition-colors duration-300 shadow-sm"
+                    : "flex-1 bg-red-600 text-white py-3 rounded-[1rem] text-[12px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-black transition-colors duration-300 shadow-sm"
+                }
               >
-                <ShoppingCart className="w-4 h-4" />
+                <ShoppingCart className={compact ? "w-3 h-3" : "w-4 h-4"} />
                 <span>Thêm</span>
               </Link>
             </div>
@@ -117,11 +156,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </div>
 
       {/* Subtle bottom accent line appearing on hover */}
-      <motion.div 
-        initial={{ width: 0 }}
-        whileHover={{ width: "80%" }}
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 h-[2px] bg-red-600/30 rounded-full"
-      />
+      {!compact && (
+        <motion.div 
+          initial={{ width: 0 }}
+          whileHover={{ width: "80%" }}
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 h-[2px] bg-red-600/30 rounded-full"
+        />
+      )}
     </motion.div>
   );
 };
