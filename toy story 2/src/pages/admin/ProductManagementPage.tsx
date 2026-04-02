@@ -12,14 +12,15 @@ import {
   filterProducts,
   getProductById,
   getProductDeactivatePreview,
-  type ProductDeactivatePreviewDto
+  type ProductAffectedSetDto,
 } from '../../services/productService';
 import { getActiveBrands } from '../../services/brandService';
 import { getCategories } from '../../services/categoryService';
+import { adminFilterSets, reactivateSetBulk } from '../../services/setService';
 import type { ViewProductDto, CreateProductDto, UpdateProductDto, GenderTarget, AgeRange } from '../../types/ProductDTO';
 import type { ViewBrandDto } from '../../types/BrandDTO';
 import type { ViewCategoryDto } from '../../types/CategoryDTO';
-import { confirmAction } from '../../utils/confirmAction';
+import type { ViewSetDetailDto } from '../../types/SetDTO';
 import { useClientPagination } from '../../hooks/useClientPagination';
 
 const PAGE_SIZE = 5;
@@ -41,10 +42,18 @@ const ProductManagementPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<ViewProductDto | null>(null);
 
-  // Deactivate preview state
-  const [deactivatePreview, setDeactivatePreview] = useState<ProductDeactivatePreviewDto | null>(null);
-  const [deactivatingProductId, setDeactivatingProductId] = useState<number | null>(null);
-  const [_previewLoading, setPreviewLoading] = useState(false);
+  // Deactivate / Activate modal state
+  const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
+  const [isActivateModalOpen, setIsActivateModalOpen] = useState(false);
+  const [selectedProductToToggle, setSelectedProductToToggle] = useState<ViewProductDto | null>(null);
+  const [affectedSets, setAffectedSets] = useState<ProductAffectedSetDto[]>([]);
+  const [isCheckingSets, setIsCheckingSets] = useState(false);
+
+  // Activate modal — inactive sets preview
+  const [activatePreviewSets, setActivatePreviewSets] = useState<ViewSetDetailDto[]>([]);
+  const [isLoadingActivateSets, setIsLoadingActivateSets] = useState(false);
+  const [selectedSetIds, setSelectedSetIds] = useState<Set<number>>(new Set());
+  const [isActivating, setIsActivating] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState<Partial<CreateProductDto>>({
@@ -149,47 +158,78 @@ const ProductManagementPage: React.FC = () => {
 
   const handleStatusChange = async (id: number) => {
     const product = allProducts.find(p => p.productId === id);
-    const isActive = product?.status?.toLowerCase() === 'đang bán' || product?.status?.toLowerCase() === 'active';
+    if (!product) return;
+    const isActive = product.status?.toLowerCase() === 'đang bán' || product.status?.toLowerCase() === 'active';
 
-    if (isActive && product?.productId) {
+    if (isActive && product.productId) {
+      setSelectedProductToToggle(product);
+      setAffectedSets([]);
+      setIsCheckingSets(true);
+      setIsDeactivateModalOpen(true);
       try {
-        setPreviewLoading(true);
         const preview = await getProductDeactivatePreview(product.productId);
-        if (preview.affectedSets.length > 0) {
-          setDeactivatePreview(preview);
-          setDeactivatingProductId(id);
-          return;
-        }
+        setAffectedSets(preview.affectedSets);
       } catch (err) {
         console.error(err);
       } finally {
-        setPreviewLoading(false);
+        setIsCheckingSets(false);
       }
-    }
-
-    const confirmed = await confirmAction(
-      'Bạn có chắc chắn muốn thay đổi trạng thái sản phẩm này?'
-    );
-    if (!confirmed) return;
-
-    try {
-      await changeProductStatus(id);
-      await fetchData();
-    } catch (err: any) {
-      console.error(err);
+    } else {
+      setSelectedProductToToggle(product);
+      setActivatePreviewSets([]);
+      setSelectedSetIds(new Set());
+      setIsLoadingActivateSets(true);
+      setIsActivateModalOpen(true);
+      try {
+        const allInactiveSets = await adminFilterSets({ status: 1 });
+        const related = allInactiveSets.filter(s =>
+          s.products?.some(p => p.productId === product.productId)
+        );
+        setActivatePreviewSets(related);
+        setSelectedSetIds(new Set(related.map(s => s.setId!)));
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoadingActivateSets(false);
+      }
     }
   };
 
   const handleConfirmDeactivate = async () => {
-    if (!deactivatingProductId) return;
+    if (!selectedProductToToggle?.productId) return;
     try {
-      await changeProductStatus(deactivatingProductId);
+      await changeProductStatus(selectedProductToToggle.productId);
       await fetchData();
     } catch (err: any) {
       console.error(err);
     } finally {
-      setDeactivatePreview(null);
-      setDeactivatingProductId(null);
+      setIsDeactivateModalOpen(false);
+      setSelectedProductToToggle(null);
+      setAffectedSets([]);
+    }
+  };
+
+  const handleConfirmActivate = async () => {
+    if (!selectedProductToToggle?.productId) return;
+    setIsActivating(true);
+    try {
+      await changeProductStatus(selectedProductToToggle.productId);
+      if (selectedSetIds.size > 0) {
+        await Promise.all(
+          Array.from(selectedSetIds).map(setId =>
+            reactivateSetBulk({ setId, productIdsToReactivate: [] })
+          )
+        );
+      }
+      await fetchData();
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setIsActivateModalOpen(false);
+      setSelectedProductToToggle(null);
+      setActivatePreviewSets([]);
+      setSelectedSetIds(new Set());
+      setIsActivating(false);
     }
   };
 
@@ -508,29 +548,57 @@ const ProductManagementPage: React.FC = () => {
         </form>
       </Modal>
 
-      {/* Deactivate preview modal */}
+      {/* Smart Deactivate Modal */}
       <Modal
-        isOpen={!!deactivatePreview}
-        onClose={() => { setDeactivatePreview(null); setDeactivatingProductId(null); }}
-        title="Xác nhận vô hiệu hóa sản phẩm"
+        isOpen={isDeactivateModalOpen}
+        onClose={() => { setIsDeactivateModalOpen(false); setSelectedProductToToggle(null); setAffectedSets([]); }}
+        title="Vô hiệu hóa sản phẩm"
         size="sm"
       >
         <div className="space-y-4">
-          <p className="text-sm text-gray-700">
-            Vô hiệu hóa sản phẩm này sẽ đồng thời vô hiệu hóa các bộ sưu tập sau:
-          </p>
-          <ul className="max-h-48 overflow-y-auto space-y-1">
-            {deactivatePreview?.affectedSets.map(s => (
-              <li key={s.setId} className="flex items-center gap-2 text-sm text-gray-800">
-                <span className="h-2 w-2 rounded-full bg-yellow-400 flex-shrink-0" />
-                {s.name}
-              </li>
-            ))}
-          </ul>
+          {isCheckingSets ? (
+            <div className="flex flex-col items-center justify-center py-6 gap-3">
+              <svg className="animate-spin h-8 w-8 text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              <p className="text-sm text-gray-500">Đang kiểm tra dữ liệu liên quan...</p>
+            </div>
+          ) : affectedSets.length > 0 ? (
+            <>
+              <div className="flex items-start gap-3 rounded-xl bg-orange-50 border border-orange-200 p-3">
+                <svg className="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                </svg>
+                <div>
+                  <p className="text-sm font-semibold text-orange-700">
+                    Cảnh báo: Sản phẩm đang thuộc {affectedSets.length} bộ sưu tập
+                  </p>
+                  <p className="text-xs text-orange-600 mt-0.5">
+                    Nếu vô hiệu hóa, các bộ sưu tập này có thể bị ảnh hưởng.
+                  </p>
+                </div>
+              </div>
+              <ul className="max-h-40 overflow-y-auto space-y-1">
+                {affectedSets.map(s => (
+                  <li key={s.setId} className="flex items-center gap-2 text-sm text-gray-800">
+                    <span className="h-2 w-2 rounded-full bg-orange-400 flex-shrink-0" />
+                    {s.name}
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p className="text-sm text-gray-700">
+              Bạn có chắc chắn muốn vô hiệu hóa sản phẩm{' '}
+              <span className="font-semibold text-gray-900">&ldquo;{selectedProductToToggle?.name}&rdquo;</span>?{' '}
+              Sản phẩm này hiện không nằm trong bộ sưu tập nào.
+            </p>
+          )}
           <div className="flex justify-end gap-3 pt-2">
             <button
               type="button"
-              onClick={() => { setDeactivatePreview(null); setDeactivatingProductId(null); }}
+              onClick={() => { setIsDeactivateModalOpen(false); setSelectedProductToToggle(null); setAffectedSets([]); }}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-2xl hover:bg-gray-200"
             >
               Hủy
@@ -538,12 +606,118 @@ const ProductManagementPage: React.FC = () => {
             <button
               type="button"
               onClick={handleConfirmDeactivate}
-              className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-2xl hover:bg-red-600"
+              disabled={isCheckingSets}
+              className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-2xl hover:bg-red-600 disabled:opacity-50"
             >
-              Đồng ý
+              Xác nhận vô hiệu hóa
             </button>
           </div>
         </div>
+      </Modal>
+
+      {/* Activate Modal — selectable inactive sets */}
+      <Modal
+        isOpen={isActivateModalOpen}
+        onClose={() => {
+          setIsActivateModalOpen(false);
+          setSelectedProductToToggle(null);
+          setActivatePreviewSets([]);
+          setSelectedSetIds(new Set());
+        }}
+        title={`Kích hoạt sản phẩm: ${selectedProductToToggle?.name || ''}`}
+        size="lg"
+      >
+        {isLoadingActivateSets ? (
+          <div className="flex flex-col items-center justify-center py-8 gap-3">
+            <svg className="animate-spin h-8 w-8 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+            </svg>
+            <p className="text-sm text-gray-500">Đang kiểm tra dữ liệu liên quan...</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              Sản phẩm này sẽ được kích hoạt lại. Chọn các bộ sưu tập liên quan mà bạn muốn kích hoạt đồng thời:
+            </p>
+
+            {activatePreviewSets.length > 0 ? (
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-semibold text-gray-700">
+                    Bộ sưu tập đang ngừng bán ({activatePreviewSets.length})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSelectedSetIds(prev =>
+                        prev.size === activatePreviewSets.length
+                          ? new Set()
+                          : new Set(activatePreviewSets.map(s => s.setId!))
+                      )
+                    }
+                    className="text-xs text-blue-600 hover:underline"
+                  >
+                    {selectedSetIds.size === activatePreviewSets.length ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
+                  </button>
+                </div>
+                <ul className="border border-gray-200 rounded-lg divide-y divide-gray-100 max-h-64 overflow-y-auto">
+                  {activatePreviewSets.map(s => (
+                    <li
+                      key={s.setId}
+                      onClick={() =>
+                        setSelectedSetIds(prev => {
+                          const next = new Set(prev);
+                          next.has(s.setId!) ? next.delete(s.setId!) : next.add(s.setId!);
+                          return next;
+                        })
+                      }
+                      className={`flex items-center gap-3 px-4 py-2 cursor-pointer transition-colors border-l-4 ${
+                        selectedSetIds.has(s.setId!)
+                          ? 'bg-green-50 border-green-500'
+                          : 'bg-white border-transparent hover:bg-gray-50'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedSetIds.has(s.setId!)}
+                        onChange={() => {}}
+                        onClick={e => e.stopPropagation()}
+                        className="accent-green-500"
+                      />
+                      <span className="text-sm text-gray-800">{s.name}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p className="text-xs text-gray-400 italic">Không có bộ sưu tập nào cần kích hoạt lại.</p>
+            )}
+
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsActivateModalOpen(false);
+                  setSelectedProductToToggle(null);
+                  setActivatePreviewSets([]);
+                  setSelectedSetIds(new Set());
+                }}
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg border border-gray-300 transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                disabled={isActivating}
+                onClick={handleConfirmActivate}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors disabled:opacity-50"
+              >
+                {isActivating ? 'Đang xử lý...' : 'Kích hoạt'}
+              </button>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );
