@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import Pagination from '../../components/ui/Pagination';
-import { Plus, Search } from 'lucide-react';
-import { useDebounce } from '../../hooks/useDebounce';
-import ProductListTable from '../../components/admin/ProductListTable';
-import Modal from '../../components/ui/Modal';
+import React, { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import Pagination from "../../components/ui/Pagination";
+import { Plus, Search } from "lucide-react";
+import { useDebounce } from "../../hooks/useDebounce";
+import ProductListTable from "../../components/admin/ProductListTable";
+import Modal from "../../components/ui/Modal";
 import {
   createProduct,
   updateProduct,
@@ -12,15 +12,21 @@ import {
   filterProducts,
   getProductById,
   getProductDeactivatePreview,
-  type ProductDeactivatePreviewDto
-} from '../../services/productService';
-import { getActiveBrands } from '../../services/brandService';
-import { getCategories } from '../../services/categoryService';
-import type { ViewProductDto, CreateProductDto, UpdateProductDto, GenderTarget, AgeRange } from '../../types/ProductDTO';
-import type { ViewBrandDto } from '../../types/BrandDTO';
-import type { ViewCategoryDto } from '../../types/CategoryDTO';
-import { confirmAction } from '../../utils/confirmAction';
-import { useClientPagination } from '../../hooks/useClientPagination';
+  type ProductDeactivatePreviewDto,
+} from "../../services/productService";
+import { getActiveBrands } from "../../services/brandService";
+import { getCategories } from "../../services/categoryService";
+import type {
+  ViewProductDto,
+  CreateProductDto,
+  UpdateProductDto,
+  GenderTarget,
+  AgeRange,
+} from "../../types/ProductDTO";
+import type { ViewBrandDto } from "../../types/BrandDTO";
+import type { ViewCategoryDto } from "../../types/CategoryDTO";
+import { confirmAction } from "../../utils/confirmAction";
+import { useClientPagination } from "../../hooks/useClientPagination";
 
 const PAGE_SIZE = 5;
 
@@ -34,36 +40,49 @@ const ProductManagementPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
-  const page = Math.max(1, Number(searchParams.get('page') || '1'));
-  const pageSize = Math.max(1, Number(searchParams.get('pageSize') || String(PAGE_SIZE)));
+  const searchParams = useMemo(
+    () => new URLSearchParams(location.search),
+    [location.search],
+  );
+  const page = Math.max(1, Number(searchParams.get("page") || "1"));
+  const pageSize = Math.max(
+    1,
+    Number(searchParams.get("pageSize") || String(PAGE_SIZE)),
+  );
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentProduct, setCurrentProduct] = useState<ViewProductDto | null>(null);
+  const [currentProduct, setCurrentProduct] = useState<ViewProductDto | null>(
+    null,
+  );
 
   // Deactivate preview state
-  const [deactivatePreview, setDeactivatePreview] = useState<ProductDeactivatePreviewDto | null>(null);
-  const [deactivatingProductId, setDeactivatingProductId] = useState<number | null>(null);
+  const [deactivatePreview, setDeactivatePreview] =
+    useState<ProductDeactivatePreviewDto | null>(null);
+  const [deactivatingProductId, setDeactivatingProductId] = useState<
+    number | null
+  >(null);
   const [_previewLoading, setPreviewLoading] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState<Partial<CreateProductDto>>({
-    Name: '',
-    Description: '',
+    Name: "",
+    Description: "",
     Price: 0,
-    Origin: '',
-    Material: '',
+    Origin: "",
+    Material: "",
     Gender: 0 as GenderTarget,
     AgeRange: 0 as AgeRange,
     CategoryId: 0,
-    BrandId: 0
+    BrandId: 0,
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   const [allProducts, setAllProducts] = useState<ViewProductDto[]>([]);
   // 0 = Active, 1 = Inactive, 2 = OutOfStock (matches C# ProductStatus enum $int32)
-  const [statusFilter, setStatusFilter] = useState<0 | 1 | 2 | undefined>(undefined);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<0 | 1 | 2 | undefined>(
+    undefined,
+  );
+  const [searchTerm, setSearchTerm] = useState("");
   const [brandFilter, setBrandFilter] = useState<number | undefined>(undefined);
   const debouncedSearch = useDebounce(searchTerm, 400);
 
@@ -79,28 +98,39 @@ const ProductManagementPage: React.FC = () => {
         getCategories(),
         filterProducts({
           status: statusFilter,
-          ...(debouncedSearch.trim() ? { searchTerm: debouncedSearch.trim() } : {}),
+          ...(debouncedSearch.trim()
+            ? { searchTerm: debouncedSearch.trim() }
+            : {}),
           ...(brandFilter !== undefined ? { brandId: brandFilter } : {}),
-        })
+        }),
       ]);
       setAllProducts(productsData);
       setBrands(brandsData);
       setCategories(categoriesData);
     } catch (err) {
       console.error(err);
-      setFetchError('Không thể tải dữ liệu, vui lòng thử lại.');
+      setFetchError("Không thể tải dữ liệu, vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: name === 'Price' || name === 'CategoryId' || name === 'BrandId' || name === 'Gender' || name === 'AgeRange'
-        ? Number(value)
-        : value
+      [name]:
+        name === "Price" ||
+        name === "CategoryId" ||
+        name === "BrandId" ||
+        name === "Gender" ||
+        name === "AgeRange"
+          ? Number(value)
+          : value,
     }));
   };
 
@@ -113,29 +143,39 @@ const ProductManagementPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const missing: string[] = [];
-    if (!formData.Name?.trim()) missing.push('Tên sản phẩm');
-    if (!formData.Price || formData.Price <= 0) missing.push('Giá tiền');
-    if (!formData.Description?.trim()) missing.push('Mô tả');
-    if (!formData.Origin?.trim()) missing.push('Xuất xứ');
-    if (!formData.CategoryId || formData.CategoryId <= 0) missing.push('Phân loại');
-    if (!formData.BrandId || formData.BrandId <= 0) missing.push('Thương hiệu');
+    if (!formData.Name?.trim()) missing.push("Tên sản phẩm");
+    if (!formData.Price || formData.Price <= 0) missing.push("Giá tiền");
+    if (!formData.Description?.trim()) missing.push("Mô tả");
+    if (!formData.Origin?.trim()) missing.push("Xuất xứ");
+    if (!formData.CategoryId || formData.CategoryId <= 0)
+      missing.push("Phân loại");
+    if (!formData.BrandId || formData.BrandId <= 0) missing.push("Thương hiệu");
     if (missing.length > 0) {
-      setFormError(`Vui lòng điền đầy đủ: ${missing.join(', ')}`);
+      setFormError(`Vui lòng điền đầy đủ: ${missing.join(", ")}`);
       return;
     }
     try {
       setIsSubmitting(true);
       setFormError(null);
       if (currentProduct && currentProduct.productId) {
-        await updateProduct(currentProduct.productId, formData as UpdateProductDto, imageFile || undefined, true);
+        await updateProduct(
+          currentProduct.productId,
+          formData as UpdateProductDto,
+          imageFile || undefined,
+          true,
+        );
       } else {
-        await createProduct(formData as CreateProductDto, imageFile || undefined, true);
+        await createProduct(
+          formData as CreateProductDto,
+          imageFile || undefined,
+          true,
+        );
       }
       setIsModalOpen(false);
       fetchData();
     } catch (err: any) {
       console.error(err);
-      setFormError(err?.message || 'Lưu sản phẩm thất bại, vui lòng thử lại.');
+      setFormError(err?.message || "Lưu sản phẩm thất bại, vui lòng thử lại.");
     } finally {
       setIsSubmitting(false);
     }
@@ -144,12 +184,14 @@ const ProductManagementPage: React.FC = () => {
   const {
     paginatedItems: paginatedProducts,
     totalPages,
-    currentPage: safePage
-  } = useClientPagination(allProducts, page, PAGE_SIZE)
+    currentPage: safePage,
+  } = useClientPagination(allProducts, page, PAGE_SIZE);
 
   const handleStatusChange = async (id: number) => {
-    const product = allProducts.find(p => p.productId === id);
-    const isActive = product?.status?.toLowerCase() === 'đang bán' || product?.status?.toLowerCase() === 'active';
+    const product = allProducts.find((p) => p.productId === id);
+    const isActive =
+      product?.status?.toLowerCase() === "đang bán" ||
+      product?.status?.toLowerCase() === "active";
 
     if (isActive && product?.productId) {
       try {
@@ -168,7 +210,7 @@ const ProductManagementPage: React.FC = () => {
     }
 
     const confirmed = await confirmAction(
-      'Bạn có chắc chắn muốn thay đổi trạng thái sản phẩm này?'
+      "Bạn có chắc chắn muốn thay đổi trạng thái sản phẩm này?",
     );
     if (!confirmed) return;
 
@@ -196,15 +238,15 @@ const ProductManagementPage: React.FC = () => {
   const openCreateModal = () => {
     setCurrentProduct(null);
     setFormData({
-      Name: '',
-      Description: '',
+      Name: "",
+      Description: "",
       Price: 0,
-      Origin: '',
-      Material: '',
+      Origin: "",
+      Material: "",
       Gender: 0 as GenderTarget,
       AgeRange: 0 as AgeRange,
       CategoryId: categories[0]?.categoryId || 0,
-      BrandId: brands[0]?.brandId || 0
+      BrandId: brands[0]?.brandId || 0,
     });
     setImageFile(null);
     setFormError(null);
@@ -216,28 +258,29 @@ const ProductManagementPage: React.FC = () => {
     setFormError(null);
     try {
       setLoading(true);
-      const details = product.productId ? await getProductById(product.productId) : product;
+      const details = product.productId
+        ? await getProductById(product.productId)
+        : product;
       setFormData({
-        Name: details.name || '',
-        Description: details.description || '',
+        Name: details.name || "",
+        Description: details.description || "",
         Price: details.price || 0,
-        Origin: details.origin || '',
-        Material: details.material || '',
+        Origin: details.origin || "",
+        Material: details.material || "",
         Gender: details.genderTarget ?? 0,
         AgeRange: details.ageRangeValue ?? 0,
         CategoryId: details.categoryId || 0,
-        BrandId: details.brandId || 0
+        BrandId: details.brandId || 0,
       });
       setImageFile(null);
       setIsModalOpen(true);
     } catch (err) {
       console.error(err);
-      setFetchError('Không thể tải chi tiết sản phẩm, vui lòng thử lại.');
+      setFetchError("Không thể tải chi tiết sản phẩm, vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
   };
-
 
   return (
     <div>
@@ -252,45 +295,65 @@ const ProductManagementPage: React.FC = () => {
       </div>
 
       <div className="flex flex-wrap gap-2 mb-4 items-center">
-        {([
-          { label: 'Tất cả', value: undefined },
-          { label: 'Đang bán', value: 0 },
-          { label: 'Ngừng bán', value: 1 },
-        ] as { label: string; value: typeof statusFilter }[]).map(tab => (
+        {(
+          [
+            { label: "Tất cả", value: undefined },
+            { label: "Đang bán", value: 0 },
+            { label: "Ngừng bán", value: 1 },
+          ] as { label: string; value: typeof statusFilter }[]
+        ).map((tab) => (
           <button
             key={tab.label}
-            onClick={() => { setStatusFilter(tab.value); navigate(location.pathname); }}
+            onClick={() => {
+              setStatusFilter(tab.value);
+              navigate(location.pathname);
+            }}
             className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
               statusFilter === tab.value
-                ? 'bg-red-400 text-white border-red-400'
-                : 'bg-white text-gray-600 border-gray-300 hover:border-red-300'
+                ? "bg-red-400 text-white border-red-400"
+                : "bg-white text-gray-600 border-gray-300 hover:border-red-300"
             }`}
           >
             {tab.label}
           </button>
         ))}
         <div className="relative">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          <Search
+            size={15}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+          />
           <input
             type="text"
             placeholder="Tìm kiếm sản phẩm..."
             value={searchTerm}
-            onChange={e => { setSearchTerm(e.target.value); navigate(location.pathname); }}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              navigate(location.pathname);
+            }}
             className="pl-9 pr-4 py-1.5 border border-gray-300 rounded-full text-sm focus:outline-none focus:border-red-400 w-56"
           />
         </div>
         <select
-          value={brandFilter ?? ''}
-          onChange={e => { setBrandFilter(e.target.value ? Number(e.target.value) : undefined); navigate(location.pathname); }}
+          value={brandFilter ?? ""}
+          onChange={(e) => {
+            setBrandFilter(e.target.value ? Number(e.target.value) : undefined);
+            navigate(location.pathname);
+          }}
           className="px-3 py-1.5 border border-gray-300 rounded-full text-sm focus:outline-none focus:border-red-400"
         >
           <option value="">Tất cả thương hiệu</option>
-          {brands.map(b => <option key={b.brandId} value={b.brandId}>{b.name}</option>)}
+          {brands.map((b) => (
+            <option key={b.brandId} value={b.brandId}>
+              {b.name}
+            </option>
+          ))}
         </select>
       </div>
 
       {loading && <div className="text-center py-4">Loading...</div>}
-      {fetchError && <div className="text-center py-4 text-red-500">{fetchError}</div>}
+      {fetchError && (
+        <div className="text-center py-4 text-red-500">{fetchError}</div>
+      )}
 
       {!loading && !fetchError && (
         <>
@@ -303,10 +366,10 @@ const ProductManagementPage: React.FC = () => {
             currentPage={safePage}
             totalPages={totalPages}
             onPageChange={(nextPage) => {
-              const next = new URLSearchParams(location.search)
-              next.set('page', String(nextPage))
-              next.set('pageSize', String(pageSize))
-              navigate(`${location.pathname}?${next.toString()}`)
+              const next = new URLSearchParams(location.search);
+              next.set("page", String(nextPage));
+              next.set("pageSize", String(pageSize));
+              navigate(`${location.pathname}?${next.toString()}`);
             }}
           />
         </>
@@ -314,8 +377,11 @@ const ProductManagementPage: React.FC = () => {
 
       <Modal
         isOpen={isModalOpen}
-        onClose={() => { setIsModalOpen(false); setFormError(null); }}
-        title={currentProduct ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm'}
+        onClose={() => {
+          setIsModalOpen(false);
+          setFormError(null);
+        }}
+        title={currentProduct ? "Chỉnh sửa sản phẩm" : "Thêm sản phẩm"}
         size="xxl"
       >
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -323,7 +389,9 @@ const ProductManagementPage: React.FC = () => {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Tên</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Tên
+                  </label>
                   <input
                     type="text"
                     name="Name"
@@ -334,7 +402,9 @@ const ProductManagementPage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Giá tiền</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Giá tiền
+                  </label>
                   <input
                     type="number"
                     name="Price"
@@ -348,7 +418,9 @@ const ProductManagementPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Mô tả</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Mô tả
+                </label>
                 <textarea
                   name="Description"
                   value={formData.Description}
@@ -361,7 +433,9 @@ const ProductManagementPage: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Phân loại</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Phân loại
+                  </label>
                   <select
                     name="CategoryId"
                     value={formData.CategoryId}
@@ -370,13 +444,17 @@ const ProductManagementPage: React.FC = () => {
                     className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
                   >
                     <option value={0}>Select Category</option>
-                    {categories.map(c => (
-                      <option key={c.categoryId} value={c.categoryId}>{c.name}</option>
+                    {categories.map((c) => (
+                      <option key={c.categoryId} value={c.categoryId}>
+                        {c.name}
+                      </option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Độ tuổi</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Độ tuổi
+                  </label>
                   <select
                     name="AgeRange"
                     value={formData.AgeRange}
@@ -390,12 +468,13 @@ const ProductManagementPage: React.FC = () => {
                     <option value={4}>Trên 6 tuổi</option>
                   </select>
                 </div>
-
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Thương hiệu</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Thương hiệu
+                  </label>
                   <select
                     name="BrandId"
                     value={formData.BrandId}
@@ -404,13 +483,17 @@ const ProductManagementPage: React.FC = () => {
                     className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
                   >
                     <option value={0}>Select Brand</option>
-                    {brands.map(b => (
-                      <option key={b.brandId} value={b.brandId}>{b.name}</option>
+                    {brands.map((b) => (
+                      <option key={b.brandId} value={b.brandId}>
+                        {b.name}
+                      </option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Xuất xứ</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Xuất xứ
+                  </label>
                   <input
                     type="text"
                     name="Origin"
@@ -423,7 +506,9 @@ const ProductManagementPage: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Chất lượng</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Chất lượng
+                  </label>
                   <input
                     type="text"
                     name="Material"
@@ -433,7 +518,9 @@ const ProductManagementPage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Giới tính</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Giới tính
+                  </label>
                   <select
                     name="Gender"
                     value={formData.Gender}
@@ -449,7 +536,9 @@ const ProductManagementPage: React.FC = () => {
             </div>
 
             <div className="flex h-full flex-col rounded-2xl border border-gray-200 bg-gray-50 p-4">
-              <label className="block text-sm font-medium text-gray-700">Hình ảnh</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Hình ảnh
+              </label>
               <input
                 type="file"
                 accept="image/*"
@@ -486,7 +575,10 @@ const ProductManagementPage: React.FC = () => {
           <div className="flex justify-end gap-3 pt-2">
             <button
               type="button"
-              onClick={() => { setIsModalOpen(false); setFormError(null); }}
+              onClick={() => {
+                setIsModalOpen(false);
+                setFormError(null);
+              }}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-2xl hover:bg-gray-200"
             >
               Hủy
@@ -497,12 +589,32 @@ const ProductManagementPage: React.FC = () => {
               className="bg-red-400 text-white px-4 py-2 rounded-3xl flex items-center gap-2 hover:bg-red-600 font-black disabled:opacity-50"
             >
               {isSubmitting && (
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
               )}
-              {isSubmitting ? 'Đang xử lý...' : (currentProduct ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm')}
+              {isSubmitting
+                ? "Đang xử lý..."
+                : currentProduct
+                  ? "Chỉnh sửa sản phẩm"
+                  : "Thêm sản phẩm"}
             </button>
           </div>
         </form>
@@ -511,17 +623,24 @@ const ProductManagementPage: React.FC = () => {
       {/* Deactivate preview modal */}
       <Modal
         isOpen={!!deactivatePreview}
-        onClose={() => { setDeactivatePreview(null); setDeactivatingProductId(null); }}
+        onClose={() => {
+          setDeactivatePreview(null);
+          setDeactivatingProductId(null);
+        }}
         title="Xác nhận vô hiệu hóa sản phẩm"
         size="sm"
       >
         <div className="space-y-4">
           <p className="text-sm text-gray-700">
-            Vô hiệu hóa sản phẩm này sẽ đồng thời vô hiệu hóa các bộ sưu tập sau:
+            Vô hiệu hóa sản phẩm này sẽ đồng thời vô hiệu hóa các bộ sưu tập
+            sau:
           </p>
           <ul className="max-h-48 overflow-y-auto space-y-1">
-            {deactivatePreview?.affectedSets.map(s => (
-              <li key={s.setId} className="flex items-center gap-2 text-sm text-gray-800">
+            {deactivatePreview?.affectedSets.map((s) => (
+              <li
+                key={s.setId}
+                className="flex items-center gap-2 text-sm text-gray-800"
+              >
                 <span className="h-2 w-2 rounded-full bg-yellow-400 flex-shrink-0" />
                 {s.name}
               </li>
@@ -530,7 +649,10 @@ const ProductManagementPage: React.FC = () => {
           <div className="flex justify-end gap-3 pt-2">
             <button
               type="button"
-              onClick={() => { setDeactivatePreview(null); setDeactivatingProductId(null); }}
+              onClick={() => {
+                setDeactivatePreview(null);
+                setDeactivatingProductId(null);
+              }}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-2xl hover:bg-gray-200"
             >
               Hủy

@@ -2,20 +2,19 @@ import React, { useEffect, useState } from 'react'
 import ProfileLayout from '../layouts/ProfileLayout'
 import { ShoppingBag, Package, Clock } from 'lucide-react'
 import { formatPrice } from '../utils/formatPrice'
-import { Link } from 'react-router-dom'
-import { getOrderById, getAccountOrders, updateOrderStatus } from '@/services/orderService'
+import { Link, useNavigate } from 'react-router-dom'
+import { getAccountOrders, updateOrderStatus } from '@/services/orderService'
 import StatusBadge from '@/components/badge/OrderStatusBadge'
-import { OrderDetailDto } from '@/types/OrderDTO'
-import OrderDetailModal from '@/components/OrderDetailModalProps'
+import { toOrderDetailPath } from '@/routes/routePaths'
 import { getOrderEventsByOrderId } from '@/services/eventService'
 import { OrderEventDto } from '@/types/EventDto'
 import OrderEventsModal from '@/components/event/OrderEventsModal'
 
 const OrderPage: React.FC = () => {
+    const navigate = useNavigate()
     const [orders, setOrders] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
 
-    const [selectedOrder, setSelectedOrder] = useState<OrderDetailDto | null>(null)
     const [selectedOrderEvents, setSelectedOrderEvents] = useState<OrderEventDto[] | null>(null)
 
     useEffect(() => {
@@ -74,14 +73,7 @@ const OrderPage: React.FC = () => {
                         {orders.map((order) => (
                             <div
                                 key={order.orderId}
-                                onClick={async () => {
-                                    try {
-                                        const detail = await getOrderById(order.orderId)
-                                        setSelectedOrder(detail)
-                                    } catch (error) {
-                                        console.error('Failed to fetch order detail:', error)
-                                    }
-                                }}
+                                onClick={() => navigate(toOrderDetailPath(order.orderId, 'customer'))}
                                 className="group bg-white border border-gray-200 rounded-2xl shadow-md p-6 hover:shadow-xl hover:border-red-100 transition-all cursor-pointer"
                             >
                                 {/* Top section: icon + info */}
@@ -152,13 +144,6 @@ const OrderPage: React.FC = () => {
                             </div>
                         ))}
                     </div>
-                )}
-
-                {selectedOrder && !selectedOrderEvents && (
-                    <OrderDetailModal
-                        order={selectedOrder}
-                        onClose={() => setSelectedOrder(null)}
-                    />
                 )}
 
                 {selectedOrderEvents && (
