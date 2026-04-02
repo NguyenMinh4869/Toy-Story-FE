@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { Package } from 'lucide-react'
-import { getOrderById, getOrders } from '@/services/orderService'
-import { ViewOrderDto, OrderDetailDto } from '@/types/OrderDTO'
-import OrderDetail from './order/OrderDetail'
+import { useNavigate } from 'react-router-dom'
+import { getOrders } from '@/services/orderService'
+import { ViewOrderDto } from '@/types/OrderDTO'
+import { toOrderDetailPath } from '@/routes/routePaths'
 import OrderEventsModal from '@/components/event/OrderEventsModal'
 import { OrderEventDto } from '@/types/EventDto'
 import { getOrderEventsByOrderId } from '@/services/eventService'
@@ -13,9 +14,9 @@ import { useClientPagination } from '@/hooks/useClientPagination'
 const PAGE_SIZE = 6
 
 const OrderManagementPage: React.FC = () => {
+    const navigate = useNavigate()
     const [orders, setOrders] = useState<ViewOrderDto[]>([])
     const [loading, setLoading] = useState(true)
-    const [selectedOrder, setSelectedOrder] = useState<OrderDetailDto | null>(null)
     const [selectedOrderEvents, setSelectedOrderEvents] = useState<OrderEventDto[] | null>(null)
     const [currentPage, setCurrentPage] = useState(1)
     const { paginatedItems: paginatedOrders, totalPages, currentPage: safePage } = useClientPagination(orders, currentPage, PAGE_SIZE)
@@ -37,13 +38,8 @@ const OrderManagementPage: React.FC = () => {
         fetchOrders()
     }, [])
 
-    const handleSelectOrder = async (orderId: number) => {
-        try {
-            const detail = await getOrderById(orderId)
-            setSelectedOrder(detail)
-        } catch (error) {
-            console.error('Failed to fetch order detail:', error)
-        }
+    const handleSelectOrder = (orderId: number) => {
+        navigate(toOrderDetailPath(orderId, 'admin'))
     }
 
     const handleViewHistory = async (orderId: number) => {
@@ -98,14 +94,6 @@ const OrderManagementPage: React.FC = () => {
                         />
                     </div>
                 </>
-            )}
-
-            {selectedOrder && !selectedOrderEvents && (
-                <OrderDetail
-                    order={selectedOrder}
-                    onClose={() => setSelectedOrder(null)}
-                    onRefresh={fetchOrders}
-                />
             )}
 
             {selectedOrderEvents && (
