@@ -9,6 +9,7 @@ import { ROUTES } from './routes/routePaths'
 import RegisterPage from './pages/RegisterPage'
 import { Toaster } from './components/ui/toaster' // Import your Toaster
 import { ToastInitializer } from './components/ToastInitializer'
+import ChatWidget from './components/chat/ChatWidget'
 
 const App: React.FC = () => {
   const location = useLocation()
@@ -53,13 +54,14 @@ const App: React.FC = () => {
   return (
     <>
       <ToastInitializer />
-      <div className="bg-[#ab0007] min-h-screen w-full">
+      <div className="bg-[#ab0007] min-h-screen w-full relative">
         <Header />
         <main className="w-full">
           <AppRoutes />
         </main>
         <Footer />
         <CartPopup />
+        <ChatWidget />
       </div>
       <Toaster />
     </>
