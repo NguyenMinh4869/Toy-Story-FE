@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { formatPrice } from '../utils/formatPrice'
 import { ROUTES } from '../routes/routePaths'
-
+import { useAuth } from '@/hooks/useAuth'
 const CartPage: React.FC = () => {
     const {
         cartItems,
@@ -14,6 +14,12 @@ const CartPage: React.FC = () => {
         getTotalOriginalPrice
     } = useCart()
     const navigate = useNavigate()
+    const { user } = useAuth()
+
+    if (user?.role !== 'Member') {
+        navigate(ROUTES.HOME)
+        return null
+    }
 
     if (cartItems.length === 0) {
         return (

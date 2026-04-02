@@ -23,8 +23,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     : 0;
   const discountLabel = hasPromotion
     ? (promoInfo && promoInfo.discountType === 1
-        ? `-${(promoInfo.discountValue / 1000).toFixed(0)}K`
-        : `-${discountPercent}%`)
+      ? `-${(promoInfo.discountValue / 1000).toFixed(0)}K`
+      : `-${discountPercent}%`)
     : "";
 
   const handleCardClick = () => {
@@ -32,7 +32,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -43,7 +43,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       {/* Discount Badge */}
       {hasPromotion && (
         <div className="absolute top-4 right-4 z-10">
-          <motion.div 
+          <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             className="bg-red-600 text-white text-[11px] font-black px-3 py-1.5 rounded-full shadow-lg shadow-red-200"
@@ -62,7 +62,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           alt={product.name ?? ""}
           className="w-full h-full object-contain p-4"
         />
-        
+
         {/* Quick View Overlay */}
         <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
@@ -117,7 +117,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </div>
 
       {/* Subtle bottom accent line appearing on hover */}
-      <motion.div 
+      <motion.div
         initial={{ width: 0 }}
         whileHover={{ width: "80%" }}
         className="absolute bottom-6 left-1/2 -translate-x-1/2 h-[2px] bg-red-600/30 rounded-full"
