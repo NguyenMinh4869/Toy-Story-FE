@@ -2,6 +2,12 @@
  * Order DTOs
  */
 
+export interface SetSubItemDto {
+  productId: number;
+  productName: string;
+  quantity: number;
+}
+
 export interface ViewOrderDto {
   orderId: number;
   orderDate: string;
@@ -23,7 +29,9 @@ export interface ViewOrderDto {
 
 export interface OrderItemDto {
   orderItemId: number;
-  productId: number;
+  productId?: number;
+  setId?: number;
+  itemType?: string;
   productName: string;
   unitPrice: number;
   originalUnitPrice?: number;
@@ -31,6 +39,7 @@ export interface OrderItemDto {
   totalPrice: number;
   totalOriginalPrice?: number;
   imageUrl?: string | null;
+  subItems?: SetSubItemDto[];
 }
 
 export interface ViewInvoiceDto {

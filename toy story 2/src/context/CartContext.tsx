@@ -6,7 +6,7 @@ import {
   clearCartServer,
   getCartServer,
 } from '../services/cartService'
-import type { CartItemDto, CartProduct } from '../types/CartDTO'
+import type { CartItemDto, CartProduct, SetSubItemDto } from '../types/CartDTO'
 import { useAuth } from '@/hooks/useAuth'
 
 export interface CartItem {
@@ -65,6 +65,7 @@ const mapDtoToCartItem = (dto: CartItemDto): CartItem => {
         name: dto.setName!,
         imageUrl: dto.setImage,
         price: dto.unitPrice,
+        subItems: dto.subItems,
       },
       quantity: dto.quantity,
       serverTotalPrice: dto.totalPrice,

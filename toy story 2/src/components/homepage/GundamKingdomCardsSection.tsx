@@ -10,6 +10,7 @@ interface GundamKingdomCardsSectionProps {
   page?: number;
   onPageChange?: (nextPage: number) => void;
   maxPages?: number;
+  variant?: 'dark' | 'light';
 }
 
 export const GundamKingdomCardsSection = ({ 
@@ -18,6 +19,7 @@ export const GundamKingdomCardsSection = ({
   page = 0,
   onPageChange,
   maxPages = 3,
+  variant = 'dark',
 }: GundamKingdomCardsSectionProps): React.JSX.Element => {
   const pageSize = 4;
   const pageCount = Math.max(1, Math.min(maxPages, Math.ceil(products.length / pageSize)));
@@ -46,7 +48,7 @@ export const GundamKingdomCardsSection = ({
   if (isLoading) {
     return (
       <div className="w-full h-80 flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-white/20 border-t-white rounded-full animate-spin" />
+        <div className={`w-10 h-10 border-4 rounded-full animate-spin ${variant === 'dark' ? 'border-white/20 border-t-white' : 'border-red-200 border-t-[#a70001]'}`} />
       </div>
     );
   }
@@ -80,7 +82,7 @@ export const GundamKingdomCardsSection = ({
             config={{ 
               direction: "left", 
               onClick: goPrev, 
-              variant: "white",
+              variant: variant === 'dark' ? 'white' : 'red',
               className: "absolute left-0 top-1/2 -translate-y-1/2 z-20 shadow-xl"
             }} 
           />
@@ -88,7 +90,7 @@ export const GundamKingdomCardsSection = ({
             config={{ 
               direction: "right", 
               onClick: goNext, 
-              variant: "white",
+              variant: variant === 'dark' ? 'white' : 'red',
               className: "absolute right-0 top-1/2 -translate-y-1/2 z-20 shadow-xl"
             }} 
           />

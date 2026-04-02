@@ -13,6 +13,7 @@ interface PromotionalOffersSectionProps {
   maxPages?: number;
   /** Discount percentage from the active promotion (e.g. 50 means 50%). 0 = no badge shown */
   promotionDiscountValue?: number;
+  variant?: 'dark' | 'light';
 }
 
 export const PromotionalOffersSection = ({
@@ -22,6 +23,7 @@ export const PromotionalOffersSection = ({
   onPageChange,
   maxPages = 3,
   promotionDiscountValue = 0,
+  variant = 'dark',
 }: PromotionalOffersSectionProps): React.JSX.Element => {
   const pageSize = 4;
   const pageCount = Math.max(1, Math.min(maxPages, Math.ceil(products.length / pageSize)));
@@ -50,14 +52,14 @@ export const PromotionalOffersSection = ({
   if (isLoading) {
     return (
       <div className="w-full h-96 flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+        <div className={`w-12 h-12 border-4 rounded-full animate-spin ${variant === 'dark' ? 'border-white/30 border-t-white' : 'border-red-200 border-t-[#a70001]'}`} />
       </div>
     );
   }
 
   return (
     <div className="relative w-full">
-      <SectionHeader title="Khuyến Mãi Hấp Dẫn" variant="dark" />
+      <SectionHeader title="Khuyến Mãi Hấp Dẫn" variant={variant} />
       
       <div className="relative mt-12 px-12">
         <div className="overflow-hidden">
@@ -90,7 +92,7 @@ export const PromotionalOffersSection = ({
               config={{ 
                 direction: "left", 
                 onClick: goPrev, 
-                variant: "white",
+                variant: variant === 'dark' ? 'white' : 'red',
                 className: "absolute left-0 top-1/2 -translate-y-1/2 z-20"
               }} 
             />
@@ -98,7 +100,7 @@ export const PromotionalOffersSection = ({
               config={{ 
                 direction: "right", 
                 onClick: goNext, 
-                variant: "white",
+                variant: variant === 'dark' ? 'white' : 'red',
                 className: "absolute right-0 top-1/2 -translate-y-1/2 z-20"
               }} 
             />
