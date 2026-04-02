@@ -611,7 +611,6 @@ const SetManagementPage: React.FC = () => {
                 .filter(p => !productTableSearch.trim() || p.name?.toLowerCase().includes(productTableSearch.toLowerCase()))
                 .map(p => {
                   const pid = p.productId!;
-                  const stock = totalStockByProductId[pid] ?? 0;
                   const isChecked = !!pendingSelectionQtys[pid];
                   const qty = pendingSelectionQtys[pid] ?? 1;
                   return (

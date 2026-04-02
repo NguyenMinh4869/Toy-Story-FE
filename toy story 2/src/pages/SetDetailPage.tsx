@@ -7,7 +7,7 @@ import {
   ChevronRight,
   Sparkles,
   Zap,
-  Gift
+  Gift,
 } from "lucide-react";
 import type { ViewSetDetailDto } from "../types/SetDTO";
 import { formatPrice } from "../utils/formatPrice";
@@ -22,7 +22,7 @@ const SetDetailPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { addToCart } = useCart();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   useEffect(() => {
     if (!id) return;
     const setId = Number(id);
@@ -90,13 +90,12 @@ const SetDetailPage: React.FC = () => {
       <BreadcrumbHeader
         items={[
           { label: "Bộ sưu tập", to: "/sets" },
-          { label: setData.name ?? "Chi tiết" }
+          { label: setData.name ?? "Chi tiết" },
         ]}
       />
 
       <main className="max-w-7xl mx-auto px-4 pt-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-
           {/* LEFT: Set Hero & Summary */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -128,7 +127,8 @@ const SetDetailPage: React.FC = () => {
                     {setData.name}
                   </h1>
                   <p className="text-gray-500 font-red-hat leading-relaxed max-w-xl text-xl font-medium">
-                    {setData.description || "Khám phá sự kết hợp độc đáo của những mẫu đồ chơi được tuyển chọn kỹ lưỡng trong bộ sưu tập này."}
+                    {setData.description ||
+                      "Khám phá sự kết hợp độc đáo của những mẫu đồ chơi được tuyển chọn kỹ lưỡng trong bộ sưu tập này."}
                   </p>
                 </div>
               </div>
@@ -136,16 +136,28 @@ const SetDetailPage: React.FC = () => {
               {/* Stats Bar */}
               <div className="grid grid-cols-3 gap-4 mt-12 pt-10 border-t border-gray-100">
                 <div className="text-center group">
-                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2 transition-colors group-hover:text-[#ca002a]">Số món</p>
-                  <p className="text-3xl font-tilt-warp text-gray-900 group-hover:scale-110 transition-transform">{setData.totalItems ?? 0}</p>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2 transition-colors group-hover:text-[#ca002a]">
+                    Số món
+                  </p>
+                  <p className="text-3xl font-tilt-warp text-gray-900 group-hover:scale-110 transition-transform">
+                    {setData.totalItems ?? 0}
+                  </p>
                 </div>
                 <div className="text-center border-x border-gray-100 group">
-                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2 transition-colors group-hover:text-[#ca002a]">Ưu đãi</p>
-                  <p className="text-3xl font-tilt-warp text-[#ca002a] group-hover:scale-110 transition-transform">-{setData.discountPercent ?? 0}%</p>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2 transition-colors group-hover:text-[#ca002a]">
+                    Ưu đãi
+                  </p>
+                  <p className="text-3xl font-tilt-warp text-[#ca002a] group-hover:scale-110 transition-transform">
+                    -{setData.discountPercent ?? 0}%
+                  </p>
                 </div>
                 <div className="text-center group">
-                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2 transition-colors group-hover:text-[#ca002a]">Tiết kiệm</p>
-                  <p className="text-3xl font-tilt-warp text-[#ca002a] group-hover:scale-110 transition-transform">{formatPrice(setData.savings ?? 0)}</p>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2 transition-colors group-hover:text-[#ca002a]">
+                    Tiết kiệm
+                  </p>
+                  <p className="text-3xl font-tilt-warp text-[#ca002a] group-hover:scale-110 transition-transform">
+                    {formatPrice(setData.savings ?? 0)}
+                  </p>
                 </div>
               </div>
             </div>
@@ -155,7 +167,9 @@ const SetDetailPage: React.FC = () => {
               <div className="flex items-center justify-between mb-8 px-4">
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-2 bg-red-600 rounded-full" />
-                  <h2 className="text-2xl font-tilt-warp text-gray-900 uppercase">Danh sách sản phẩm trong set</h2>
+                  <h2 className="text-2xl font-tilt-warp text-gray-900 uppercase">
+                    Danh sách sản phẩm trong set
+                  </h2>
                 </div>
               </div>
 
@@ -184,8 +198,12 @@ const SetDetailPage: React.FC = () => {
                         {item.productName}
                       </Link>
                       <div className="mt-2 flex items-center gap-4 text-sm">
-                        <span className="font-bold text-gray-900 px-3 py-1 bg-white rounded-lg border border-gray-100 shadow-sm">SL: {item.quantity}</span>
-                        <span className="text-gray-400 line-through text-xs font-medium">{formatPrice(item.unitPrice ?? 0)}</span>
+                        <span className="font-bold text-gray-900 px-3 py-1 bg-white rounded-lg border border-gray-100 shadow-sm">
+                          SL: {item.quantity}
+                        </span>
+                        <span className="text-gray-400 line-through text-xs font-medium">
+                          {formatPrice(item.unitPrice ?? 0)}
+                        </span>
                       </div>
                     </div>
 
@@ -214,7 +232,9 @@ const SetDetailPage: React.FC = () => {
               <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/5 rounded-bl-[5rem] -mr-8 -mt-8 -z-10 transition-all group-hover:scale-110" />
 
               <div className="mb-8">
-                <p className="text-gray-400 font-bold text-xs uppercase tracking-widest mb-2">Giá trọn bộ</p>
+                <p className="text-gray-400 font-bold text-xs uppercase tracking-widest mb-2">
+                  Giá trọn bộ
+                </p>
                 <div className="flex flex-col">
                   <span className="text-5xl font-tilt-warp text-gray-900 tracking-tight leading-none mb-2">
                     {formatPrice(setData.price ?? 0)}
@@ -224,7 +244,9 @@ const SetDetailPage: React.FC = () => {
                       <span className="bg-red-100 text-red-600 px-3 py-1 rounded-lg text-xs font-black italic">
                         TỐI ƯU HƠN
                       </span>
-                      <span className="text-gray-400 text-sm font-medium">Bạn tiết kiệm {formatPrice(setData.savings)}</span>
+                      <span className="text-gray-400 text-sm font-medium">
+                        Bạn tiết kiệm {formatPrice(setData.savings)}
+                      </span>
                     </div>
                   ) : null}
                 </div>
@@ -236,8 +258,12 @@ const SetDetailPage: React.FC = () => {
                     <Zap className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-gray-900 uppercase">Ưu đãi giới hạn</p>
-                    <p className="text-[10px] text-orange-700 font-medium">Khám phá ngay bộ sưu tập duy nhất</p>
+                    <p className="text-xs font-bold text-gray-900 uppercase">
+                      Ưu đãi giới hạn
+                    </p>
+                    <p className="text-[10px] text-orange-700 font-medium">
+                      Khám phá ngay bộ sưu tập duy nhất
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 p-4 bg-purple-50/50 rounded-2xl border border-purple-100 transition-colors hover:bg-purple-50">
@@ -245,8 +271,12 @@ const SetDetailPage: React.FC = () => {
                     <Gift className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-gray-900 uppercase">Quà tặng kèm</p>
-                    <p className="text-[10px] text-purple-700 font-medium">Túi đựng cao cấp Toy Story</p>
+                    <p className="text-xs font-bold text-gray-900 uppercase">
+                      Quà tặng kèm
+                    </p>
+                    <p className="text-[10px] text-purple-700 font-medium">
+                      Túi đựng cao cấp Toy Story
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 p-4 bg-blue-50/50 rounded-2xl border border-blue-100 transition-colors hover:bg-blue-50">
@@ -254,12 +284,17 @@ const SetDetailPage: React.FC = () => {
                     <Package className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-gray-900 uppercase">Freeship</p>
-                    <p className="text-[10px] text-blue-700 font-medium">Miễn phí giao hàng toàn quốc</p>
+                    <p className="text-xs font-bold text-gray-900 uppercase">
+                      Freeship
+                    </p>
+                    <p className="text-[10px] text-blue-700 font-medium">
+                      Miễn phí giao hàng toàn quốc
+                    </p>
                   </div>
                 </div>
               </div>
-              {user && (
+
+              {user && role === "Member" && (
                 <motion.button
                   whileHover={{ scale: 1.02, backgroundColor: "#000" }}
                   whileTap={{ scale: 0.98 }}
@@ -270,8 +305,10 @@ const SetDetailPage: React.FC = () => {
                   Sở hữu ngay
                 </motion.button>
               )}
+
               <p className="mt-8 text-center text-[10px] text-gray-400 font-medium tracking-wide uppercase px-4 leading-relaxed">
-                * Sản phẩm được bảo hành chính hãng và hỗ trợ đổi trả trong 7 ngày nếu có lỗi từ NSX.
+                * Sản phẩm được bảo hành chính hãng và hỗ trợ đổi trả trong 7
+                ngày nếu có lỗi từ NSX.
               </p>
             </div>
           </motion.div>

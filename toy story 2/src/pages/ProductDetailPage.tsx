@@ -32,7 +32,7 @@ const ProductDetail: React.FC = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [bestPromoName, setBestPromoName] = useState<string | null>(null);
   const { addToCart } = useCart();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -50,19 +50,23 @@ const ProductDetail: React.FC = () => {
 
         const [productData, promos] = await Promise.all([
           getProductById(productId),
-          getPromotionsCustomerFilter({ discountType: 0 })
+          getPromotionsCustomerFilter({ discountType: 0 }),
         ]);
 
         const promoInfo = findBestPromotion(productData, promos);
 
         const originalPrice = productData.price ?? 0;
         let finalPrice = originalPrice;
-        let promotionName = '';
+        let promotionName = "";
         let hasPromotion = false;
 
         // Always compute finalPrice from the best promotion (max discount value),
         // instead of trusting API-provided finalPrice which may reflect a smaller promo.
-        if (promoInfo.hasPromotion && promoInfo.discountValue > 0 && originalPrice > 0) {
+        if (
+          promoInfo.hasPromotion &&
+          promoInfo.discountValue > 0 &&
+          originalPrice > 0
+        ) {
           hasPromotion = true;
           promotionName = promoInfo.label;
           finalPrice = originalPrice * (1 - promoInfo.discountValue / 100);
@@ -76,7 +80,7 @@ const ProductDetail: React.FC = () => {
           finalPrice: finalPrice,
           originalPrice: originalPrice,
           hasPromotion,
-          promotionName
+          promotionName,
         };
         setBestPromoName(promotionName || null);
         setProduct(mapped);
@@ -101,13 +105,12 @@ const ProductDetail: React.FC = () => {
       toast({
         title: "Vui lòng đăng nhập",
         description: "Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
     if (product) addToCart(product.productId, undefined, quantity);
   };
-
 
   if (isLoading) {
     return (
@@ -143,21 +146,31 @@ const ProductDetail: React.FC = () => {
     product.images?.length ? product.images : [product.imageUrl].filter(Boolean)
   ) as string[];
 
-  const currentDisplayPrice = product.hasPromotion ? (product.finalPrice ?? product.price ?? 0) : (product.price ?? 0);
+  const currentDisplayPrice = product.hasPromotion
+    ? (product.finalPrice ?? product.price ?? 0)
+    : (product.price ?? 0);
   const currentOriginalPrice = product.originalPrice ?? product.price ?? 0;
 
-  const hasDiscount = product.hasPromotion && currentOriginalPrice > currentDisplayPrice;
+  const hasDiscount =
+    product.hasPromotion && currentOriginalPrice > currentDisplayPrice;
   const discountPercent = hasDiscount
-    ? Math.round(((currentOriginalPrice - currentDisplayPrice) / currentOriginalPrice) * 100)
+    ? Math.round(
+        ((currentOriginalPrice - currentDisplayPrice) / currentOriginalPrice) *
+          100,
+      )
     : 0;
 
   return (
     <div className="bg-white min-h-screen pb-20">
-      <BreadcrumbHeader items={[{ label: "Sản phẩm", to: "/products" }, { label: product.name ?? "Chi tiết" }]} />
+      <BreadcrumbHeader
+        items={[
+          { label: "Sản phẩm", to: "/products" },
+          { label: product.name ?? "Chi tiết" },
+        ]}
+      />
 
       <main className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-
           {/* LEFT COLUMN: Gallery */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
@@ -199,10 +212,14 @@ const ProductDetail: React.FC = () => {
                       "w-24 h-24 rounded-2xl overflow-hidden border-2 transition-all p-2 flex-shrink-0 bg-white",
                       selectedImageIndex === index
                         ? "border-red-600 shadow-lg ring-4 ring-red-50"
-                        : "border-gray-100 hover:border-red-200"
+                        : "border-gray-100 hover:border-red-200",
                     )}
                   >
-                    <img src={img} alt="Thumbnail" className="w-full h-full object-contain" />
+                    <img
+                      src={img}
+                      alt="Thumbnail"
+                      className="w-full h-full object-contain"
+                    />
                   </motion.button>
                 ))}
               </div>
@@ -223,10 +240,15 @@ const ProductDetail: React.FC = () => {
               </span>
               <div className="h-1 w-1 bg-gray-300 rounded-full" />
               <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map(s => (
-                  <Star key={s} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star
+                    key={s}
+                    className="w-4 h-4 text-yellow-400 fill-yellow-400"
+                  />
                 ))}
-                <span className="text-gray-400 text-xs font-medium ml-1">(4.8/5)</span>
+                <span className="text-gray-400 text-xs font-medium ml-1">
+                  (4.8/5)
+                </span>
               </div>
             </div>
 
@@ -235,7 +257,9 @@ const ProductDetail: React.FC = () => {
             </h1>
 
             <div className="flex items-center gap-4 mb-8">
-              <span className="text-gray-500 font-medium whitespace-nowrap">Thương hiệu:</span>
+              <span className="text-gray-500 font-medium whitespace-nowrap">
+                Thương hiệu:
+              </span>
               <Link
                 to={`/brands/${product.brandId}`}
                 className="bg-gray-100 hover:bg-red-600 hover:text-white px-4 py-1.5 rounded-xl transition-all font-tilt-warp text-red-600 uppercase text-sm tracking-wide"
@@ -260,12 +284,19 @@ const ProductDetail: React.FC = () => {
                 <div className="flex flex-col gap-2 mt-2">
                   <div className="flex items-center gap-2 text-red-600 font-bold text-sm">
                     <ShieldCheck className="w-4 h-4" />
-                    <span>Tiết kiệm: {formatPrice((currentOriginalPrice - currentDisplayPrice) * quantity)}</span>
+                    <span>
+                      Tiết kiệm:{" "}
+                      {formatPrice(
+                        (currentOriginalPrice - currentDisplayPrice) * quantity,
+                      )}
+                    </span>
                   </div>
                   {bestPromoName && (
                     <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-1.5">
                       <Tag className="w-3.5 h-3.5 text-red-500 shrink-0" />
-                      <span className="text-red-600 text-xs font-bold tracking-wide">{bestPromoName}</span>
+                      <span className="text-red-600 text-xs font-bold tracking-wide">
+                        {bestPromoName}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -279,7 +310,9 @@ const ProductDetail: React.FC = () => {
                   <Truck className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-gray-900">Giao hỏa tốc</p>
+                  <p className="text-xs font-bold text-gray-900">
+                    Giao hỏa tốc
+                  </p>
                   <p className="text-[10px] text-gray-500">Chỉ trong 4 giờ</p>
                 </div>
               </div>
@@ -288,63 +321,80 @@ const ProductDetail: React.FC = () => {
                   <RotateCcw className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-gray-900">Đổi trả 7 ngày</p>
-                  <p className="text-[10px] text-gray-500">Dễ dàng & Miễn phí</p>
+                  <p className="text-xs font-bold text-gray-900">
+                    Đổi trả 7 ngày
+                  </p>
+                  <p className="text-[10px] text-gray-500">
+                    Dễ dàng & Miễn phí
+                  </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-col gap-6 mb-12">
-              <div className="flex items-center justify-between px-2">
-                <span className="font-tilt-warp text-gray-900 uppercase tracking-wide">Số lượng</span>
-                <div className="flex items-center bg-gray-100 rounded-2xl p-1 shadow-inner">
-                  <button
-                    onClick={() => handleQuantityChange(-1)}
-                    className="p-3 hover:bg-white hover:text-red-600 rounded-xl transition-all text-gray-500"
+            {user && role === "Member" && (
+              <div className="flex flex-col gap-6 mb-12">
+                <div className="flex items-center justify-between px-2">
+                  <span className="font-tilt-warp text-gray-900 uppercase tracking-wide">
+                    Số lượng
+                  </span>
+                  <div className="flex items-center bg-gray-100 rounded-2xl p-1 shadow-inner">
+                    <button
+                      onClick={() => handleQuantityChange(-1)}
+                      className="p-3 hover:bg-white hover:text-red-600 rounded-xl transition-all text-gray-500"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <span className="w-12 text-center font-tilt-warp text-lg">
+                      {quantity}
+                    </span>
+                    <button
+                      onClick={() => handleQuantityChange(1)}
+                      className="p-3 hover:bg-white hover:text-red-600 rounded-xl transition-all text-gray-500"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleAddToCart}
+                    className="flex-1 bg-red-600 text-white h-16 rounded-3xl font-tilt-warp text-xl uppercase tracking-widest shadow-2xl hover:bg-black transition-colors flex items-center justify-center gap-4 group"
                   >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <span className="w-12 text-center font-tilt-warp text-lg">{quantity}</span>
-                  <button
-                    onClick={() => handleQuantityChange(1)}
-                    className="p-3 hover:bg-white hover:text-red-600 rounded-xl transition-all text-gray-500"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
+                    <ShoppingCart className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+                    Thêm vào giỏ
+                  </motion.button>
                 </div>
               </div>
-
-              <div className="flex gap-4">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleAddToCart}
-                  className="flex-1 bg-red-600 text-white h-16 rounded-3xl font-tilt-warp text-xl uppercase tracking-widest shadow-2xl hover:bg-black transition-colors flex items-center justify-center gap-4 group"
-                >
-                  <ShoppingCart className="w-6 h-6 group-hover:rotate-12 transition-transform" />
-                  Thêm vào giỏ
-                </motion.button>
-              </div>
-            </div>
+            )}
 
             {/* Product Meta Stats */}
             <div className="border-t border-gray-100 pt-8 flex items-center justify-around text-gray-400 text-xs font-medium">
-              <div className="flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> Chính hãng 100%</div>
-              <div className="flex items-center gap-2"><Truck className="w-4 h-4" /> Miễn phí vận chuyển</div>
-              <div className="flex items-center gap-2 border-l pl-8"><Share2 className="w-4 h-4 cursor-pointer hover:text-red-600" /> Chia sẻ</div>
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4" /> Chính hãng 100%
+              </div>
+              <div className="flex items-center gap-2">
+                <Truck className="w-4 h-4" /> Miễn phí vận chuyển
+              </div>
+              <div className="flex items-center gap-2 border-l pl-8">
+                <Share2 className="w-4 h-4 cursor-pointer hover:text-red-600" />{" "}
+                Chia sẻ
+              </div>
             </div>
-
           </motion.div>
         </div>
 
         {/* DETAILS SECTION */}
         <div className="mt-32 grid grid-cols-1 lg:grid-cols-3 gap-16">
-
           <div className="lg:col-span-1">
             <div className="sticky top-8">
               <div className="flex items-center gap-3 mb-8">
                 <div className="h-6 w-1.5 bg-red-600 rounded-full" />
-                <h2 className="text-2xl font-tilt-warp text-gray-900 uppercase">Thông số kỹ thuật</h2>
+                <h2 className="text-2xl font-tilt-warp text-gray-900 uppercase">
+                  Thông số kỹ thuật
+                </h2>
               </div>
               <div className="space-y-4">
                 {[
@@ -354,12 +404,22 @@ const ProductDetail: React.FC = () => {
                   { label: "Xuất xứ", value: product.origin },
                   { label: "Chất liệu", value: product.material },
                   { label: "Chủ đề", value: product.categoryName },
-                ].map((item, idx) => item.value && (
-                  <div key={idx} className="flex justify-between items-center py-3 border-b border-gray-50">
-                    <span className="text-gray-400 font-medium text-sm">{item.label}</span>
-                    <span className="text-gray-800 font-bold text-sm text-right">{item.value}</span>
-                  </div>
-                ))}
+                ].map(
+                  (item, idx) =>
+                    item.value && (
+                      <div
+                        key={idx}
+                        className="flex justify-between items-center py-3 border-b border-gray-50"
+                      >
+                        <span className="text-gray-400 font-medium text-sm">
+                          {item.label}
+                        </span>
+                        <span className="text-gray-800 font-bold text-sm text-right">
+                          {item.value}
+                        </span>
+                      </div>
+                    ),
+                )}
               </div>
             </div>
           </div>
@@ -367,12 +427,20 @@ const ProductDetail: React.FC = () => {
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-8">
               <div className="h-6 w-1.5 bg-red-600 rounded-full" />
-              <h2 className="text-2xl font-tilt-warp text-gray-900 uppercase">Mô tả sản phẩm</h2>
+              <h2 className="text-2xl font-tilt-warp text-gray-900 uppercase">
+                Mô tả sản phẩm
+              </h2>
             </div>
             <div className="prose prose-red max-w-none text-gray-600 leading-relaxed font-medium">
-              {(product.description || "Đang cập nhật mô tả cho sản phẩm này...").split("\n").map((p, i) => (
-                <p key={i} className="mb-6 last:mb-0">{p}</p>
-              ))}
+              {(
+                product.description || "Đang cập nhật mô tả cho sản phẩm này..."
+              )
+                .split("\n")
+                .map((p, i) => (
+                  <p key={i} className="mb-6 last:mb-0">
+                    {p}
+                  </p>
+                ))}
             </div>
 
             {/* Description Graphic */}
@@ -380,17 +448,26 @@ const ProductDetail: React.FC = () => {
               <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_20%_20%,#a70001_0%,transparent_50%)]" />
               <motion.div
                 animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
                 className="relative z-10 flex flex-col items-center gap-4"
               >
                 <div className="w-20 h-20 bg-white rounded-3xl shadow-xl flex items-center justify-center p-4">
-                  <img src={imageSources[0]} alt="brand-deco" className="w-full h-full object-contain" />
+                  <img
+                    src={imageSources[0]}
+                    alt="brand-deco"
+                    className="w-full h-full object-contain"
+                  />
                 </div>
-                <p className="font-tilt-warp text-red-600/50 uppercase text-xs tracking-[0.2em]">Toy Story Quality Assurance</p>
+                <p className="font-tilt-warp text-red-600/50 uppercase text-xs tracking-[0.2em]">
+                  Toy Story Quality Assurance
+                </p>
               </motion.div>
             </div>
           </div>
-
         </div>
       </main>
     </div>

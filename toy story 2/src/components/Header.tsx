@@ -68,7 +68,6 @@ const Header: React.FC = () => {
         </Link>
         <div className="flex flex-1 justify-center">
           <nav className="flex gap-8 items-center font-tilt-warp text-xs">
-
             <Link to={ROUTES.PRODUCTS} className="text-white hover:opacity-80">
               SẢN PHẨM
             </Link>
@@ -84,7 +83,6 @@ const Header: React.FC = () => {
             <Link to={ROUTES.CAM_NANG} className="text-white hover:opacity-80">
               CẨM NANG
             </Link>
-
           </nav>
         </div>
 
@@ -169,7 +167,7 @@ const Header: React.FC = () => {
               </Link>
             </>
           )}
-          {user && (
+          {user && role === "Member" && (
             <button
               onClick={openCart}
               className="flex items-center gap-2 bg-transparent border-none"

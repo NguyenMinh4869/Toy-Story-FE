@@ -20,14 +20,16 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({
   const productName = product.name ?? "Unnamed Product";
   const productImage = product.imageUrl ?? PRODUCT_PLACEHOLDER;
   const hasPromotion = product.hasPromotion ?? false;
-  const discountedPrice = hasPromotion ? (product.finalPrice ?? productPrice) : productPrice;
+  const discountedPrice = hasPromotion
+    ? (product.finalPrice ?? productPrice)
+    : productPrice;
   const { addToCart } = useCart();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const handleAddToCart = (e: React.MouseEvent): void => {
-    e.preventDefault()
-    e.stopPropagation()
-    addToCart(product.productId!, undefined, 1)
-  }
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(product.productId!, undefined, 1);
+  };
 
   return (
     <Link
@@ -38,7 +40,10 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({
         {hasPromotion && (
           <div className="absolute top-4 right-4 z-10 flex flex-col items-end gap-1">
             <div className="bg-[#e41e31] text-white text-[12px] font-bold py-1 px-2.5 rounded-full shadow-sm">
-              {product.promotionName || (product.finalPrice && product.price ? `-${Math.round((1 - product.finalPrice/product.price) * 100)}%` : 'GIẢM GIÁ')}
+              {product.promotionName ||
+                (product.finalPrice && product.price
+                  ? `-${Math.round((1 - product.finalPrice / product.price) * 100)}%`
+                  : "GIẢM GIÁ")}
             </div>
           </div>
         )}
@@ -67,7 +72,7 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({
             </span>
           )}
         </div>
-        {user && (
+        {user && role === "Member" && (
           <div className="flex items-center gap-4">
             <button
               onClick={handleAddToCart}

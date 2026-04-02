@@ -9,7 +9,6 @@ import {
 } from '../../services/articleService';
 import type { ViewArticleCategoryDto, CreateArticleCategoryDto, UpdateArticleCategoryDto } from '../../types/ArticleDTO';
 import { confirmAction } from '../../utils/confirmAction';
-import { runAsync } from '../../utils/runAsync';
 
 const ArticleCategoryManagementPage: React.FC = () => {
   const [categories, setCategories] = useState<ViewArticleCategoryDto[]>([]);

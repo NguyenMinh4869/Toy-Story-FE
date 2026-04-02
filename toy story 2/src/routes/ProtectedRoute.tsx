@@ -1,7 +1,7 @@
-import React from 'react';
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { getUserRole } from '../services/authService';
-import { ROUTES } from './routePaths';
+import React from "react";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { getUserRole } from "../services/authService";
+import { ROUTES } from "./routePaths";
 
 interface ProtectedRouteProps {
   /**
@@ -13,7 +13,7 @@ interface ProtectedRouteProps {
 
 /**
  * Protected Route Component with Role-Based Access Control (RBAC)
- * 
+ *
  * Features:
  * - Redirects unauthenticated users to login
  * - Prevents unauthorized access based on user roles
@@ -23,7 +23,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) => {
   const userRole = getUserRole();
   const location = useLocation();
 
-  console.log(`[ProtectedRoute] Path: ${location.pathname}, Role: ${userRole}, Allowed: ${allowedRoles.join(', ')}`);
+  console.log(
+    `[ProtectedRoute] Path: ${location.pathname}, Role: ${userRole}, Allowed: ${allowedRoles.join(", ")}`,
+  );
 
   // Not authenticated - redirect to login
   if (!userRole) {
@@ -46,11 +48,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) => {
  */
 export const getDashboardByRole = (role: string | null): string => {
   switch (role) {
-    case 'Admin':
+    case "Admin":
       return ROUTES.ADMIN_DASHBOARD;
-    case 'Staff':
+    case "Staff":
       return ROUTES.STAFF_DASHBOARD;
-    case 'Member':
+    case "Member":
     default:
       return ROUTES.HOME;
   }
