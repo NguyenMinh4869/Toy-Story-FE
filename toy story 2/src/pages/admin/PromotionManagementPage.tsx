@@ -40,6 +40,7 @@ const PromotionManagementPage: React.FC = () => {
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -101,7 +102,6 @@ const PromotionManagementPage: React.FC = () => {
       case 0: return "Giá trị giảm (%)";
       case 1: return "Giá trị giảm (VNĐ)";
       case 2: return "Mức giảm phí ship tối đa (VNĐ)";
-      case 3: return "Số lượng tặng (Mua X tặng Y)";
       default: return "Giá trị giảm";
     }
   };
@@ -135,6 +135,16 @@ const PromotionManagementPage: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
+    
+    // Clear field error when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
+
     setFormData((prev) => {
       let newValue: any = value;
       if (
@@ -142,10 +152,25 @@ const PromotionManagementPage: React.FC = () => {
       ) {
         newValue = value === '' ? undefined : Number(value);
       }
-      return {
+
+      const updated = {
         ...prev,
         [name]: newValue,
       };
+
+      // Ensure only one target type is set at a time
+      if (name === 'BrandId' && newValue) {
+        updated.CategoryId = undefined;
+        updated.ProductId = undefined;
+      } else if (name === 'CategoryId' && newValue) {
+        updated.BrandId = undefined;
+        updated.ProductId = undefined;
+      } else if (name === 'ProductId' && newValue) {
+        updated.BrandId = undefined;
+        updated.CategoryId = undefined;
+      }
+
+      return updated;
     });
   };
 
@@ -182,11 +207,13 @@ const PromotionManagementPage: React.FC = () => {
 
   const handleOpenCreate = () => {
     resetForm();
+    setFieldErrors({});
     setIsModalOpen(true);
   };
 
   const handleEdit = async (promotion: ViewPromotionDto) => {
     if (!promotion.promotionId) return;
+    setFieldErrors({});
     try {
       const details = await getPromotionById(promotion.promotionId);
       setFormData({
@@ -223,16 +250,27 @@ const PromotionManagementPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const missing: string[] = [];
-    if (!formData.Name?.trim()) missing.push('Tên khuyến mãi');
-    if (formData.DiscountValue === undefined || formData.DiscountValue <= 0) missing.push('Giá trị giảm');
-    if (!formData.StartDate) missing.push('Ngày bắt đầu');
-    if (!formData.EndDate) missing.push('Ngày kết thúc');
-    if (missing.length > 0) {
-      setError(`Vui lòng điền đầy đủ: ${missing.join(', ')}`);
+    const newFieldErrors: Record<string, string> = {};
+    
+    if (!formData.Name?.trim()) newFieldErrors.Name = 'Tên khuyến mãi không được để trống';
+    if (formData.DiscountValue === undefined || formData.DiscountValue <= 0) {
+      newFieldErrors.DiscountValue = 'Giá trị giảm phải lớn hơn 0';
+    } else if (Number(formData.DiscountType) === 0 && formData.DiscountValue > 100) {
+      newFieldErrors.DiscountValue = 'Phần trăm giảm giá không được vượt quá 100%';
+    }
+    if (!formData.StartDate) newFieldErrors.StartDate = 'Ngày bắt đầu không được để trống';
+    if (!formData.EndDate) newFieldErrors.EndDate = 'Ngày kết thúc không được để trống';
+    
+    if (Object.keys(newFieldErrors).length > 0) {
+      setFieldErrors(newFieldErrors);
+      setError(null); // Clear global error if field errors exist
       return;
     }
+    
     setIsSubmitting(true);
+    setError(null);
+    setFieldErrors({});
+    
     try {
       if (isEditing && currentPromotionId) {
         const updateData: UpdatePromotionDto = { ...formData };
@@ -243,9 +281,9 @@ const PromotionManagementPage: React.FC = () => {
       setIsModalOpen(false);
       resetForm();
       fetchData();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError('Failed to save promotion');
+      setError(err.message || 'Không thể lưu khuyến mãi. Vui lòng thử lại.');
     } finally {
       setIsSubmitting(false);
     }
@@ -344,9 +382,9 @@ const PromotionManagementPage: React.FC = () => {
                   name="Name"
                   value={formData.Name}
                   onChange={handleInputChange}
-                  required
-                  className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                  className={`mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 ${fieldErrors.Name ? 'border-red-500' : ''}`}
                 />
+                {fieldErrors.Name && <p className="mt-1 text-xs text-red-500">{fieldErrors.Name}</p>}
               </div>
 
               <div>
@@ -372,7 +410,6 @@ const PromotionManagementPage: React.FC = () => {
                     <option value={0}>Phần trăm</option>
                     <option value={1}>Số tiền cố định</option>
                     <option value={2}>Miễn phí vận chuyển</option>
-                    <option value={3}>Mua X tặng Y</option>
                   </select>
                 </div>
                 <div>
@@ -384,10 +421,10 @@ const PromotionManagementPage: React.FC = () => {
                     name="DiscountValue"
                     value={formData.DiscountValue}
                     onChange={handleInputChange}
-                    required
                     min="0"
-                    className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                    className={`mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 ${fieldErrors.DiscountValue ? 'border-red-500' : ''}`}
                   />
+                  {fieldErrors.DiscountValue && <p className="mt-1 text-xs text-red-500">{fieldErrors.DiscountValue}</p>}
                 </div>
               </div>
 
@@ -426,6 +463,9 @@ const PromotionManagementPage: React.FC = () => {
                     className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
                   >
                     <option value="">Không</option>
+                    {formData.BrandId && !brands.some(b => b.brandId === formData.BrandId) && (
+                      <option value={formData.BrandId}>ID: {formData.BrandId} (Không tồn tại/Đã ẩn)</option>
+                    )}
                     {brands.map((brand) => (
                       <option key={brand.brandId} value={brand.brandId}>
                         {brand.name}
@@ -442,6 +482,9 @@ const PromotionManagementPage: React.FC = () => {
                     className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
                   >
                     <option value="">Không</option>
+                    {formData.CategoryId && !categories.some(c => c.categoryId === formData.CategoryId) && (
+                      <option value={formData.CategoryId}>ID: {formData.CategoryId} (Không tồn tại/Đã ẩn)</option>
+                    )}
                     {categories.map((category) => (
                       <option key={category.categoryId} value={category.categoryId}>
                         {category.name}
@@ -458,6 +501,9 @@ const PromotionManagementPage: React.FC = () => {
                     className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
                   >
                     <option value="">Không</option>
+                    {formData.ProductId && !products.some(p => p.productId === formData.ProductId) && (
+                      <option value={formData.ProductId}>ID: {formData.ProductId} (Không tồn tại/Đã ẩn)</option>
+                    )}
                     {products.map((product) => (
                       <option key={product.productId} value={product.productId}>
                         {product.name}
@@ -475,8 +521,9 @@ const PromotionManagementPage: React.FC = () => {
                     name="StartDate"
                     value={formData.StartDate}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                    className={`mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 ${fieldErrors.StartDate ? 'border-red-500' : ''}`}
                   />
+                  {fieldErrors.StartDate && <p className="mt-1 text-xs text-red-500">{fieldErrors.StartDate}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Ngày kết thúc</label>
@@ -485,8 +532,9 @@ const PromotionManagementPage: React.FC = () => {
                     name="EndDate"
                     value={formData.EndDate}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                    className={`mt-1 block w-full rounded-2xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 ${fieldErrors.EndDate ? 'border-red-500' : ''}`}
                   />
+                  {fieldErrors.EndDate && <p className="mt-1 text-xs text-red-500">{fieldErrors.EndDate}</p>}
                 </div>
               </div>
             </div>

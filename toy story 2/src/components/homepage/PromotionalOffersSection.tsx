@@ -75,7 +75,6 @@ export const PromotionalOffersSection = ({
                   >
                     <ProductCard
                       product={product}
-                      discount={promotionDiscountValue}
                     />
                   </div>
                 ))}

@@ -1,6 +1,6 @@
 import React from 'react';
-import type { ViewPromotionDto } from '../../types/PromotionDTO';
-import { Edit, Power, PowerOff } from 'lucide-react';
+import { ViewPromotionDto } from '../../types/PromotionDTO';
+import { formatVND } from '../../utils/formatPrice';
 
 interface PromotionListTableProps {
   promotions: ViewPromotionDto[];
@@ -10,30 +10,36 @@ interface PromotionListTableProps {
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
-type ScopeMeta = { label: string; className: string };
+interface ScopeMeta {
+  label: string;
+  className: string;
+}
 
 function getScope(p: ViewPromotionDto): ScopeMeta {
-  if (p.productId != null)
-    return { label: 'Sản phẩm cụ thể', className: 'bg-blue-100 text-blue-800' };
-  if (p.brandId != null)
-    return { label: 'Thương hiệu', className: 'bg-purple-100 text-purple-800' };
-  if (p.categoryId != null)
-    return { label: 'Phân loại', className: 'bg-orange-100 text-orange-800' };
+  if (p.productId != null && Number(p.productId) > 0)
+    return { 
+      label: p.productName ? `Sản phẩm: ${p.productName}` : `Sản phẩm (ID: ${p.productId})`, 
+      className: 'bg-blue-100 text-blue-800' 
+    };
+  if (p.brandId != null && Number(p.brandId) > 0)
+    return { 
+      label: p.brandName ? `Thương hiệu: ${p.brandName}` : `Thương hiệu (ID: ${p.brandId})`, 
+      className: 'bg-purple-100 text-purple-800' 
+    };
+  if (p.categoryId != null && Number(p.categoryId) > 0)
+    return { 
+      label: p.categoryName ? `Phân loại: ${p.categoryName}` : `Phân loại (ID: ${p.categoryId})`, 
+      className: 'bg-orange-100 text-orange-800' 
+    };
   return { label: 'Tất cả sản phẩm', className: 'bg-green-100 text-green-800' };
 }
 
-function formatVND(amount: number): string {
-  return amount.toLocaleString('vi-VN') + 'đ';
-}
-
-function getDiscountDisplay(p: ViewPromotionDto): string {
-  const value = p.discountValue ?? 0;
-  if (value <= 0) return '—';
-  switch (p.discountType) {
-    case 0: return `${value}%`;                        // Percentage
+function formatDiscount(type: number | undefined, value: number | undefined): string {
+  if (value === undefined) return '0';
+  switch (type) {
+    case 0: return `${value}%`;                      // Percentage
     case 1: return formatVND(value);                   // Fixed amount
     case 2: return `Giảm ${formatVND(value)} ship`;    // Shipping discount
-    case 3: return `Tặng ${value} sản phẩm`;           // Buy X Get Y
     default: return String(value);
   }
 }
@@ -46,115 +52,70 @@ const PromotionListTable: React.FC<PromotionListTableProps> = ({
   onStatusChange,
 }) => {
   return (
-    <div className="bg-white rounded-lg shadow overflow-x-auto">
+    <div className="overflow-x-auto rounded-3xl border border-gray-200 bg-white shadow-sm">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Tên
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Loại ưu đãi
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Giá trị
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Thời gian
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Trạng thái
-            </th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Hành động
-            </th>
+            <th className="px-6 py-4 text-left text-[11px] font-black uppercase tracking-wider text-gray-500">Tên</th>
+            <th className="px-6 py-4 text-left text-[11px] font-black uppercase tracking-wider text-gray-500">Loại ưu đãi</th>
+            <th className="px-6 py-4 text-center text-[11px] font-black uppercase tracking-wider text-gray-500">Giá trị</th>
+            <th className="px-6 py-4 text-left text-[11px] font-black uppercase tracking-wider text-gray-500">Thời gian</th>
+            <th className="px-6 py-4 text-center text-[11px] font-black uppercase tracking-wider text-gray-500">Trạng thái</th>
+            <th className="px-6 py-4 text-right text-[11px] font-black uppercase tracking-wider text-gray-500">Thao tác</th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {promotions.map((promotion) => {
-            const scope = getScope(promotion);
-            const discountDisplay = getDiscountDisplay(promotion);
+        <tbody className="divide-y divide-gray-200 bg-white">
+          {promotions.map((p) => {
+            const scope = getScope(p);
             return (
-              <tr key={promotion.promotionId} className="hover:bg-gray-50">
-                {/* Tên */}
-                <td className="px-6 py-4 whitespace-nowrap">
+              <tr key={p.promotionId} className="hover:bg-gray-50 transition-colors">
+                <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    {promotion.imageUrl && (
-                      <img
-                        className="h-8 w-8 rounded-full object-cover flex-shrink-0"
-                        src={promotion.imageUrl}
-                        alt=""
-                      />
+                    {p.imageUrl && (
+                      <img src={p.imageUrl} alt={p.name} className="h-10 w-10 rounded-lg object-cover border border-gray-100" />
                     )}
-                    <span className="text-sm font-medium text-gray-900">{promotion.name}</span>
+                    <div>
+                      <div className="text-sm font-bold text-gray-900">{p.name}</div>
+                      <div className="text-xs text-gray-500 line-clamp-1">{p.description}</div>
+                    </div>
                   </div>
                 </td>
-
-                {/* Loại ưu đãi */}
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${scope.className}`}>
+                <td className="px-6 py-4">
+                  <span className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-black ${scope.className}`}>
                     {scope.label}
                   </span>
                 </td>
-
-                {/* Giá trị */}
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="text-sm font-bold text-gray-800">{discountDisplay}</span>
-                </td>
-
-                {/* Thời gian */}
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <div className="flex flex-col gap-0.5">
-                    <span>
-                      Từ:{' '}
-                      {promotion.startDate
-                        ? new Date(promotion.startDate).toLocaleDateString('vi-VN')
-                        : 'N/A'}
-                    </span>
-                    <span>
-                      Đến:{' '}
-                      {promotion.endDate
-                        ? new Date(promotion.endDate).toLocaleDateString('vi-VN')
-                        : 'N/A'}
-                    </span>
-                  </div>
-                </td>
-
-                {/* Trạng thái */}
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      promotion.isActive
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}
-                  >
-                    {promotion.isActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}
+                <td className="px-6 py-4 text-center">
+                  <span className="text-sm font-black text-gray-900">
+                    {formatDiscount(p.discountType, p.discountValue)}
                   </span>
                 </td>
-
-                {/* Hành động */}
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div className="flex justify-end space-x-2">
-                    <button
-                      onClick={() => onEdit(promotion)}
-                      className="text-blue-600 hover:text-blue-900 text-xs font-medium flex items-center gap-1"
-                    >
-                      <Edit size={14} /> Chỉnh sửa
+                <td className="px-6 py-4">
+                  <div className="text-[11px] text-gray-600">
+                    <div>Từ: {p.startDate ? new Date(p.startDate).toLocaleDateString('vi-VN') : '-'}</div>
+                    <div>Đến: {p.endDate ? new Date(p.endDate).toLocaleDateString('vi-VN') : '-'}</div>
+                  </div>
+                </td>
+                <td className="px-6 py-4 text-center">
+                  <span className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-black ${
+                    p.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}>
+                    {p.isActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}
+                  </span>
+                </td>
+                <td className="px-6 py-4 text-right text-sm font-medium">
+                  <div className="flex justify-end gap-3">
+                    <button onClick={() => onEdit(p)} className="text-blue-600 hover:text-blue-900 flex items-center gap-1 font-bold">
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      Chỉnh sửa
                     </button>
-                    <button
-                      onClick={() => promotion.promotionId && onStatusChange(promotion.promotionId)}
-                      className={`text-xs font-medium flex items-center gap-1 ${
-                        promotion.isActive
-                          ? 'text-yellow-600 hover:text-yellow-900'
-                          : 'text-green-600 hover:text-green-900'
-                      }`}
-                    >
-                      {promotion.isActive ? (
-                        <><PowerOff size={14} /> Ngừng hoạt động</>
-                      ) : (
-                        <><Power size={14} /> Kích hoạt</>
-                      )}
+                    <button onClick={() => p.promotionId && onStatusChange(p.promotionId)} className="text-orange-600 hover:text-orange-900 flex items-center gap-1 font-bold">
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636" />
+                      </svg>
+                      {p.isActive ? 'Ngừng hoạt động' : 'Kích hoạt'}
                     </button>
                   </div>
                 </td>

@@ -4,6 +4,7 @@ import type { ProductDTO } from "../../types/ProductDTO";
 import { formatPrice } from "../../utils/formatPrice";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/hooks/useAuth";
+
 interface ProductGridCardProps {
   product: ProductDTO;
   className?: string;
@@ -22,7 +23,24 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({
   const hasPromotion = product.hasPromotion ?? false;
   const discountedPrice = hasPromotion ? (product.finalPrice ?? productPrice) : productPrice;
   const { addToCart } = useCart();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
+
+  const promoInfo = (product as any).promoInfo;
+  let discountLabel = "";
+  if (hasPromotion) {
+    if (promoInfo && promoInfo.discountType === 1) {
+      discountLabel = `-${(promoInfo.discountValue / 1000).toFixed(0)}K`;
+    } else if (productPrice > 0) {
+      const percent = Math.round((1 - discountedPrice / productPrice) * 100);
+      if (percent > 0) {
+        discountLabel = `-${percent}%`;
+      }
+    }
+  }
+
+  const finalBadgeLabel = discountLabel || 
+    (product.promotionName && product.promotionName !== product.brandName ? product.promotionName : "Giảm giá");
+
   const handleAddToCart = (e: React.MouseEvent): void => {
     e.preventDefault()
     e.stopPropagation()
@@ -38,7 +56,7 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({
         {hasPromotion && (
           <div className="absolute top-4 right-4 z-10 flex flex-col items-end gap-1">
             <div className="bg-[#e41e31] text-white text-[12px] font-bold py-1 px-2.5 rounded-full shadow-sm">
-              {product.promotionName || (product.finalPrice && product.price ? `-${Math.round((1 - product.finalPrice / product.price) * 100)}%` : 'GIẢM GIÁ')}
+              {finalBadgeLabel}
             </div>
           </div>
         )}
@@ -67,7 +85,7 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({
             </span>
           )}
         </div>
-        {user && user.role === "Member" && (
+        {user && role === "Member" && (
           <div className="flex items-center gap-4">
             <button
               onClick={handleAddToCart}

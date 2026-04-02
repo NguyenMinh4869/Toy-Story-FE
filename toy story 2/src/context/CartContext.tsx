@@ -23,6 +23,7 @@ interface CartContextType {
   removeFromCart: (item: CartItem) => void
   updateQuantity: (item: CartItem, quantity: number) => void
   clearCart: () => void
+  refreshCart: () => Promise<void>
   getTotalPrice: () => number
   getTotalOriginalPrice: () => number
   getTotalItems: () => number
@@ -84,6 +85,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       const cart = await getCartServer()
       setCartItems(cart?.items?.map(mapDtoToCartItem) ?? [])
     } catch (error) {
+      console.error('Failed to load cart:', error)
     }
   }
 
@@ -93,9 +95,35 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
   }, [isAuthenticated])
 
+  // Refresh cart when user returns to tab or window (e.g. after changing promotions)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && isAuthenticated) {
+        loadServerCart()
+      }
+    }
+    const handleFocus = () => {
+      if (isAuthenticated) {
+        loadServerCart()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('focus', handleFocus)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [isAuthenticated])
+
   const addToCart = (productId?: number, setId?: number, quantity: number = 1): void => {
-    addToCartServer(productId, setId, quantity).then(loadServerCart).catch(() => { })
-    setIsCartOpen(true)
+    addToCartServer(productId, setId, quantity)
+      .then(async () => {
+        await loadServerCart()
+        setIsCartOpen(true)
+      })
+      .catch((error) => {
+        console.error('Failed to add to cart:', error)
+      })
   }
 
   const removeFromCart = (item: CartItem): void => {
@@ -122,6 +150,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     clearCartServer().then(() => setCartItems([])).catch(() => { })
   }
 
+  const refreshCart = (): Promise<void> => loadServerCart()
+
   const getTotalPrice = (): number =>
     cartItems.reduce((total, item) => total + (item.serverTotalPrice ?? ((item.product.price ?? 0) * item.quantity)), 0)
 
@@ -131,7 +161,14 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const getTotalItems = (): number =>
     cartItems.reduce((total, item) => total + item.quantity, 0)
 
-  const openCart = (): void => setIsCartOpen(true)
+  const openCart = (): void => {
+    if (!isAuthenticated) {
+      setIsCartOpen(true)
+      return
+    }
+    loadServerCart()
+      .finally(() => setIsCartOpen(true))
+  }
   const closeCart = (): void => setIsCartOpen(false)
 
   const value: CartContextType = {
@@ -140,6 +177,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     removeFromCart,
     updateQuantity,
     clearCart,
+    refreshCart,
     getTotalPrice,
     getTotalOriginalPrice,
     getTotalItems,

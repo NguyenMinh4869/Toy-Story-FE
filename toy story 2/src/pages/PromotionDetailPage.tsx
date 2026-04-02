@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getPromotionsCustomerFilter } from "../services/promotionService";
-import { filterProducts, getProductById } from "../services/productService";
+import { filterProductsPublic, getProductById } from "../services/productService";
 import { BreadcrumbHeader } from "../components/BreadcrumbHeader";
 import { ProductCard } from "../components/ProductCard";
 import type { ViewPromotionDto } from "../types/PromotionDTO";
@@ -69,7 +69,7 @@ const PromotionDetailPage: React.FC = () => {
             const filter: Record<string, number> = {};
             if (promo.categoryId) filter.categoryId = promo.categoryId;
             if (promo.brandId) filter.brandId = promo.brandId;
-            productList = await filterProducts(Object.keys(filter).length > 0 ? filter : {});
+            productList = await filterProductsPublic(Object.keys(filter).length > 0 ? filter : {});
           }
         } catch {
           productList = [];
@@ -357,7 +357,6 @@ const PromotionDetailPage: React.FC = () => {
                   >
                     <ProductCard
                       product={product}
-                      discount={product.discount}
                     />
                   </motion.div>
                 ))}

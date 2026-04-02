@@ -9,6 +9,7 @@ import type { ViewBrandDto } from "../types/BrandDTO";
 import type { ViewCategoryDto } from "../types/CategoryDTO";
 import { motion } from "framer-motion";
 import { Gift, Tag, Calendar, ChevronRight, Sparkles, Percent, Globe, Package, Grid, Diamond } from "lucide-react";
+import { formatVND } from "../utils/formatPrice";
 
 const PromotionPage: React.FC = () => {
   const [promotions, setPromotions] = useState<ViewPromotionDto[]>([]);
@@ -57,17 +58,26 @@ const PromotionPage: React.FC = () => {
   };
 
   const getScopeLabel = (promo: ViewPromotionDto) => {
-    if (promo.productId) return "Sản phẩm cụ thể";
-    if (promo.categoryId) return categories[promo.categoryId] || "Danh mục";
-    if (promo.brandId) return brands[promo.brandId] || "Thương hiệu";
+    if (promo.productId && Number(promo.productId) > 0) return "Sản phẩm cụ thể";
+    if (promo.categoryId && Number(promo.categoryId) > 0) return categories[promo.categoryId] || "Danh mục";
+    if (promo.brandId && Number(promo.brandId) > 0) return brands[promo.brandId] || "Thương hiệu";
     return "Toàn bộ sản phẩm";
   };
 
   const getScopeBadgeColor = (promo: ViewPromotionDto) => {
-    if (promo.productId) return "bg-purple-100 text-purple-700";
-    if (promo.categoryId) return "bg-blue-100 text-blue-700";
-    if (promo.brandId) return "bg-orange-100 text-orange-700";
+    if (promo.productId && Number(promo.productId) > 0) return "bg-purple-100 text-purple-700";
+    if (promo.categoryId && Number(promo.categoryId) > 0) return "bg-blue-100 text-blue-700";
+    if (promo.brandId && Number(promo.brandId) > 0) return "bg-orange-100 text-orange-700";
     return "bg-green-100 text-green-700";
+  };
+
+  const getDiscountBadgeText = (promo: ViewPromotionDto) => {
+    const value = promo.discountValue ?? 0;
+    if (value <= 0) return null;
+    if (promo.discountType === 0) return `-${value}%`;
+    if (promo.discountType === 1) return `-${formatVND(value)}`;
+    if (promo.discountType === 2) return "FREESHIP";
+    return null;
   };
 
   if (error) {
@@ -91,12 +101,16 @@ const PromotionPage: React.FC = () => {
   }
 
   const globalPromotions = promotions
-    .filter((p) => !p.productId && !p.categoryId && !p.brandId)
+    .filter((p) => 
+      (!p.productId || Number(p.productId) === 0) && 
+      (!p.categoryId || Number(p.categoryId) === 0) && 
+      (!p.brandId || Number(p.brandId) === 0)
+    )
     .sort((a, b) => (b.discountValue ?? 0) - (a.discountValue ?? 0))
     .slice(0, 1);
-  const brandPromotions = promotions.filter((p) => p.brandId);
-  const categoryPromotions = promotions.filter((p) => p.categoryId);
-  const productPromotions = promotions.filter((p) => p.productId);
+  const brandPromotions = promotions.filter((p) => p.brandId && Number(p.brandId) > 0);
+  const categoryPromotions = promotions.filter((p) => p.categoryId && Number(p.categoryId) > 0);
+  const productPromotions = promotions.filter((p) => p.productId && Number(p.productId) > 0);
 
   const renderPromotionCard = (promo: ViewPromotionDto, index: number) => (
     <motion.div
@@ -122,9 +136,9 @@ const PromotionPage: React.FC = () => {
           </div>
         )}
         {/* Discount badge */}
-        {promo.discountType === 0 && (promo.discountValue ?? 0) > 0 && (
+        {getDiscountBadgeText(promo) && (
           <div className="absolute top-4 right-4 bg-[#a70001] text-white font-['Tilt_Warp',sans-serif] text-xl px-4 py-1.5 rounded-2xl shadow-lg">
-            -{promo.discountValue}%
+            {getDiscountBadgeText(promo)}
           </div>
         )}
         {/* Scope badge */}
@@ -151,6 +165,18 @@ const PromotionPage: React.FC = () => {
             <div className="flex items-center gap-1.5 bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-bold">
               <Percent className="w-3 h-3" />
               Giảm {promo.discountValue}%
+            </div>
+          )}
+          {promo.discountType === 1 && (promo.discountValue ?? 0) > 0 && (
+            <div className="flex items-center gap-1.5 bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-bold">
+              <Tag className="w-3 h-3" />
+              Giảm {formatVND(promo.discountValue ?? 0)}
+            </div>
+          )}
+          {promo.discountType === 2 && (promo.discountValue ?? 0) > 0 && (
+            <div className="flex items-center gap-1.5 bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-bold">
+              <Tag className="w-3 h-3" />
+              Freeship {formatVND(promo.discountValue ?? 0)}
             </div>
           )}
           {promo.endDate && (
