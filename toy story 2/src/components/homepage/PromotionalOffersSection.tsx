@@ -67,11 +67,11 @@ export const PromotionalOffersSection = ({
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           >
             {pages.map((pageProducts, pageIndex) => (
-              <div key={`promo-page-${pageIndex}`} className="w-full shrink-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 justify-items-center py-4">
+              <div key={`promo-page-${pageIndex}`} className="w-full shrink-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 justify-items-center items-stretch py-4">
                 {pageProducts.map((product) => (
                   <div 
                     key={product.productId} 
-                    className="relative"
+                    className="relative h-full w-full"
                   >
                     <ProductCard
                       product={product}

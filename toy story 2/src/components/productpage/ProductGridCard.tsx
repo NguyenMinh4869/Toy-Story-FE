@@ -50,9 +50,9 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({
   return (
     <Link
       to={`/product/${product.productId}`}
-      className={`block bg-white border border-[#5a5050]/20 rounded-[17px] overflow-hidden hover:shadow-lg transition-shadow no-underline ${className}`}
+      className={`flex flex-col h-full bg-white border border-[#5a5050]/20 rounded-[17px] overflow-hidden hover:shadow-lg transition-shadow no-underline ${className}`}
     >
-      <div className="relative flex justify-center items-center pt-5 pb-4">
+      <div className="relative flex justify-center items-center pt-5 pb-4 shrink-0">
         {hasPromotion && (
           <div className="absolute top-4 right-4 z-10 flex flex-col items-end gap-1">
             <div className="bg-[#e41e31] text-white text-[12px] font-bold py-1 px-2.5 rounded-full shadow-sm">
@@ -70,31 +70,33 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({
         />
       </div>
 
-      <div className="px-[18px] pb-5">
-        <h3 className="font-tilt-warp text-[14px] text-black leading-[1.4] line-clamp-3">
+      <div className="px-[18px] pb-5 flex flex-col flex-grow min-h-0">
+        <h3 className="font-tilt-warp text-[14px] text-black leading-[1.4] line-clamp-3 min-h-[3.7rem]">
           {productName}
         </h3>
 
-        <div className="flex flex-col mb-4">
-          <span className="font-tilt-warp text-[20px] text-[#ff0000]">
-            {formatPrice(discountedPrice)}
-          </span>
-          {hasPromotion && (
-            <span className="text-gray-400 text-[14px] line-through">
-              {formatPrice(productPrice)}
+        <div className="mt-auto flex flex-col gap-4 pt-3">
+          <div className="flex flex-col">
+            <span className="font-tilt-warp text-[20px] text-[#ff0000]">
+              {formatPrice(discountedPrice)}
             </span>
+            {hasPromotion && (
+              <span className="text-gray-400 text-[14px] line-through">
+                {formatPrice(productPrice)}
+              </span>
+            )}
+          </div>
+          {user && role === "Member" && (
+            <div className="flex items-center gap-4">
+              <button
+                onClick={handleAddToCart}
+                className="flex-1 bg-[#c40029] hover:bg-[#a00022] text-white font-tilt-warp text-[16px] py-[10px] px-6 rounded-[6px] transition-colors cursor-pointer border-none"
+              >
+                Thêm vào giỏ hàng
+              </button>
+            </div>
           )}
         </div>
-        {user && role === "Member" && (
-          <div className="flex items-center gap-4">
-            <button
-              onClick={handleAddToCart}
-              className="flex-1 bg-[#c40029] hover:bg-[#a00022] text-white font-tilt-warp text-[16px] py-[10px] px-6 rounded-[6px] transition-colors cursor-pointer border-none"
-            >
-              Thêm vào giỏ hàng
-            </button>
-          </div>
-        )}
       </div>
     </Link>
   );

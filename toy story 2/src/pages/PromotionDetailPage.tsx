@@ -366,8 +366,8 @@ const PromotionDetailPage: React.FC = () => {
                 ref={scrollRef}
                 className={
                   products.length > 1
-                    ? "flex gap-3 overflow-x-auto snap-x snap-mandatory pb-1 pl-1 pr-1 sm:pl-10 sm:pr-10 no-scrollbar scroll-smooth justify-start items-start min-h-[10rem]"
-                    : "flex gap-3 justify-start items-start min-h-[10rem]"
+                    ? "flex gap-3 overflow-x-auto snap-x snap-mandatory pb-1 pl-1 pr-1 sm:pl-10 sm:pr-10 no-scrollbar scroll-smooth justify-start items-stretch min-h-[10rem]"
+                    : "flex gap-3 justify-start items-stretch min-h-[10rem]"
                 }
               >
                   {products.map((product, idx) => (
@@ -377,7 +377,7 @@ const PromotionDetailPage: React.FC = () => {
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.3, delay: idx * 0.04 }}
-                      className="snap-center shrink-0"
+                      className="snap-center shrink-0 h-full"
                     >
                       <ProductCard product={product} compact />
                     </motion.div>

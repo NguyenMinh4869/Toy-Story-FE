@@ -58,9 +58,11 @@ const ProductSection: React.FC<ProductSectionProps> = ({
           }}
         />
 
-        <div className="flex gap-[50px] overflow-x-auto scroll-smooth flex-1 py-5 [&::-webkit-scrollbar]:hidden">
+        <div className="flex gap-[50px] overflow-x-auto scroll-smooth flex-1 py-5 items-stretch [&::-webkit-scrollbar]:hidden">
           {products.map((product) => (
-            <ProductCard key={product.productId} product={product} />
+            <div key={product.productId} className="h-full shrink-0">
+              <ProductCard product={product} />
+            </div>
           ))}
         </div>
 

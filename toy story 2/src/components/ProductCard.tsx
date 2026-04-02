@@ -114,7 +114,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, compact = fal
           className={
             compact
               ? "text-[11px] font-bold text-gray-800 line-clamp-2 leading-snug group-hover:text-red-600 transition-colors min-h-[2.25rem]"
-              : "text-[15px] font-black text-gray-800 line-clamp-2 leading-tight group-hover:text-red-600 transition-colors duration-300"
+              : "text-[15px] font-black text-gray-800 line-clamp-2 leading-tight group-hover:text-red-600 transition-colors duration-300 min-h-[2.75rem] sm:min-h-[3rem]"
           }
         >
           {product.name}
