@@ -23,6 +23,7 @@ interface CartContextType {
   removeFromCart: (item: CartItem) => void
   updateQuantity: (item: CartItem, quantity: number) => void
   clearCart: () => void
+  refreshCart: () => Promise<void>
   getTotalPrice: () => number
   getTotalOriginalPrice: () => number
   getTotalItems: () => number
@@ -93,6 +94,26 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
   }, [isAuthenticated])
 
+  // Refresh cart when user returns to tab or window (e.g. after changing promotions)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && isAuthenticated) {
+        loadServerCart()
+      }
+    }
+    const handleFocus = () => {
+      if (isAuthenticated) {
+        loadServerCart()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('focus', handleFocus)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [isAuthenticated])
+
   const addToCart = (productId?: number, setId?: number, quantity: number = 1): void => {
     addToCartServer(productId, setId, quantity).then(loadServerCart).catch(() => { })
     setIsCartOpen(true)
@@ -122,6 +143,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     clearCartServer().then(() => setCartItems([])).catch(() => { })
   }
 
+  const refreshCart = (): Promise<void> => loadServerCart()
+
   const getTotalPrice = (): number =>
     cartItems.reduce((total, item) => total + (item.serverTotalPrice ?? ((item.product.price ?? 0) * item.quantity)), 0)
 
@@ -140,6 +163,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     removeFromCart,
     updateQuantity,
     clearCart,
+    refreshCart,
     getTotalPrice,
     getTotalOriginalPrice,
     getTotalItems,

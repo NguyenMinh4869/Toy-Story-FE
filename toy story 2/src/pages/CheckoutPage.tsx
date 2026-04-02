@@ -13,7 +13,7 @@ import EmptyCart from "@/components/checkout/EmptyCart";
 import { useAuth } from "@/hooks/useAuth";
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
-  const { cartItems, getTotalOriginalPrice } = useCart();
+  const { cartItems, getTotalOriginalPrice, refreshCart } = useCart();
 
   const {
     formData,
@@ -25,10 +25,11 @@ const CheckoutPage: React.FC = () => {
   } = useCheckout();
 
   const { role } = useAuth();
-  if (role !== "Member") {
-    navigate(ROUTES.HOME);
-    return null;
-  }
+
+  // Refresh cart on mount to get latest prices (e.g. after promotion change)
+  useEffect(() => {
+    refreshCart();
+  }, []);
   // Redirect if cart is empty
   useEffect(() => {
     if (cartItems.length === 0 && !isSubmitting) {
@@ -38,6 +39,11 @@ const CheckoutPage: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [cartItems, navigate, isSubmitting]);
+
+  if (role !== "Member") {
+    navigate(ROUTES.HOME);
+    return null;
+  }
 
   if (cartItems.length === 0 && !isSubmitting) {
     return <EmptyCart />;
