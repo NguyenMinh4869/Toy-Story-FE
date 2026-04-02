@@ -3,7 +3,6 @@ import { NavLink, Link } from 'react-router-dom';
 import { LayoutDashboard, ShoppingBag, Users, Tag, Percent, Layers, Warehouse, List, BookOpen, Album, Truck } from 'lucide-react';
 import { ROUTES } from '../../routes/routePaths';
 import { getUserRole } from '../../services/authService';
-import { useNotifications } from '../../context/NotificationContext';
 
 interface SidebarProps {
   /**
@@ -16,7 +15,6 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
   const userRole = getUserRole();
   const effectiveMode = mode || (userRole === 'Admin' ? 'admin' : 'staff');
-  const { unreadCount } = useNotifications();
 
   // Define navigation links based on role
   const getNavLinks = (): Array<{ to: string; icon: React.ReactNode; label: string; badge?: number }> => {

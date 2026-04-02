@@ -133,11 +133,11 @@ const WarehouseManagementPage: React.FC = () => {
         </button>
       </div>
 
-      {/* {error && (
+      {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
         </div>
-      )} */}
+      )}
       
       {loading && !isModalOpen ? (
         <div className="text-center py-10">Loading...</div>

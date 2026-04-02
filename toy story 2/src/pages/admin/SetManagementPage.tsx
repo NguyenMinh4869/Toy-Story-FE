@@ -55,7 +55,6 @@ const SetManagementPage: React.FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   const [products, setProducts] = useState<ViewProductDto[]>([]);
-  const [totalStockByProductId, setTotalStockByProductId] = useState<Record<number, number>>({});
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -129,8 +128,6 @@ const SetManagementPage: React.FC = () => {
             totals[pid] = (totals[pid] || 0) + qty;
           }
         }
-
-        setTotalStockByProductId(totals);
       } catch (e) {
         console.error(e);
         // Do not block set creation if stock cannot be loaded.
@@ -352,11 +349,10 @@ const SetManagementPage: React.FC = () => {
           <button
             key={tab.label}
             onClick={() => { setStatusFilter(tab.value); navigate(location.pathname); }}
-            className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
-              statusFilter === tab.value
+            className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors ${statusFilter === tab.value
                 ? 'bg-red-400 text-white border-red-400'
                 : 'bg-white text-gray-600 border-gray-300 hover:border-red-300'
-            }`}
+              }`}
           >
             {tab.label}
           </button>
@@ -676,10 +672,10 @@ const SetManagementPage: React.FC = () => {
                 (p.productId || 0) > 0 &&
                 (!productTableSearch.trim() || p.name?.toLowerCase().includes(productTableSearch.toLowerCase()))
               ).length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-3 py-8 text-center text-gray-400">Không tìm thấy sản phẩm</td>
-                </tr>
-              )}
+                  <tr>
+                    <td colSpan={5} className="px-3 py-8 text-center text-gray-400">Không tìm thấy sản phẩm</td>
+                  </tr>
+                )}
             </tbody>
           </table>
         </div>
@@ -792,11 +788,10 @@ const SetManagementPage: React.FC = () => {
                     <li
                       key={p.productId}
                       onClick={() => toggleProduct(p.productId)}
-                      className={`flex items-center gap-3 px-4 py-2 cursor-pointer transition-colors border-l-4 ${
-                        selectedProductIds.has(p.productId)
+                      className={`flex items-center gap-3 px-4 py-2 cursor-pointer transition-colors border-l-4 ${selectedProductIds.has(p.productId)
                           ? 'bg-green-50 border-green-500'
                           : 'bg-white border-transparent hover:bg-gray-50'
-                      }`}
+                        }`}
                     >
                       <input
                         type="checkbox"
