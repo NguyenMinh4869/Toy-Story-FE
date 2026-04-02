@@ -3,12 +3,14 @@
  * @param price - Price as number
  * @returns Formatted price string (e.g., "1.245.300 Đ")
  */
-export const formatPrice = (price: number): string => {
+export const formatVND = (price: number): string => {
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
     currency: 'VND'
   }).format(price).replace('₫', 'Đ')
 }
+
+export const formatPrice = formatVND;
 
 /**
  * Format discount percentage

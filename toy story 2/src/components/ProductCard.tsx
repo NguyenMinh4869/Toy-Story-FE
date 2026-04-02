@@ -5,110 +5,114 @@ import { formatPrice } from "../utils/formatPrice";
 import { PRODUCT_IMAGE_87 } from "../constants/imageAssets";
 import { ShoppingCart } from "lucide-react";
 import { motion } from "framer-motion";
-import { cn } from "../lib/utils";
+import { useAuth } from "../hooks/useAuth";
 
 interface ProductCardProps {
   product: ProductDTO;
-  className?: string;
-  style?: React.CSSProperties;
-  discount?: number;
 }
 
-export const ProductCard = ({
-  product,
-  className = "",
-  style,
-  discount = 0,
-}: ProductCardProps): React.JSX.Element => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const navigate = useNavigate();
+  const { user, role } = useAuth();
   const productPrice = product.price ?? 0;
-  const productName = product.name ?? "Unnamed Product";
-  const productImage = product.imageUrl ?? PRODUCT_IMAGE_87;
-
-  const hasPromotion = product.hasPromotion || (typeof discount === "number" && discount > 0);
-  const discountedPrice = product.hasPromotion 
-    ? (product.finalPrice ?? productPrice) 
-    : (typeof discount === "number" && discount > 0 ? productPrice * (1 - discount / 100) : productPrice);
-  const originalPrice = productPrice;
-  
-  const discountPercent = product.hasPromotion && originalPrice > 0 
-    ? Math.round((1 - discountedPrice / originalPrice) * 100)
-    : discount;
+  const productFinalPrice = product.finalPrice ?? productPrice;
+  const hasPromotion = product.hasPromotion && productPrice > productFinalPrice;
+  const promoInfo = (product as any).promoInfo as any;
+  const discountPercent = hasPromotion
+    ? Math.round(((productPrice - productFinalPrice) / productPrice) * 100)
+    : 0;
+  const discountLabel = hasPromotion
+    ? (promoInfo && promoInfo.discountType === 1
+        ? `-${(promoInfo.discountValue / 1000).toFixed(0)}K`
+        : `-${discountPercent}%`)
+    : "";
 
   const handleCardClick = () => {
     navigate(`/product/${product.productId}`);
   };
 
   return (
-    <motion.article
+    <motion.div 
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      whileHover={{ y: -8 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
+      whileHover={{ y: -5 }}
       onClick={handleCardClick}
-      className={cn(
-        "group relative bg-white rounded-[2.5rem] p-6 flex flex-col items-center select-none cursor-pointer",
-        "w-[250px] h-[380px] shadow-[0_10px_30px_-15px_rgba(0,0,0,0.2)] hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.3)] transition-shadow duration-300",
-        className
-      )}
-      style={style}
+      className="group relative bg-white rounded-[2rem] p-4 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-gray-100/50 cursor-pointer overflow-hidden flex flex-col h-full"
     >
       {/* Discount Badge */}
       {hasPromotion && (
-        <div className="absolute top-6 right-6 z-20 flex flex-col gap-1 items-end overflow-hidden rounded-xl">
-           <div className="bg-red-600 text-white px-3 py-1.5 text-[11px] font-bold font-archivo tracking-tight shadow-md rounded-lg">
-            {product.promotionName ? product.promotionName : `-${discountPercent}%`}
-          </div>
+        <div className="absolute top-4 right-4 z-10">
+          <motion.div 
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="bg-red-600 text-white text-[11px] font-black px-3 py-1.5 rounded-full shadow-lg shadow-red-200"
+          >
+            {discountLabel}
+          </motion.div>
         </div>
       )}
 
-      {/* Image Container with Hover Effect */}
-      <div className="relative aspect-square mb-4 bg-gray-50 rounded-2xl overflow-hidden flex items-center justify-center border border-gray-100 group-hover:border-red-100 transition-colors">
+      {/* Image Container */}
+      <div className="relative aspect-square mb-6 rounded-[1.5rem] overflow-hidden bg-gray-50 group-hover:bg-white transition-colors duration-500">
         <motion.img
-          whileHover={{ scale: 1.15, rotate: 2 }}
-          transition={{ type: "spring", stiffness: 300, damping: 15 }}
-          className="w-full h-full object-contain drop-shadow-xl"
-          alt={productName}
-          src={productImage}
+          whileHover={{ scale: 1.1 }}
+          transition={{ duration: 0.6, ease: [0.33, 1, 0.68, 1] }}
+          src={product.imageUrl || PRODUCT_IMAGE_87}
+          alt={product.name ?? ""}
+          className="w-full h-full object-contain p-4"
         />
         
-        {/* Quick Actions Overlay */}
-        <div className="absolute inset-0 bg-red-600/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" />
+        {/* Quick View Overlay */}
+        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
 
-      {/* Product Info */}
-      <div className="w-full flex flex-col flex-1 px-1">
-        <h3 className="text-[15px] leading-[1.4] text-gray-800 font-medium line-clamp-2 min-h-[42px] mb-3 group-hover:text-red-600 transition-colors">
-          {productName}
+      {/* Content */}
+      <div className="flex flex-col flex-grow space-y-3">
+        {/* Category/Brand */}
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+            {product.brandName || "Toy Story"}
+          </span>
+          <div className="h-1 w-1 rounded-full bg-gray-300" />
+          <span className="text-[10px] font-black uppercase tracking-widest text-red-500">
+            {product.categoryName || "Hot Deal"}
+          </span>
+        </div>
+
+        {/* Title */}
+        <h3 className="text-[15px] font-black text-gray-800 line-clamp-2 leading-tight group-hover:text-red-600 transition-colors duration-300">
+          {product.name}
         </h3>
 
-        <div className="mt-auto">
-          {/* Pricing */}
-          <div className="flex flex-col mb-3">
-            <span className="text-red-600 font-tilt-warp text-2xl leading-none tracking-tight">
-              {formatPrice(discountedPrice)}
-            </span>
-            {hasPromotion && (
-              <span className="text-gray-400 text-[13px] line-through mt-1">
-                {formatPrice(originalPrice)}
+        {/* Pricing & Actions */}
+        <div className="pt-2 mt-auto space-y-4">
+          <div className="flex flex-col">
+            <div className="flex items-baseline gap-2">
+              <span className="text-[18px] font-black text-red-600">
+                {formatPrice(productFinalPrice)}
               </span>
-            )}
+              {hasPromotion && (
+                <span className="text-[12px] text-gray-400 line-through font-bold">
+                  {formatPrice(productPrice)}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Action Row */}
-          <div className="flex items-center gap-2">
-            <Link
-              to={`/product/${product.productId}`}
-              onClick={(e) => e.stopPropagation()}
-              className="flex-1 bg-red-600 text-white py-3 rounded-[1rem] text-[12px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-black transition-colors duration-300 shadow-sm"
-            >
-              <ShoppingCart className="w-4 h-4" />
-              <span>Thêm</span>
-            </Link>
-            
-
-          </div>
+          {user && role === "Member" && (
+            <div className="flex items-center gap-2">
+              <Link
+                to={`/product/${product.productId}`}
+                onClick={(e) => e.stopPropagation()}
+                className="flex-1 bg-red-600 text-white py-3 rounded-[1rem] text-[12px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-black transition-colors duration-300 shadow-sm"
+              >
+                <ShoppingCart className="w-4 h-4" />
+                <span>Thêm</span>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
 
@@ -118,6 +122,8 @@ export const ProductCard = ({
         whileHover={{ width: "80%" }}
         className="absolute bottom-6 left-1/2 -translate-x-1/2 h-[2px] bg-red-600/30 rounded-full"
       />
-    </motion.article>
+    </motion.div>
   );
 };
+
+export default ProductCard;

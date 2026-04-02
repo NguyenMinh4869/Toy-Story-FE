@@ -8,6 +8,7 @@ import { getActiveProducts } from "../services/productService";
 import { getActiveBrands } from "../services/brandService";
 import { getCategories } from "../services/categoryService";
 import { getPromotionsCustomerFilter } from "../services/promotionService";
+import { findBestPromotion } from "../utils/promotionUtils";
 import type { ViewProductDto } from "../types/ProductDTO";
 import type { ViewBrandDto } from "../types/BrandDTO";
 
@@ -27,16 +28,45 @@ export const Homepage = (): React.JSX.Element => {
   const [heroPage, setHeroPage] = useState(0);
   const [promotionsPage, setPromotionsPage] = useState(0);
   const [gundamPage, setGundamPage] = useState(0);
-  const [promotionDiscountValue, setPromotionDiscountValue] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
         setError(null);
-        const allProducts = await getActiveProducts();
+        const [allProducts, promos] = await Promise.all([
+          getActiveProducts(),
+          getPromotionsCustomerFilter({ isActive: true }).catch(() => [])
+        ]);
 
-        const promotional = allProducts.length > 0 ? allProducts.slice(0, 12) : [];
+        // Apply best promotion to each product
+        const enrichedProducts = allProducts.map((p) => {
+          const promoInfo = findBestPromotion(p, promos);
+          const originalPrice = p.price ?? 0;
+          let finalPrice = originalPrice;
+          let hasPromotion = false;
+
+          if (promoInfo.hasPromotion && originalPrice > 0) {
+            hasPromotion = true;
+            if (promoInfo.discountType === 0) { // Percentage
+              finalPrice = originalPrice * (1 - promoInfo.discountValue / 100);
+            } else { // Fixed Amount
+              finalPrice = Math.max(0, originalPrice - promoInfo.discountValue);
+            }
+          }
+
+          return {
+            ...p,
+            hasPromotion,
+            promotionName: hasPromotion ? promoInfo.label : undefined,
+            finalPrice: finalPrice,
+            originalPrice: originalPrice,
+            promoInfo: promoInfo as any,
+          };
+        });
+
+        // Filter products that actually have promotions for the "Hot Deals" section
+        const promotional = enrichedProducts.filter(p => p.hasPromotion).slice(0, 12);
         setPromotionalProducts(promotional);
 
         const categories = await getCategories();
@@ -45,27 +75,13 @@ export const Homepage = (): React.JSX.Element => {
         );
 
         const gundam = gundamCategory
-          ? allProducts.filter((p) => p.categoryId === gundamCategory.categoryId).slice(0, 12)
-          : allProducts.filter((p) => p.name?.toUpperCase().includes("GUNDAM")).slice(0, 12);
+          ? enrichedProducts.filter((p) => p.categoryId === gundamCategory.categoryId).slice(0, 12)
+          : enrichedProducts.filter((p) => p.name?.toUpperCase().includes("GUNDAM")).slice(0, 12);
 
-        setGundamProducts(gundam.length > 0 ? gundam : allProducts.slice(0, 12));
+        setGundamProducts(gundam.length > 0 ? gundam : enrichedProducts.slice(0, 12));
 
         const brandsData = await getActiveBrands();
         setBrands(brandsData);
-
-        // Fetch active promotions to get the real discount percentage
-        try {
-          const promos = await getPromotionsCustomerFilter();
-          // Prefer a percentage-type promotion (discountType === 0)
-          const activePromo = promos.find(
-            (p) => p.isActive && p.discountType === 0 && (p.discountValue ?? 0) > 0
-          ) ?? promos.find((p) => p.isActive && (p.discountValue ?? 0) > 0);
-          if (activePromo?.discountValue) {
-            setPromotionDiscountValue(activePromo.discountValue);
-          }
-        } catch {
-          // silently ignore – badge simply won't show
-        }
       } catch (err) {
         console.error("Error fetching homepage data:", err);
         setError("Không thể tải dữ liệu. Vui lòng thử lại sau.");
@@ -108,7 +124,6 @@ export const Homepage = (): React.JSX.Element => {
               isLoading={isLoading}
               page={promotionsPage}
               onPageChange={setPromotionsPage}
-              promotionDiscountValue={promotionDiscountValue}
             />
           </div>
         </motion.section>

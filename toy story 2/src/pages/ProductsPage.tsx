@@ -42,21 +42,33 @@ export const ProductsPage: React.FC = () => {
         // Fetch both products and active promotions in parallel
         const [productsData, promosData] = await Promise.all([
           getCustomerFilterProducts(),
-          getPromotionsCustomerFilter({ discountType: 0 }) // percent-based as priority
+          getPromotionsCustomerFilter({ isActive: true }).catch(() => [])
         ])
 
         // Ensure each product has the best promotion info applied as a fallback
         const productsWithPromos = productsData.map(p => {
           const promoInfo = findBestPromotion(p, promosData)
-          if (promoInfo.hasPromotion) {
-            return {
-              ...p,
-              hasPromotion: true,
-              promotionName: promoInfo.label,
-              finalPrice: p.price ? p.price * (1 - promoInfo.discountValue / 100) : p.finalPrice
+          const originalPrice = p.price ?? 0
+          let finalPrice = originalPrice
+          let hasPromotion = false
+
+          if (promoInfo.hasPromotion && originalPrice > 0) {
+            hasPromotion = true
+            if (promoInfo.discountType === 0) {
+              finalPrice = originalPrice * (1 - promoInfo.discountValue / 100)
+            } else {
+              finalPrice = Math.max(0, originalPrice - promoInfo.discountValue)
             }
           }
-          return p
+
+          return {
+            ...p,
+            hasPromotion,
+            promotionName: hasPromotion ? promoInfo.label : undefined,
+            finalPrice: finalPrice,
+            originalPrice: originalPrice,
+            promoInfo: promoInfo as any
+          }
         })
 
         setProducts(productsWithPromos)

@@ -357,7 +357,6 @@ const PromotionDetailPage: React.FC = () => {
                   >
                     <ProductCard
                       product={product}
-                      discount={product.discount}
                     />
                   </motion.div>
                 ))}

@@ -32,7 +32,7 @@ const ProductDetail: React.FC = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [bestPromoName, setBestPromoName] = useState<string | null>(null);
   const { addToCart } = useCart();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -50,7 +50,7 @@ const ProductDetail: React.FC = () => {
 
         const [productData, promos] = await Promise.all([
           getProductById(productId),
-          getPromotionsCustomerFilter({ discountType: 0 })
+          getPromotionsCustomerFilter({ isActive: true })
         ]);
 
         const promoInfo = findBestPromotion(productData, promos);
@@ -62,10 +62,18 @@ const ProductDetail: React.FC = () => {
 
         // Always compute finalPrice from the best promotion (max discount value),
         // instead of trusting API-provided finalPrice which may reflect a smaller promo.
-        if (promoInfo.hasPromotion && promoInfo.discountValue > 0 && originalPrice > 0) {
+        if (
+          promoInfo.hasPromotion &&
+          promoInfo.discountValue > 0 &&
+          originalPrice > 0
+        ) {
           hasPromotion = true;
           promotionName = promoInfo.label;
-          finalPrice = originalPrice * (1 - promoInfo.discountValue / 100);
+          if (promoInfo.discountType === 0) {
+            finalPrice = originalPrice * (1 - promoInfo.discountValue / 100);
+          } else {
+            finalPrice = Math.max(0, originalPrice - promoInfo.discountValue);
+          }
         }
 
         const mapped: ProductDTO = {
@@ -76,7 +84,9 @@ const ProductDetail: React.FC = () => {
           finalPrice: finalPrice,
           originalPrice: originalPrice,
           hasPromotion,
-          promotionName
+          promotionName,
+          // Store the promoInfo for UI display
+          promoInfo: promoInfo as any 
         };
         setBestPromoName(promotionName || null);
         setProduct(mapped);
@@ -147,9 +157,12 @@ const ProductDetail: React.FC = () => {
   const currentOriginalPrice = product.originalPrice ?? product.price ?? 0;
 
   const hasDiscount = product.hasPromotion && currentOriginalPrice > currentDisplayPrice;
-  const discountPercent = hasDiscount
-    ? Math.round(((currentOriginalPrice - currentDisplayPrice) / currentOriginalPrice) * 100)
-    : 0;
+  const promoInfo = (product as any).promoInfo as any;
+  const discountLabel = hasDiscount && promoInfo
+    ? (promoInfo.discountType === 1 
+        ? `-${(promoInfo.discountValue / 1000).toFixed(0)}K` 
+        : `-${Math.round(((currentOriginalPrice - currentDisplayPrice) / currentOriginalPrice) * 100)}%`)
+    : "";
 
   return (
     <div className="bg-white min-h-screen pb-20">
@@ -181,7 +194,7 @@ const ProductDetail: React.FC = () => {
               {hasDiscount && (
                 <div className="absolute top-10 right-10 z-10">
                   <div className="bg-red-600 text-white px-5 py-2 rounded-2xl font-tilt-warp text-xl shadow-lg ring-4 ring-red-100 italic">
-                    -{discountPercent}%
+                    {discountLabel}
                   </div>
                 </div>
               )}
@@ -315,15 +328,17 @@ const ProductDetail: React.FC = () => {
               </div>
 
               <div className="flex gap-4">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleAddToCart}
-                  className="flex-1 bg-red-600 text-white h-16 rounded-3xl font-tilt-warp text-xl uppercase tracking-widest shadow-2xl hover:bg-black transition-colors flex items-center justify-center gap-4 group"
-                >
-                  <ShoppingCart className="w-6 h-6 group-hover:rotate-12 transition-transform" />
-                  Thêm vào giỏ
-                </motion.button>
+                {user && role === "Member" && (
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleAddToCart}
+                    className="flex-1 bg-red-600 text-white h-16 rounded-3xl font-tilt-warp text-xl uppercase tracking-widest shadow-2xl hover:bg-black transition-colors flex items-center justify-center gap-4 group"
+                  >
+                    <ShoppingCart className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+                    Thêm vào giỏ
+                  </motion.button>
+                )}
               </div>
             </div>
 

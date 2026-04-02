@@ -5,6 +5,7 @@ import { getProductsByBrandId } from "../services/productService";
 import { getPromotionsCustomerFilter } from "../services/promotionService";
 import { ProductCard } from "../components/ProductCard";
 import { BreadcrumbHeader } from "../components/BreadcrumbHeader";
+import { findBestPromotion } from "../utils/promotionUtils";
 import type { ViewBrandDto } from "../types/BrandDTO";
 import type { ProductDTO } from "../types/ProductDTO";
 import { motion } from "framer-motion";
@@ -24,36 +25,33 @@ const BrandDetailPage: React.FC = () => {
         const [brandData, productsData, promos] = await Promise.all([
           getBrandById(Number(id)),
           getProductsByBrandId(Number(id)),
-          getPromotionsCustomerFilter().catch(() => []),
+          getPromotionsCustomerFilter({ isActive: true }).catch(() => []),
         ]);
         setBrand(brandData);
 
         // Áp promotion tốt nhất cho mỗi sản phẩm
         const enriched: ProductDTO[] = productsData.map((product) => {
-          const applicable = promos.filter((p) => {
-            if (!p.isActive) return false;
-            const hasProductScope = p.productId != null;
-            const hasCategoryScope = p.categoryId != null;
-            const hasBrandScope = p.brandId != null;
-            if (hasProductScope) return p.productId === product.productId;
-            if (hasCategoryScope) return p.categoryId === product.categoryId;
-            if (hasBrandScope) return p.brandId === product.brandId;
-            return true; // promotion toàn bộ
-          });
-          const bestPromo = applicable
-            .filter((p) => p.discountType === 0)
-            .sort((a, b) => (b.discountValue ?? 0) - (a.discountValue ?? 0))[0];
-
-          const discount = bestPromo?.discountValue ?? 0;
+          const promoInfo = findBestPromotion(product, promos);
           const originalPrice = product.price ?? 0;
-          const finalPrice = discount > 0 ? originalPrice * (1 - discount / 100) : originalPrice;
+          let finalPrice = originalPrice;
+          let hasPromotion = false;
+
+          if (promoInfo.hasPromotion && originalPrice > 0) {
+            hasPromotion = true;
+            if (promoInfo.discountType === 0) {
+              finalPrice = originalPrice * (1 - promoInfo.discountValue / 100);
+            } else {
+              finalPrice = Math.max(0, originalPrice - promoInfo.discountValue);
+            }
+          }
 
           return {
             ...product,
-            hasPromotion: discount > 0,
-            promotionName: bestPromo?.name ?? undefined,
+            hasPromotion,
+            promotionName: hasPromotion ? promoInfo.label : undefined,
             finalPrice: finalPrice,
             originalPrice: originalPrice,
+            promoInfo: promoInfo as any,
           };
         });
         setProducts(enriched);
