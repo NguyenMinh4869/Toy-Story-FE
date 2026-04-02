@@ -5,7 +5,7 @@ import { getSetsCustomerFilter } from '../services/setService'
 import type { ViewSetDetailDto } from '../types/SetDTO'
 import { useCart } from '@/context/CartContext'
 import { ROUTES } from '../routes/routePaths'
-
+import { useAuth } from '@/hooks/useAuth'
 const breadcrumbItems = [{ label: 'Set sản phẩm' }]
 
 export const SetPage: React.FC = () => {
@@ -13,7 +13,7 @@ export const SetPage: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { addToCart } = useCart()
-
+  const { user } = useAuth()
   useEffect(() => {
     const fetchSets = async () => {
       try {
@@ -57,7 +57,7 @@ export const SetPage: React.FC = () => {
           </div>
         ) : sets.length === 0 ? (
           <div className="text-center py-20 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-             <p className="font-red-hat text-gray-500">Chưa có bộ sưu tập nào được mở bán.</p>
+            <p className="font-red-hat text-gray-500">Chưa có bộ sưu tập nào được mở bán.</p>
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2">
@@ -88,7 +88,7 @@ export const SetPage: React.FC = () => {
                         <p className="font-red-hat text-sm text-gray-600 mt-2 line-clamp-2 leading-relaxed">{s.description}</p>
                       )}
                     </div>
-                    
+
                     <div className="mt-4 flex flex-col gap-2">
                       <div className="flex items-center gap-3 flex-wrap">
                         {s.price != null && (
@@ -102,7 +102,7 @@ export const SetPage: React.FC = () => {
                           </span>
                         )}
                       </div>
-                      
+
                       <div className="flex items-center gap-4 text-xs font-red-hat text-gray-500">
                         {s.totalItems != null && (
                           <span className="flex items-center gap-1.5">
@@ -113,23 +113,25 @@ export const SetPage: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  
-                  <div className="flex items-center justify-center">
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        addToCart(undefined, s.setId!, 1)
-                      }}
-                      className="w-12 h-12 flex items-center justify-center bg-[#ca002a] hover:bg-[#a00022] text-white rounded-full transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 group-hover:rotate-[360deg]"
-                      title="Thêm vào giỏ hàng"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-                      </svg>
-                    </button>
-                  </div>
+
+                  {user && user.role === "Member" && (
+                    <div className="flex items-center justify-center">
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          addToCart(undefined, s.setId!, 1)
+                        }}
+                        className="w-12 h-12 flex items-center justify-center bg-[#ca002a] hover:bg-[#a00022] text-white rounded-full transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 group-hover:rotate-[360deg]"
+                        title="Thêm vào giỏ hàng"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" />
+                          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </Link>
             ))}

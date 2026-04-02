@@ -314,17 +314,19 @@ const ProductDetail: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex gap-4">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleAddToCart}
-                  className="flex-1 bg-red-600 text-white h-16 rounded-3xl font-tilt-warp text-xl uppercase tracking-widest shadow-2xl hover:bg-black transition-colors flex items-center justify-center gap-4 group"
-                >
-                  <ShoppingCart className="w-6 h-6 group-hover:rotate-12 transition-transform" />
-                  Thêm vào giỏ
-                </motion.button>
-              </div>
+              {user && user.role === "Member" && (
+                <div className="flex gap-4">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleAddToCart}
+                    className="flex-1 bg-red-600 text-white h-16 rounded-3xl font-tilt-warp text-xl uppercase tracking-widest shadow-2xl hover:bg-black transition-colors flex items-center justify-center gap-4 group"
+                  >
+                    <ShoppingCart className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+                    Thêm vào giỏ
+                  </motion.button>
+                </div>
+              )}
             </div>
 
             {/* Product Meta Stats */}

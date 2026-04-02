@@ -259,7 +259,7 @@ const SetDetailPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              {user && (
+              {user && user.role === "Member" && (
                 <motion.button
                   whileHover={{ scale: 1.02, backgroundColor: "#000" }}
                   whileTap={{ scale: 0.98 }}

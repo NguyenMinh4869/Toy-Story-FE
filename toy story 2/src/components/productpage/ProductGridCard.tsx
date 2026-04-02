@@ -38,7 +38,7 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({
         {hasPromotion && (
           <div className="absolute top-4 right-4 z-10 flex flex-col items-end gap-1">
             <div className="bg-[#e41e31] text-white text-[12px] font-bold py-1 px-2.5 rounded-full shadow-sm">
-              {product.promotionName || (product.finalPrice && product.price ? `-${Math.round((1 - product.finalPrice/product.price) * 100)}%` : 'GIẢM GIÁ')}
+              {product.promotionName || (product.finalPrice && product.price ? `-${Math.round((1 - product.finalPrice / product.price) * 100)}%` : 'GIẢM GIÁ')}
             </div>
           </div>
         )}
@@ -67,7 +67,7 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({
             </span>
           )}
         </div>
-        {user && (
+        {user && user.role === "Member" && (
           <div className="flex items-center gap-4">
             <button
               onClick={handleAddToCart}

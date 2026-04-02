@@ -169,7 +169,8 @@ const Header: React.FC = () => {
               </Link>
             </>
           )}
-          {user && (
+
+          {user && user.role === "Member" && (
             <button
               onClick={openCart}
               className="flex items-center gap-2 bg-transparent border-none"

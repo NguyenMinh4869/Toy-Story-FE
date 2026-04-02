@@ -26,12 +26,12 @@ export const ProductCard = ({
   const productImage = product.imageUrl ?? PRODUCT_IMAGE_87;
 
   const hasPromotion = product.hasPromotion || (typeof discount === "number" && discount > 0);
-  const discountedPrice = product.hasPromotion 
-    ? (product.finalPrice ?? productPrice) 
+  const discountedPrice = product.hasPromotion
+    ? (product.finalPrice ?? productPrice)
     : (typeof discount === "number" && discount > 0 ? productPrice * (1 - discount / 100) : productPrice);
   const originalPrice = productPrice;
-  
-  const discountPercent = product.hasPromotion && originalPrice > 0 
+
+  const discountPercent = product.hasPromotion && originalPrice > 0
     ? Math.round((1 - discountedPrice / originalPrice) * 100)
     : discount;
 
@@ -57,7 +57,7 @@ export const ProductCard = ({
       {/* Discount Badge */}
       {hasPromotion && (
         <div className="absolute top-6 right-6 z-20 flex flex-col gap-1 items-end overflow-hidden rounded-xl">
-           <div className="bg-red-600 text-white px-3 py-1.5 text-[11px] font-bold font-archivo tracking-tight shadow-md rounded-lg">
+          <div className="bg-red-600 text-white px-3 py-1.5 text-[11px] font-bold font-archivo tracking-tight shadow-md rounded-lg">
             {product.promotionName ? product.promotionName : `-${discountPercent}%`}
           </div>
         </div>
@@ -72,7 +72,7 @@ export const ProductCard = ({
           alt={productName}
           src={productImage}
         />
-        
+
         {/* Quick Actions Overlay */}
         <div className="absolute inset-0 bg-red-600/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" />
       </div>
@@ -104,16 +104,14 @@ export const ProductCard = ({
               className="flex-1 bg-red-600 text-white py-3 rounded-[1rem] text-[12px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-black transition-colors duration-300 shadow-sm"
             >
               <ShoppingCart className="w-4 h-4" />
-              <span>Thêm</span>
+              <span>Xem chi tiết</span>
             </Link>
-            
-
           </div>
         </div>
       </div>
 
       {/* Subtle bottom accent line appearing on hover */}
-      <motion.div 
+      <motion.div
         initial={{ width: 0 }}
         whileHover={{ width: "80%" }}
         className="absolute bottom-6 left-1/2 -translate-x-1/2 h-[2px] bg-red-600/30 rounded-full"
