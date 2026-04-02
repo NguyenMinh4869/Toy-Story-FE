@@ -85,7 +85,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, compact = fal
       </div>
 
       {/* Content */}
-      <div className={compact ? "flex flex-col flex-grow space-y-1.5" : "flex flex-col flex-grow space-y-3"}>
+      <div className={compact ? "flex flex-col flex-grow gap-1.5" : "flex flex-col flex-grow gap-3"}>
         {/* Category/Brand */}
         <div className={`flex items-center gap-1 ${compact ? "flex-wrap" : "gap-2"}`}>
           <span
@@ -147,8 +147,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, compact = fal
                     : "flex-1 bg-red-600 text-white py-3 rounded-[1rem] text-[12px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-black transition-colors duration-300 shadow-sm"
                 }
               >
-                <ShoppingCart className={compact ? "w-3 h-3" : "w-4 h-4"} />
-                <span>Thêm</span>
+                {/* <ShoppingCart className={compact ? "w-3 h-3" : "w-4 h-4"} /> */}
+                <span>Xem chi tiết</span>
               </Link>
             </div>
           )}
