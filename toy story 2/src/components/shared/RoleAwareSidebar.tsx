@@ -3,6 +3,7 @@ import { NavLink, Link } from 'react-router-dom';
 import { LayoutDashboard, ShoppingBag, Users, Tag, Percent, Layers, Warehouse, List, BookOpen, Album, Truck } from 'lucide-react';
 import { ROUTES } from '../../routes/routePaths';
 import { getUserRole } from '../../services/authService';
+import { useNotifications } from '../../context/NotificationContext';
 
 interface SidebarProps {
   /**
@@ -15,9 +16,10 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
   const userRole = getUserRole();
   const effectiveMode = mode || (userRole === 'Admin' ? 'admin' : 'staff');
+  const { unreadCount } = useNotifications();
 
   // Define navigation links based on role
-  const getNavLinks = (): Array<{ to: string; icon: React.ReactNode; label: string }> => {
+  const getNavLinks = (): Array<{ to: string; icon: React.ReactNode; label: string; badge?: number }> => {
     const baseLinks: Array<{ to: string; icon: React.ReactNode; label: string }> = [
       {
         to: effectiveMode === 'admin' ? ROUTES.ADMIN_DASHBOARD : ROUTES.STAFF_DASHBOARD,
@@ -96,7 +98,8 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
     baseLinks.push({
       to: effectiveMode === 'admin' ? ROUTES.ADMIN_TRANSFER : ROUTES.STAFF_TRANSFER,
       icon: <Truck size={20} />,
-      label: 'Lịch sử chuyển kho'
+      label: 'Lịch sử chuyển kho',
+      badge: unreadCount > 0 ? unreadCount : undefined
     });
 
     return baseLinks;
@@ -126,7 +129,12 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
             }
           >
             {link.icon}
-            <span className="ml-3">{link.label}</span>
+            <span className="ml-3 flex-1">{link.label}</span>
+            {link.badge !== undefined && (
+              <span className="ml-2 bg-red-500 text-white rounded-full px-1.5 py-0.5 text-xs leading-none font-bold min-w-[18px] text-center">
+                {link.badge > 99 ? '99+' : link.badge}
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>

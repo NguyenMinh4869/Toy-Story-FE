@@ -10,6 +10,7 @@ import CreateTransferModal from '@/components/transfer/CreateTransferModal'
 import { useAuth } from '@/hooks/useAuth'
 import Pagination from '@/components/ui/Pagination'
 import { useClientPagination } from '@/hooks/useClientPagination'
+import { useNotifications } from '@/context/NotificationContext'
 
 const TRANSFERS_PAGE_SIZE = 6
 
@@ -22,6 +23,14 @@ const TransferPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const { user } = useAuth()
   const userWarehouseId = user?.warehouseId
+  const { lastTransferUpdate, unreadCount, markAllRead } = useNotifications()
+
+  // Auto-clear notification badge while on this page
+  useEffect(() => {
+    if (unreadCount > 0) {
+      markAllRead()
+    }
+  }, [unreadCount, markAllRead])
 
   // Pagination
   const {
@@ -79,7 +88,7 @@ const TransferPage: React.FC = () => {
       return
     }
     fetchTransfers(filter)
-  }, [filter, fetchTransfers, userWarehouseId])
+  }, [filter, fetchTransfers, userWarehouseId, lastTransferUpdate])
 
   const handleFilter = useCallback((newFilter: TransferFilterDto) => {
     console.log('Filter changed:', newFilter)

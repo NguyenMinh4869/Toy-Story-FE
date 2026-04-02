@@ -15,6 +15,13 @@ export default defineConfig({
         changeOrigin: true,
         secure: true,
       },
+      // SignalR WebSocket proxy
+      "/notificationHub": {
+        target: "https://toy-story-xwni.onrender.com",
+        changeOrigin: true,
+        secure: true,
+        ws: true,
+      },
     },
   },
   plugins: [react()],
