@@ -16,7 +16,7 @@ import { getActiveBrands } from '../../services/brandService';
 import { getCategories } from '../../services/categoryService';
 import { getActiveProducts } from '../../services/productService';
 import type {
-  ViewPromotionSummaryDto,
+  ViewPromotionDto,
   CreatePromotionDto,
   UpdatePromotionDto,
   DiscountType,
@@ -30,7 +30,7 @@ import Pagination from '../../components/ui/Pagination';
 const PAGE_SIZE = 10;
 
 const PromotionManagementPage: React.FC = () => {
-  const [promotions, setPromotions] = useState<ViewPromotionSummaryDto[]>([]);
+  const [promotions, setPromotions] = useState<ViewPromotionDto[]>([]);
   const [brands, setBrands] = useState<ViewBrandDto[]>([]);
   const [categories, setCategories] = useState<ViewCategoryDto[]>([]);
   const [products, setProducts] = useState<ViewProductDto[]>([]);
@@ -185,7 +185,7 @@ const PromotionManagementPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleEdit = async (promotion: ViewPromotionSummaryDto) => {
+  const handleEdit = async (promotion: ViewPromotionDto) => {
     if (!promotion.promotionId) return;
     try {
       const details = await getPromotionById(promotion.promotionId);

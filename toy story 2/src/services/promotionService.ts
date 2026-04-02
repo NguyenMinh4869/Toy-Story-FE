@@ -116,7 +116,7 @@ export const adminFilterPromotions = async (params?: {
   startDate?: string
   endDate?: string
   isActive?: boolean
-}): Promise<ViewPromotionSummaryDto[]> => {
+}): Promise<ViewPromotionDto[]> => {
   const queryParams = new URLSearchParams()
   if (params?.name) queryParams.append('name', params.name)
   if (params?.discountType !== undefined) queryParams.append('discountType', String(params.discountType))
@@ -128,6 +128,6 @@ export const adminFilterPromotions = async (params?: {
   if (params?.isActive !== undefined) queryParams.append('isActive', String(params.isActive))
 
   const endpoint = `/promotions/admin-filter${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
-  const response = await apiGet<ViewPromotionSummaryDto[]>(endpoint)
+  const response = await apiGet<ViewPromotionDto[]>(endpoint)
   return response.data
 }
