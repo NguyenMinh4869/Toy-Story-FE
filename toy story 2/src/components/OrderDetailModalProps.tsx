@@ -37,7 +37,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClose }) =
 
                 <div className="flex-1 overflow-y-auto px-4 py-4">
                     <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50/70 p-3.5">
-                        <div className="grid gap-3 grid-cols-3">
+                        <div className="grid gap-3 grid-cols-2">
                             <div>
                                 <div className="mb-1 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
                                     <User size={12} /> Khách hàng
@@ -50,12 +50,21 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClose }) =
                                 </div>
                                 <p className="text-xs font-bold text-slate-900">{order.phoneNumber}</p>
                             </div>
+                        </div>
+                        <div className="grid gap-3 grid-cols-2 mt-4">
                             <div>
                                 <div className="mb-1 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
                                     <CalendarDays size={12} /> Ngày đặt
                                 </div>
                                 <p className="text-xs font-bold text-slate-900">{new Date(order.orderDate).toLocaleString('vi-VN')}</p>
                             </div>
+                            <div>
+                                <div className="mb-1 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                                    <Store size={12} /> Địa chỉ giao hàng
+                                </div>
+                                <p className="text-xs font-bold text-slate-900">{order.address || 'N/A'}</p>
+                            </div>
+                            <div />
                         </div>
                     </div>
 
