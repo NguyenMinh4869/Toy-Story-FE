@@ -38,7 +38,7 @@ const isNonEmptyString = (value: unknown): value is string => {
   return typeof value === 'string' && value.trim().length > 0
 }
 
-const extractApiErrorMessage = (status: number, payload: any): string => {
+const extractApiErrorMessage = (_status: number, payload: any): string => {
   const nestedData = payload?.data
   const nestedMessage = nestedData?.message
   const message = payload?.message
@@ -61,7 +61,7 @@ const extractApiErrorMessage = (status: number, payload: any): string => {
     return message
   }
 
-  return `HTTP error! status: ${status}`
+  return 'Có lỗi xảy ra, vui lòng thử lại.'
 }
 
 const extractSuccessMessage = (payload: any): string | null => {
@@ -116,9 +116,9 @@ async function apiRequest<T>(
     const contentType = response.headers.get('content-type')
     if (!contentType?.includes('application/json')) {
       if (!response.ok) {
-        const errorMsg = `HTTP error! status: ${response.status}`
+        const errorMsg = 'Có lỗi xảy ra, vui lòng thử lại.'
         showToast(errorMsg, "destructive")
-        throw new Error(errorMsg)
+        throw { message: errorMsg, status: response.status } as ApiError
       }
       const text = await response.text()
       return { data: text as unknown as T, success: true }

@@ -97,6 +97,14 @@ const ArticleManagementPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const missing: string[] = [];
+    if (!formData.title?.trim()) missing.push('Tiêu đề');
+    if (!formData.content?.trim()) missing.push('Nội dung');
+    if (!formData.articleCategoryId || formData.articleCategoryId <= 0) missing.push('Danh mục');
+    if (missing.length > 0) {
+      setError(`Vui lòng điền đầy đủ: ${missing.join(', ')}`);
+      return;
+    }
     try {
       setLoading(true);
       if (currentArticle) {

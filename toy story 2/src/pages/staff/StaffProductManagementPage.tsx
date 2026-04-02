@@ -88,6 +88,15 @@ const StaffProductManagementPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const missing: string[] = [];
+    if (!formData.Name?.trim()) missing.push('Tên sản phẩm');
+    if (!formData.Price || formData.Price <= 0) missing.push('Giá tiền');
+    if (!formData.CategoryId || formData.CategoryId <= 0) missing.push('Phân loại');
+    if (!formData.BrandId || formData.BrandId <= 0) missing.push('Thương hiệu');
+    if (missing.length > 0) {
+      setError(`Vui lòng điền đầy đủ: ${missing.join(', ')}`);
+      return;
+    }
     try {
       setLoading(true);
       if (currentProduct && currentProduct.productId) {

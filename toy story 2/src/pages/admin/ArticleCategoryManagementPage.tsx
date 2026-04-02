@@ -46,6 +46,10 @@ const ArticleCategoryManagementPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.name?.trim()) {
+      setError('Vui lòng nhập tên danh mục.');
+      return;
+    }
     try {
       setLoading(true);
       if (currentCategory) {

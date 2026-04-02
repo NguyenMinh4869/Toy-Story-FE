@@ -118,6 +118,10 @@ const BrandManagementPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.name?.trim()) {
+      setError('Vui lòng nhập tên thương hiệu.');
+      return;
+    }
     try {
       setLoading(true);
       if (currentBrand && currentBrand.brandId) {

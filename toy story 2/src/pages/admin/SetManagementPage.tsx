@@ -167,6 +167,10 @@ const SetManagementPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.Name?.trim()) {
+      setError('Vui lòng nhập tên bộ sưu tập.');
+      return;
+    }
     try {
       setLoading(true);
       setError(null);
@@ -383,19 +387,14 @@ const SetManagementPage: React.FC = () => {
             <SetListTable
               sets={paginatedSets}
               onEdit={openEditModal}
-              onDelete={async (set) => {
-                if (!set.setId) return;
-                if (!confirm(`Bạn có chắc muốn thay đổi trạng thái bộ "${set.name || set.setId}"?`)) return;
-                try {
-                  setLoading(true);
-                  setError(null);
-                  await deleteSet(set.setId);
-                  await fetchData();
-                } catch (err) {
-                  console.error(err);
-                  setError('Failed to delete set');
-                } finally {
-                  setLoading(false);
+              onDelete={(set) => {
+                // Inactive sets use the reactivate modal; active sets use the simple deactivate confirm
+                const rawStatus = (set as any).Status ?? (set as any).status;
+                const isActive = rawStatus === 'Đang bán' || rawStatus === 'Active' || rawStatus === 0 || Number(rawStatus) === 0;
+                if (!isActive) {
+                  openReactivateModal(set);
+                } else {
+                  setConfirmSet(set);
                 }
               }}
             />
