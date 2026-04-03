@@ -14,7 +14,7 @@ interface TransferModalProps {
 
 const TransferModal: React.FC<TransferModalProps> = ({ transfer, onClose, onUpdated }) => {
     const [loading, setLoading] = useState(false)
-    const { user } = useAuth();
+    const { user, role } = useAuth();
     if (!transfer) return null
 
     const handleAccept = async () => {
@@ -134,7 +134,7 @@ const TransferModal: React.FC<TransferModalProps> = ({ transfer, onClose, onUpda
                     </ul>
                 </div>
 
-                {user?.accountId != transfer.createdByStaffId && (
+                {user?.accountId != transfer.createdByStaffId &&  role !== "Admin" && (
                     <div className="flex gap-6 mt-6 justify-center">
                         {transfer.status === TransferStatus.Pending && (
                             <>
