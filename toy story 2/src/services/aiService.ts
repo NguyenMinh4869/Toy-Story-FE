@@ -189,14 +189,31 @@ export class AIService {
           if (fnName === "search_products") {
             data = await filterProductsPublic(args);
           } else if (fnName === "get_product_details") {
-            data = await getProductById(args.productId);
-          } else if (fnName === "add_to_cart") {
-            if (this.onAddToCart) {
-              this.onAddToCart(args.productId, undefined, args.quantity || 1);
+            const pid = Number(args.productId);
+            if (isNaN(pid)) {
+              data = { error: "ID sản phẩm không hợp lệ." };
             } else {
-              await addToCartServer(args.productId, undefined, args.quantity || 1);
+              data = await getProductById(pid);
             }
-            data = { success: true, message: "Đã thêm vào giỏ hàng!" };
+          } else if (fnName === "get_order_status") {
+            const oid = Number(args.orderId);
+            if (isNaN(oid)) {
+              data = { error: "Mã đơn hàng phải là một con số." };
+            } else {
+              data = await getOrderById(oid);
+            }
+          } else if (fnName === "add_to_cart") {
+            const pid = Number(args.productId);
+            if (isNaN(pid)) {
+              data = { error: "Không tìm thấy mã sản phẩm để thêm vào giỏ hàng." };
+            } else {
+              if (this.onAddToCart) {
+                this.onAddToCart(pid, undefined, args.quantity || 1);
+              } else {
+                await addToCartServer(pid, undefined, args.quantity || 1);
+              }
+              data = { success: true, message: "Đã thêm vào giỏ hàng!" };
+            }
           } else if (fnName === "get_categories") {
             data = await getCategories();
           } else if (fnName === "get_brands") {

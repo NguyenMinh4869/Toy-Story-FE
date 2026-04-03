@@ -67,8 +67,17 @@ const ChatWidget: React.FC = () => {
         timestamp: new Date()
       };
       setMessages(prev => [...prev, assistantMessage]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Chat error:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: error.message?.includes("not initialized")
+          ? " Bot chưa được cấu hình API Key hoàn chỉnh. Bạn vui lòng kiểm tra lại file .env nhé! "
+          : "Có lỗi gì đó xảy ra khi mình đang trả lời rồi. Bạn nhấn lại nhé! ",
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -114,11 +123,10 @@ const ChatWidget: React.FC = () => {
                   className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div className={`flex flex-col max-w-[85%] ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                    <div className={`px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed shadow-sm ${
-                      msg.role === 'user'
+                    <div className={`px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed shadow-sm ${msg.role === 'user'
                         ? 'bg-[#ab0007] text-white rounded-tr-none'
                         : 'bg-gray-100 text-slate-700 rounded-tl-none border border-gray-200'
-                    }`}>
+                      }`}>
                       {msg.content.split(/(!\[.*?\]\(.*?\))/g).map((part, i) => {
                         const imgMatch = part.match(/!\[(.*?)\]\((.*?)\)/);
                         if (imgMatch) {
@@ -185,8 +193,8 @@ const ChatWidget: React.FC = () => {
                 onClick={() => handleSend()}
                 disabled={!input.trim() || isLoading}
                 className={`p-2.5 rounded-xl transition-all shadow-md ${!input.trim() || isLoading
-                    ? 'bg-gray-100 text-gray-400 shadow-none'
-                    : 'bg-[#ab0007] text-white hover:bg-red-800'
+                  ? 'bg-gray-100 text-gray-400 shadow-none'
+                  : 'bg-[#ab0007] text-white hover:bg-red-800'
                   }`}
               >
                 <Send size={18} />
