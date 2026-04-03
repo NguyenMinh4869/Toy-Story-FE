@@ -99,6 +99,18 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClose }) =
                                             <div className="flex items-start justify-between gap-2">
                                                 <div>
                                                     <p className="truncate text-[11px] font-bold text-slate-900">{item.productName}</p>
+                                                    {/* Sub-items for Set type */}
+                                                    {item.subItems && item.subItems.length > 0 && (
+                                                        <ul className="mt-1 space-y-0.5 pl-2 border-l-2 border-slate-200">
+                                                            {item.subItems.map(sub => (
+                                                                <li key={sub.productId} className="flex items-center gap-1 text-[9px] text-slate-400">
+                                                                    <span className="text-slate-500 font-semibold">+</span>
+                                                                    <span>{sub.productName}</span>
+                                                                    <span className="ml-0.5">(x{sub.quantity})</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    )}
                                                     <p className="mt-0.5 text-[10px] text-slate-500">SL: {item.quantity}</p>
                                                 </div>
                                                 <div className="text-right">

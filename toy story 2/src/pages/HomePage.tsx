@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { GundamKingdomCardsSection } from "../components/homepage/GundamKingdomCardsSection";
 import { PromotionalOffersSection } from "../components/homepage/PromotionalOffersSection";
-import { HeroBannerSection } from "../components/homepage/HeroBannerSection"; import { GundamKingdomHeaderSection } from "../components/homepage/GundamKingdomHeaderSection";
+import { HeroBannerSection } from "../components/homepage/HeroBannerSection";
+import { GundamKingdomHeaderSection } from "../components/homepage/GundamKingdomHeaderSection";
+import { SectionHeader } from "../components/homepage/SectionHeader";
 import { BrandsSection } from "../components/homepage/BrandsSection";
 import { getActiveProducts } from "../services/productService";
 import { getActiveBrands } from "../services/brandService";
@@ -28,6 +31,9 @@ export const Homepage = (): React.JSX.Element => {
   const [heroPage, setHeroPage] = useState(0);
   const [promotionsPage, setPromotionsPage] = useState(0);
   const [gundamPage, setGundamPage] = useState(0);
+  const [allDisplayProducts, setAllDisplayProducts] = useState<ViewProductDto[]>([]);
+  const [allProductsPage, setAllProductsPage] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -78,7 +84,8 @@ export const Homepage = (): React.JSX.Element => {
           ? enrichedProducts.filter((p) => p.categoryId === gundamCategory.categoryId).slice(0, 12)
           : enrichedProducts.filter((p) => p.name?.toUpperCase().includes("GUNDAM")).slice(0, 12);
 
-        setGundamProducts(gundam.length > 0 ? gundam : enrichedProducts.slice(0, 12));
+        setGundamProducts(gundam);
+        setAllDisplayProducts(enrichedProducts.slice(0, 12));
 
         const brandsData = await getActiveBrands();
         setBrands(brandsData);
@@ -91,6 +98,25 @@ export const Homepage = (): React.JSX.Element => {
     };
     fetchData();
   }, []);
+
+  type SectionVariant = 'dark' | 'light';
+  type SectionId = 'promo' | 'allProducts' | 'gundam' | 'brands';
+
+  const sectionPlan = useMemo(() => {
+    if (isLoading) return null;
+    const candidates: SectionId[] = ['promo', 'allProducts', 'gundam', 'brands'];
+    const visible = candidates.filter(id => {
+      if (id === 'promo') return promotionalProducts.length > 0;
+      if (id === 'allProducts') return allDisplayProducts.length > 0;
+      if (id === 'gundam') return gundamProducts.length > 0;
+      return true;
+    });
+    return visible.map((id, idx) => ({
+      id,
+      variant: (idx % 2 === 0 ? 'dark' : 'light') as SectionVariant,
+      bg: idx % 2 === 0 ? 'bg-[#a70001]' : 'bg-white',
+    }));
+  }, [isLoading, promotionalProducts.length, allDisplayProducts.length, gundamProducts.length]);
 
   return (
     <div className="bg-[#F8FAFC] min-h-screen font-sans text-slate-900">
@@ -109,47 +135,108 @@ export const Homepage = (): React.JSX.Element => {
       </AnimatePresence>
 
       <main>
-        {/* 1. HERO - Clean background */}
+        {/* HERO - always white */}
         <section className="pt-8 pb-12 bg-white">
           <div className="max-w-7xl mx-auto">
             <HeroBannerSection page={heroPage} onPageChange={setHeroPage} />
           </div>
         </section>
 
-        {/* 2. PROMOTIONS - Light gray/blue tint to separate from Hero */}
-        <motion.section {...fadeInUp} className="py-20 bg-[#a70001] border-y border-slate-100">
-          <div className="max-w-7xl mx-auto px-4">
-            <PromotionalOffersSection
-              products={promotionalProducts}
-              isLoading={isLoading}
-              page={promotionsPage}
-              onPageChange={setPromotionsPage}
-            />
-          </div>
-        </motion.section>
-
-        {/* 3. GUNDAM KINGDOM - White background, emphasized header */}
-        <motion.section {...fadeInUp} className="py-20 bg-white">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center mb-12">
-              <span className="text-red-600 font-bold tracking-widest uppercase text-sm">Premium Collection</span>
-              <GundamKingdomHeaderSection />
+        {/* LOADING SKELETON */}
+        {isLoading && (
+          <div className="py-20 bg-[#a70001]">
+            <div className="max-w-7xl mx-auto px-4">
+              <div className="flex flex-col items-center gap-3 mb-12">
+                <div className="h-3 w-32 bg-white/20 rounded-full animate-pulse" />
+                <div className="h-8 w-64 bg-white/20 rounded-full animate-pulse" />
+                <div className="h-2 w-24 bg-white/20 rounded-full animate-pulse" />
+              </div>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="h-64 bg-white/10 rounded-2xl animate-pulse" />
+                ))}
+              </div>
             </div>
-            <GundamKingdomCardsSection
-              products={gundamProducts}
-              isLoading={isLoading}
-              page={gundamPage}
-              onPageChange={setGundamPage}
-            />
           </div>
-        </motion.section>
+        )}
 
-        {/* 4. BRANDS - Simple and clean */}
-        <motion.section {...fadeInUp} className="py-20 bg-[#a70001]">
-          <div className="max-w-7xl mx-auto px-4">
-            <BrandsSection brands={brands} isLoading={isLoading} />
-          </div>
-        </motion.section>
+        {/* DYNAMIC STRIPE SECTIONS */}
+        {sectionPlan?.map(({ id, variant, bg }) => {
+          const isDark = variant === 'dark';
+
+          if (id === 'promo') return (
+            <motion.section key="promo" {...fadeInUp} className={`py-20 ${bg}`}>
+              <div className="max-w-7xl mx-auto px-4">
+                <PromotionalOffersSection
+                  products={promotionalProducts}
+                  isLoading={false}
+                  page={promotionsPage}
+                  onPageChange={setPromotionsPage}
+                  variant={variant}
+                />
+              </div>
+            </motion.section>
+          );
+
+          if (id === 'allProducts') return (
+            <motion.section key="allProducts" {...fadeInUp} className={`py-20 ${bg}`}>
+              <div className="max-w-7xl mx-auto px-4">
+                <SectionHeader title="TẤT CẢ SẢN PHẨM" variant={variant} />
+                <div className="mt-12">
+                  <GundamKingdomCardsSection
+                    products={allDisplayProducts}
+                    isLoading={false}
+                    page={allProductsPage}
+                    onPageChange={setAllProductsPage}
+                    variant={variant}
+                  />
+                </div>
+                <div className="flex justify-center mt-10">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate('/products')}
+                    className={`px-8 py-3 font-bold rounded-full transition-colors tracking-wide uppercase text-sm shadow-md ${
+                      isDark ? 'bg-white text-[#a70001] hover:bg-gray-100' : 'bg-[#a70001] text-white hover:bg-red-800'
+                    }`}
+                  >
+                    Xem tất cả
+                  </motion.button>
+                </div>
+              </div>
+            </motion.section>
+          );
+
+          if (id === 'gundam') return (
+            <motion.section key="gundam" {...fadeInUp} className={`py-20 ${bg}`}>
+              <div className="max-w-7xl mx-auto px-4">
+                <div className="text-center mb-12">
+                  <span className={`font-bold tracking-widest uppercase text-sm ${isDark ? 'text-white/70' : 'text-red-600'}`}>
+                    Premium Collection
+                  </span>
+                  <GundamKingdomHeaderSection variant={variant} />
+                </div>
+                <GundamKingdomCardsSection
+                  products={gundamProducts}
+                  isLoading={false}
+                  page={gundamPage}
+                  onPageChange={setGundamPage}
+                  variant={variant}
+                />
+              </div>
+            </motion.section>
+          );
+
+          if (id === 'brands') return (
+            <motion.section key="brands" {...fadeInUp} className={`py-20 ${bg}`}>
+              <div className="max-w-7xl mx-auto px-4">
+                <BrandsSection brands={brands} isLoading={false} variant={variant} />
+              </div>
+            </motion.section>
+          );
+
+          return null;
+        })}
       </main>
     </div>
   );

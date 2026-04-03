@@ -2,6 +2,12 @@
  * Cart DTOs
  */
 
+export interface SetSubItemDto {
+    productId: number;
+    productName: string;
+    quantity: number;
+}
+
 export interface CartItemDto {
     cartItemId: number;
     quantity: number;
@@ -22,6 +28,12 @@ export interface CartItemDto {
 
     // Type indicator
     itemType: "product" | "set";
+
+    // Sub-items for Set type
+    subItems?: SetSubItemDto[];
+
+    // True when the product has been deactivated since being added to the cart
+    isDeactivated?: boolean;
 }
 
 export interface CartDto {
@@ -49,6 +61,7 @@ interface SetCart {
   name: string
   imageUrl?: string
   price: number
+  subItems?: SetSubItemDto[]
 }
 
 export type CartProduct = ProductCart | SetCart

@@ -11,22 +11,23 @@ const image24 = "https://www.figma.com/api/mcp/asset/bc780d28-b30d-4701-8754-499
 interface BrandsSectionProps {
   brands: ViewBrandDto[];
   isLoading: boolean;
+  variant?: 'dark' | 'light';
 }
 
-export const BrandsSection = ({ brands, isLoading }: BrandsSectionProps): React.JSX.Element => {
+export const BrandsSection = ({ brands, isLoading, variant = 'dark' }: BrandsSectionProps): React.JSX.Element => {
   const displayBrands = brands.slice(0, 8);
 
   if (isLoading) {
     return (
       <div className="w-full h-64 flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+        <div className={`w-10 h-10 border-4 rounded-full animate-spin ${variant === 'dark' ? 'border-white/30 border-t-white' : 'border-red-200 border-t-[#a70001]'}`} />
       </div>
     );
   }
 
   return (
     <div className="relative w-full">
-      <SectionHeader title="THƯƠNG HIỆU UY TÍN" variant="dark" />
+      <SectionHeader title="THƯƠNG HIỆU UY TÍN" variant={variant} />
       
       <div className="max-w-5xl mx-auto mt-12 px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -61,13 +62,21 @@ export const BrandsSection = ({ brands, isLoading }: BrandsSectionProps): React.
           >
             <Link
               to={ROUTES.BRANDS}
-              className="group flex items-center justify-center gap-3 px-10 py-4 rounded-full bg-white text-red-600 font-bold shadow-2xl hover:bg-red-50 transition-all border-2 border-transparent hover:border-white/50"
+              className={`group flex items-center justify-center gap-3 px-10 py-4 rounded-full font-bold shadow-2xl transition-all border-2 border-transparent ${
+                variant === 'dark'
+                  ? 'bg-white text-red-600 hover:bg-red-50 hover:border-white/50'
+                  : 'bg-[#a70001] text-white hover:bg-red-800 hover:border-[#a70001]/30'
+              }`}
             >
               <span className="font-tilt-warp text-lg uppercase tracking-wider">Xem Thêm</span>
               <motion.img 
                 animate={{ x: [0, 5, 0] }}
                 transition={{ duration: 1.5, repeat: Infinity }}
-                className="w-3 h-4 object-contain brightness-0 invert-[.5] sepia-0 saturate-100 hue-rotate-0 group-hover:invert-0 group-hover:brightness-100 transition-all" 
+                className={`w-3 h-4 object-contain transition-all ${
+                  variant === 'dark'
+                    ? 'brightness-0 invert-[.5] sepia-0 saturate-100 hue-rotate-0 group-hover:invert-0 group-hover:brightness-100'
+                    : 'brightness-0 invert'
+                }`}
                 alt="" 
                 src={POLYGON_ARROW} 
               />

@@ -91,6 +91,14 @@ export const useCheckout = () => {
       return;
     }
 
+    // Front-end guard: block checkout if any item is deactivated
+    const deactivatedItems = cartItems.filter(item => item.isDeactivated);
+    if (deactivatedItems.length > 0) {
+      const names = deactivatedItems.map(i => i.product.name).join(", ");
+      setError(`Giỏ hàng chứa sản phẩm không còn được bán: ${names}. Vui lòng xóa trước khi thanh toán.`);
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
 

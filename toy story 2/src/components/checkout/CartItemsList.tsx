@@ -1,6 +1,7 @@
 // components/checkout/CartItemsList.tsx
 import React from "react";
 import { useCart, type CartItem } from "@/context/CartContext";
+import type { SetSubItemDto } from "@/types/CartDTO";
 import { Minus, Plus, Trash2 } from "lucide-react";
 
 interface CartItemsListProps {
@@ -59,6 +60,19 @@ const CartItemsList: React.FC<CartItemsListProps> = ({ items }) => {
             {/* Product Info */}
             <div className="flex-1">
               <h3 className="font-semibold text-gray-900">{item.product.name}</h3>
+
+              {/* Sub-items for Sets */}
+              {'subItems' in item.product && item.product.subItems && item.product.subItems.length > 0 && (
+                <ul className="mt-1.5 space-y-0.5 pl-3 border-l-2 border-red-100">
+                  {(item.product.subItems as SetSubItemDto[]).map((sub) => (
+                    <li key={sub.productId} className="flex items-center gap-1 text-xs text-gray-500">
+                      <span className="text-red-400 font-bold">+</span>
+                      <span>{sub.productName}</span>
+                      <span className="text-gray-400">(x{sub.quantity})</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
               
               <div className="flex justify-between items-start mt-2">
                 <div className="flex flex-col gap-2">
