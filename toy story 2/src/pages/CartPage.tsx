@@ -1,5 +1,5 @@
 import React from 'react'
-import { Trash2, ShoppingBag, ArrowLeft, Minus, Plus } from 'lucide-react'
+import { Trash2, ShoppingBag, ArrowLeft, Minus, Plus, AlertTriangle } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { formatPrice } from '../utils/formatPrice'
@@ -11,10 +11,13 @@ const CartPage: React.FC = () => {
         removeFromCart,
         updateQuantity,
         getTotalPrice,
-        getTotalOriginalPrice
+        getTotalOriginalPrice,
+        removeDeactivatedItems,
     } = useCart()
     const navigate = useNavigate()
     const { user } = useAuth()
+
+    const hasDeactivatedItems = cartItems.some(item => item.isDeactivated)
 
     if (user?.role !== 'Member') {
         navigate(ROUTES.HOME)
@@ -55,7 +58,7 @@ const CartPage: React.FC = () => {
                     {cartItems.map((item) => (
                         <div
                             key={"productId" in item.product ? item.product.productId : item.product.setId}
-                            className="bg-white rounded-2xl p-4 shadow-lg flex flex-col sm:flex-row gap-4 items-center"
+                            className={`bg-white rounded-2xl p-4 shadow-lg flex flex-col sm:flex-row gap-4 items-center ${item.isDeactivated ? 'border-2 border-red-400 opacity-70' : ''}`}
                         >
                             <img
                                 src={item.product.imageUrl ?? ''}
@@ -67,6 +70,12 @@ const CartPage: React.FC = () => {
                                 <h3 className="font-bold text-lg text-gray-900 line-clamp-1">
                                     {item.product.name}
                                 </h3>
+                                {item.isDeactivated && (
+                                    <p className="text-red-500 text-sm font-semibold flex items-center gap-1 mt-1">
+                                        <AlertTriangle size={14} />
+                                        Sản phẩm này hiện không còn được bán
+                                    </p>
+                                )}
                                 {item.originalTotalPrice !== undefined && item.originalTotalPrice > (item.serverTotalPrice ?? 0) ? (
                                     <div className="mb-2">
                                         <p className="text-red-600 font-bold">
@@ -158,10 +167,26 @@ const CartPage: React.FC = () => {
 
                         <button
                             onClick={() => navigate(ROUTES.CHECKOUT)}
-                            className="w-full py-4 bg-red-600 text-white rounded-2xl font-bold text-lg hover:bg-red-700 transition-all shadow-lg hover:shadow-red-200 ring-4 ring-white"
+                            disabled={hasDeactivatedItems}
+                            className={`w-full py-4 text-white rounded-2xl font-bold text-lg transition-all shadow-lg ring-4 ring-white ${hasDeactivatedItems ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700 hover:shadow-red-200'}`}
                         >
                             Tiến hành thanh toán
                         </button>
+
+                        {hasDeactivatedItems && (
+                            <div className="flex items-start gap-2 mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+                                <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+                                <div className="flex-1">
+                                    <p>Giỏ hàng có sản phẩm không còn được bán. Vui lòng xóa các sản phẩm đó trước khi tiến hành thanh toán.</p>
+                                    <button
+                                        onClick={removeDeactivatedItems}
+                                        className="mt-2 text-xs font-bold underline hover:no-underline"
+                                    >
+                                        Xóa tất cả sản phẩm ngừng bán
+                                    </button>
+                                </div>
+                            </div>
+                        )}
 
                         <p className="text-center text-xs text-gray-400 mt-4 leading-relaxed">
                             Bằng cách nhấn thanh toán, bạn đồng ý với các Chính sách và Điều khoản của Toy Story.

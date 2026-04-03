@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ShoppingCart,
   Share2,
@@ -25,6 +25,7 @@ import { useToast } from "../hooks/useToast";
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [product, setProduct] = useState<ProductDTO | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,6 +53,12 @@ const ProductDetail: React.FC = () => {
           getProductById(productId),
           getPromotionsCustomerFilter({ isActive: true })
         ]);
+
+        // Guard: redirect to 404 if the product is not active (deactivated/inactive)
+        if (!productData || productData.status !== 'Đang bán') {
+          navigate('/404');
+          return;
+        }
 
         const promoInfo = findBestPromotion(productData, promos);
 
@@ -92,8 +99,7 @@ const ProductDetail: React.FC = () => {
         setProduct(mapped);
       } catch (err) {
         console.error("Error fetching product:", err);
-        setError("Không thể tải chi tiết sản phẩm. Vui lòng thử lại sau.");
-        setProduct(null);
+        navigate('/404');
       } finally {
         setIsLoading(false);
       }

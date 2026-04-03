@@ -15,6 +15,7 @@ export interface CartItem {
   serverTotalPrice?: number
   originalUnitPrice?: number
   originalTotalPrice?: number
+  isDeactivated?: boolean
 }
 
 interface CartContextType {
@@ -24,6 +25,8 @@ interface CartContextType {
   updateQuantity: (item: CartItem, quantity: number) => void
   clearCart: () => void
   refreshCart: () => Promise<void>
+  removeDeactivatedItems: () => Promise<void>
+  hasDeactivatedItems: boolean
   getTotalPrice: () => number
   getTotalOriginalPrice: () => number
   getTotalItems: () => number
@@ -57,6 +60,7 @@ const mapDtoToCartItem = (dto: CartItemDto): CartItem => {
       serverTotalPrice: dto.totalPrice,
       originalUnitPrice: dto.originalUnitPrice,
       originalTotalPrice: dto.originalTotalPrice,
+      isDeactivated: dto.isDeactivated ?? false,
     }
   } else {
     return {
@@ -71,6 +75,7 @@ const mapDtoToCartItem = (dto: CartItemDto): CartItem => {
       serverTotalPrice: dto.totalPrice,
       originalUnitPrice: dto.originalUnitPrice,
       originalTotalPrice: dto.originalTotalPrice,
+      isDeactivated: false,
     }
   }
 }
@@ -153,6 +158,21 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
   const refreshCart = (): Promise<void> => loadServerCart()
 
+  // Remove every item whose product has been deactivated since being added
+  const removeDeactivatedItems = async (): Promise<void> => {
+    const deactivated = cartItems.filter(item => item.isDeactivated)
+    await Promise.all(
+      deactivated.map(item =>
+        "productId" in item.product
+          ? removeFromCartServer(item.product.productId, undefined)
+          : removeFromCartServer(undefined, item.product.setId)
+      )
+    )
+    await loadServerCart()
+  }
+
+  const hasDeactivatedItems = cartItems.some(item => item.isDeactivated)
+
   const getTotalPrice = (): number =>
     cartItems.reduce((total, item) => total + (item.serverTotalPrice ?? ((item.product.price ?? 0) * item.quantity)), 0)
 
@@ -179,6 +199,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     updateQuantity,
     clearCart,
     refreshCart,
+    removeDeactivatedItems,
+    hasDeactivatedItems,
     getTotalPrice,
     getTotalOriginalPrice,
     getTotalItems,

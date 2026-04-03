@@ -1,5 +1,5 @@
 import React from "react";
-import { X, Trash2, ShoppingBag, } from "lucide-react";
+import { X, Trash2, ShoppingBag, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { formatPrice } from "../utils/formatPrice";
@@ -12,6 +12,7 @@ const CartPopup: React.FC = () => {
     updateQuantity,
     getTotalPrice,
     getTotalOriginalPrice,
+    hasDeactivatedItems,
     isCartOpen,
     closeCart,
   } = useCart();
@@ -67,6 +68,12 @@ const CartPopup: React.FC = () => {
                       <h3 className="font-red-hat text-[14px] text-black leading-tight mb-1.5 line-clamp-2 lg:pr-2">
                         {item.product.name}
                       </h3>
+                      {item.isDeactivated && (
+                        <p className="flex items-center gap-1 text-red-500 text-[11px] font-semibold mb-1">
+                          <AlertTriangle size={11} />
+                          Ngừng bán
+                        </p>
+                      )}
 
                       <div className="flex flex-col">
                         <span className="font-tilt-warp text-red-600 text-[14px]">
@@ -151,11 +158,13 @@ const CartPopup: React.FC = () => {
 
                 <button
                   onClick={() => {
+                    if (hasDeactivatedItems) return;
                     closeCart();
                     navigate(ROUTES.CHECKOUT);
                   }}
-                  className={`flex-1 h-[33px] border border-[#c40000] rounded-[25px] flex items-center justify-center transition-colors text-white cursor-pointer bg-[#d62525] hover:bg-[#c41f1f]"
-                  }`}
+                  disabled={hasDeactivatedItems}
+                  title={hasDeactivatedItems ? "Xóa sản phẩm ngừng bán trước khi thanh toán" : undefined}
+                  className={`flex-1 h-[33px] border rounded-[25px] flex items-center justify-center transition-colors text-white ${hasDeactivatedItems ? 'border-gray-400 bg-gray-400 cursor-not-allowed' : 'border-[#c40000] bg-[#d62525] hover:bg-[#c41f1f] cursor-pointer'}`}
                 >
                   <span className="font-reddit-sans text-[14px] text-white font-normal">
                     Thanh Toán Ngay
