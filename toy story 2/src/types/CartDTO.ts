@@ -31,6 +31,9 @@ export interface CartItemDto {
 
     // Sub-items for Set type
     subItems?: SetSubItemDto[];
+
+    // True when the product has been deactivated since being added to the cart
+    isDeactivated?: boolean;
 }
 
 export interface CartDto {
